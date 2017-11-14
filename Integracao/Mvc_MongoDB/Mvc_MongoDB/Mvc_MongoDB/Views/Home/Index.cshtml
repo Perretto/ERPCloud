@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Mvc_MongoDB.Models.layouts>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Relação de layout</h2>
+
+<p>
+    @Html.ActionLink("Criar novo Layout", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.layoutID)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.html)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.layoutID)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.html)
+        </td>
+        <td>
+            @Html.ActionLink("Editar", "Edit", new { id=item.id }) |
+            @Html.ActionLink("Deletar", "Delete", new { id=item.id })
+        </td>
+    </tr>
+}
+
+</table>

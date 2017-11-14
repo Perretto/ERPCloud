@@ -1,0 +1,35 @@
+﻿@model Mvc_MongoDB.Models.layouts
+
+@{
+    ViewBag.Title = "Delete";
+}
+<h3>Deseja deletar esse pais?</h3>
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.layoutID)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.layoutID)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.html)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.html)
+        </dd>
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Deletar" class="btn btn-default" /> |
+            @Html.ActionLink("Retornar", "Index")
+        </div>
+    }
+</div>

@@ -1,0 +1,781 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Empresario Cloud</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <!-- Viewport metatags -->
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <!-- iOS webapp metatags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link href="Style/jquery-ui.css" rel="stylesheet" />
+    <link href="Style/animate.css" rel="stylesheet" />
+
+    <!-- iOS webapp icons -->
+    <link rel="apple-touch-icon-precomposed" href="Images/ios/fickle-logo-72.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="Images/ios/fickle-logo-72.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="Images/ios/fickle-logo-114.png" />
+
+    <!-- TODO: Add a favicon -->
+    <link rel="shortcut icon" href="favicon.ico">
+
+
+
+    <script src="Script/jquery/jquery.js"></script>
+    <script type="text/javascript" src="Script/lib/jquery-ui.min.js"></script>
+
+    <!--Page loading plugin Start -->
+    <link rel="stylesheet" href="Style/plugins/pace.css">
+    <script src="Script/pace.min.js"></script>
+
+    <!--Page loading plugin End   -->
+    <!-- Plugin Css Put Here -->
+    <link href="Script/formvalidation/formValidation.css" rel="stylesheet" />
+    <link href="Style/bootstrap.min.css" rel="stylesheet" />
+    <link href="Style/plugins/bootstrap-progressbar-3.1.1.css" rel="stylesheet" />
+    <link href="Style/plugins/jquery-jvectormap.css" rel="stylesheet" />
+    <link href="Style/plugins/bootstrap-progressbar-3.1.1.css" rel="stylesheet" />
+    <link href="Style/plugins/dndTable.css" rel="stylesheet" />
+    <link href="Style/plugins/tsort.css" rel="stylesheet" />
+    <link href="themes/classic/global/vendor/bootstrap-table/bootstrap-table.css" rel="stylesheet" />
+    <link href="themes/classic/global/vendor/intro-js/introjs.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="themes/classic/base/assets/examples/css/structure/ribbon.css">
+    <link rel="stylesheet" href="themes/classic/global/vendor/flag-icon-css/flag-icon.css">
+    <link rel="stylesheet" href="themes/classic/global/vendor/multi-select/multi-select.css">
+    <link rel="stylesheet" href="themes/classic/global/vendor/bootstrap-select/bootstrap-select.min.css?v2.2.0">
+    <!-- Fonts -->
+    <link href="themes/classic/global/fonts/material-design/material-design.min.css" rel="stylesheet" />
+    <link href="themes/assets/fonts/web-icons/web-icons.min.css" rel="stylesheet" />
+    <link href="themes/assets/fonts/font-awesome/font-awesome.css" rel="stylesheet" />
+    <link href="themes/assets/fonts/brand-icons/brand-icons.min.css" rel="stylesheet" />
+    <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:300,400,500,300italic'>
+
+    <!--AmaranJS Css Start-->
+    <link href="Style/plugins/amaranjs/jquery.amaran.css" rel="stylesheet" />
+    <link href="Style/plugins/amaranjs/theme/all-themes.css" rel="stylesheet" />
+    <link href="Style/plugins/amaranjs/theme/awesome.css" rel="stylesheet" />
+    <link href="Style/plugins/amaranjs/theme/default.css" rel="stylesheet" />
+    <link href="Style/plugins/amaranjs/theme/blur.css" rel="stylesheet" />
+    <link href="Style/plugins/amaranjs/theme/user.css" rel="stylesheet" />
+    <link href="Style/plugins/amaranjs/theme/rounded.css" rel="stylesheet" />
+    <link href="Style/plugins/amaranjs/theme/readmore.css" rel="stylesheet" />
+    <link href="Style/plugins/amaranjs/theme/metro.css" rel="stylesheet" />
+    <!--AmaranJS Css End -->
+    <!-- Plugin Css End -->
+    <link href="Style/site.css" rel="stylesheet" />
+    <!-- Custom styles Style -->
+    <link href="Style/style.css" rel="stylesheet" />
+    <!-- Custom styles Style End-->
+    <!-- Responsive Style For-->
+    <link href="Style/responsive.css" rel="stylesheet" />
+    <!-- Responsive Style For-->
+    <link href="Style/plugins/jquery.remodal.css" rel="stylesheet" />
+    <link href="Style/plugins/icheck/skins/flat/flat.css" rel="stylesheet" />
+    <link href="Style/plugins/icheck/skins/flat/blue.css" rel="stylesheet" />
+    <link href="Style/plugins/icheck/skins/flat/green.css" rel="stylesheet" />
+    <link href="Style/plugins/icheck/skins/flat/red.css" rel="stylesheet" />
+    <link href="Style/plugins/icheck/skins/flat/yellow.css" rel="stylesheet" />
+    <link href="Style/plugins/jquery.datetimepicker.css" rel="stylesheet" />
+
+    
+    <link href="Style/plugins/easyTree.css" rel="stylesheet" />
+
+    <link href="Style/plugins/jquery.dataTables.min.css" rel="stylesheet" />
+    <!--    <link href="Style/plugins/datatable.Editor/dataTables.editor.css" rel="stylesheet"/>
+    <link href="Style/plugins/datatable.Editor/dataTables.editor.css" rel="stylesheet" />
+    <link href="Style/plugins/datatable.Editor/dataTables.tableTools.css" rel="stylesheet" />-->
+    <link rel="stylesheet" href="Style/plugins/accordion.css">
+    <link href="Script/jquery-wizard/jquery-wizard.css" rel="stylesheet" />
+    <link href="Script/magnific-popup/magnific-popup.css" rel="stylesheet" />
+    <link rel="stylesheet" href="themes/classic/global/vendor/ace/ace.css" />
+    <link href="themes/classic/base/assets/examples/css/uikit/modals.css" rel="stylesheet" />
+
+    <!-- SweetAlert - plugin para modal -->
+    <link href="Style/sweetalert.css" rel="stylesheet" />
+
+    <!-- TreeView  CSS  jstree-->
+    
+    
+
+    <link href="https://static.jstree.com/latest/assets/dist/themes/default/style.min.css" rel="stylesheet" />
+
+    <!-- Custom styles for this template -->
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="Script/bootstrap.js"></script>
+
+</head>
+<body class="">
+    <!--Navigation Top Bar Start-->
+    <nav class="navigation">
+        <div class="container-fluid">
+
+            <!--Logo text start-->
+            <div class="header-logo">
+                <a href="index.html" title="">
+                    <img src="Images/logo.png" height="40" />
+                </a>
+            </div>
+            <!--Logo text End-->
+
+            <div class="top-navigation">
+                <!--Collapse navigation menu icon start -->
+                <div class="menu-control hidden-xs">
+                    <a href="javascript:void(0)">
+                        <i class="fa fa-bars"></i>
+                    </a>
+                </div>
+                <div class="search-box">
+                    <ul>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="javascript:void(0)">
+                                <span class="fa fa-search"></span>
+                            </a>
+                            <div class="dropdown-menu  top-dropDown-1">
+                                <h4>Search</h4>
+                                <form>
+                                    <input id="searchField" type="search" placeholder="what you want to see ?">
+                                </form>
+                            </div>
+
+                        </li>
+                    </ul>
+                </div>
+
+                <!--Collapse navigation menu icon end -->
+                <!--Top Navigation Start-->
+
+                <ul>
+                    <li class="dropdown">
+                        <!--Notification drop down start-->
+                        <a id="Empresas" class="dropdown-toggle" data-toggle="dropdown" href="javascript:void(0)">
+                            <span class="fa fa-refresh"></span>
+                            <!--<span class="badge badge-red">6</span>-->
+                        </a>
+
+                        <div id="empresa" class="dropdown-menu right top-notification">
+                            <h4>Empresas</h4>
+                            <ul class="ls-feed">
+                                <li class="only-link">
+                                    <a href="javascript:void(0)">N�o h� empresas filiais</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <!--Notification drop down end-->
+                    </li>
+
+                    <li class="dropdown">
+                        <!--All task drop down start-->
+                        <a id="taskNumber" class="dropdown-toggle" data-toggle="dropdown" href="javascript:void(0)">
+                            <span class="fa fa-tasks"></span>
+                            <!--<span class="badge badge-lightBlue"></span>-->
+                        </a>
+                        <div id="task" class="dropdown-menu right top-dropDown-1">
+                            <h4>Tarefas</h4>
+                            <ul class="goal-item">
+                                <li class="only-link">
+                                    <a href="javascript:void(0)">N�o h� tarefas</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <!--All task drop down end-->
+                    </li>
+                    <li class="dropdown">
+                        <!--Notification drop down start-->
+                        <a id="notificationNumber" class="dropdown-toggle" data-toggle="dropdown" href="javascript:void(0)">
+                            <span class="fa fa-bell"></span>
+                            <!--<span class="badge badge-red">6</span>-->
+                        </a>
+
+                        <div id="notification" class="dropdown-menu right top-notification">
+                            <h4>Notifica��es</h4>
+                            <ul class="ls-feed">
+                                <li class="only-link">
+                                    <a href="javascript:void(0)">N�o h� notifica��es</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <!--Notification drop down end-->
+                    </li>
+                    <!--
+                    <li class="dropdown">
+                      
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="javascript:void(0)">
+                            <span class="fa fa-envelope"></span>
+                            <span class="badge badge-red">3</span>
+                        </a>
+
+                        <div class="dropdown-menu right email-notification">
+                            <h4>Email</h4>
+                            <ul class="email-top">
+                                <li class="only-link">
+                                    <a href="mail.html">N�o h� emails</a>
+                                </li>
+                            </ul>
+                        </div>
+                        >
+                    </li>
+					-->
+                    <!--<li class="hidden-xs">
+                        <a class="right-sidebar" href="javascript:void(0)">
+                            <i class="fa fa-comment-o"></i>
+                        </a>
+                    </li>
+                    <li class="hidden-xs">
+                        <a onclick="window.open('http://54.149.163.193:9000/Menu/Index2?EnterpriseID=713dbd2c-012d-462d-a12f-cda8cb15d5ad&UserID=de5d2469-ae66-4696-9147-004f86f7d0d9&Lang=PT_BR')" class="" href="javascript:void(0)">
+                            <i class="fa fa-cogs"></i>
+                        </a>
+                    </li>
+
+                    <li class="hidden-xs" id="UpdateSystem">
+                        <a onclick="" class="" href="javascript:void(0)" id="UpdateSystemLink">
+                            <i class="fa fa-cogs"></i>
+                            <span id="UpdateSystemLabel"></span>
+                        </a>
+                    </li>
+-->
+                    <!--<li class="hidden-xs">
+                        <a class="right-sidebar-setting" href="javascript:void(0)">
+                            <i class="fa fa-cogs"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="lock-screen.html">
+                            <i class="fa fa-lock"></i>
+                        </a>
+                    </li>
+					-->
+                    <li>
+                        <a href="login.aspx">
+                            <i class="fa fa-power-off" onclick="logoff()"></i>
+                        </a>
+                    </li>
+                </ul>
+                <!--Top Navigation End-->
+            </div>
+
+        </div>
+    </nav>
+    <!--Navigation Top Bar End-->
+
+    <section id="main-container">
+        <div class="">
+
+        </div>
+        <!--Left navigation section start-->
+        <section id="left-navigation">
+            <!--Left navigation user details start-->
+            <div class="user-image">
+                
+                <img id="img" name="img" src="" />
+
+                
+            </div>
+            <!--Left navigation user details end-->
+            <!--Phone Navigation Menu icon start-->
+            <div class="phone-nav-box visible-xs">
+                <a class="phone-logo" href="default.aspx" title="">
+                    <img src="Images/logo.png" height="40px" />
+                </a>
+                <a class="phone-nav-control" href="javascript:void(0)">
+                    <span class="fa fa-bars"></span>
+                </a>
+                <div class="clearfix"></div>
+            </div>
+            <!--Phone Navigation Menu icon start-->
+            <!--Left navigation start-->
+
+            <ul class="mainNav" style="">
+
+                <div id="menu1"></div>
+
+            </ul>
+
+            <!--Left navigation end-->
+        </section>
+        <!--Left navigation section end-->
+        <!--Page main section start-->
+        <section id="min-wrapper" style="display: none">
+            <div id="main-content">
+                <div class="container-fluid">
+                    <div id="pnlCotacao">
+                    </div>
+
+                    <div id="content" class="content">
+                        <ul id="controls-tabs" class='profile-tab nav nav-tabs'>
+                            <li class="active"><a href="#tabsdashboard" data-toggle="tab">Dashboard &nbsp&nbsp&nbsp;&nbsp;<i class="fa fa-times-circle" onclick="fechaAba('tabsdashboard');"></i></a></li>
+                        </ul>
+                        <div id="controls-recipient" class="profile-tab-content tab-content  tab-border">
+                            <div class="tab-pane fade in active controls-recipient" id="tabsdashboard">
+
+                                <!-- Main Content Element  Start-->
+
+                                <div class="panel">
+                                    <div class="panel-body">
+                                        <ul id="" class="profile-tab nav nav-tabs nav-tabs-line">
+                                            <li class="active">
+                                                <a href="#tabsdashboard-Vendas" data-toggle="tab">Vendas</a>
+                                            </li>
+                                            <li class="">
+                                                <a href="#tabsdashboard-Compras" data-toggle="tab">Compras</a>
+
+                                            </li>
+                                        </ul>
+                                        <div class="tab-content tab-border">
+                                            <div id="tabsdashboard-Vendas" class="tab-pane fade controls-recipient in active">
+                                            </div>
+                                            <div id="tabsdashboard-Compras" class="tab-pane fade controls-recipient in ">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Main Content Element  End-->
+
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!--Page main section end -->
+        <!--Right hidden  section start-->
+        <section id="right-wrapper">
+            <!--Right hidden  section close icon start-->
+            <div class="close-right-wrapper">
+                <a href="javascript:void(0)"><i class="fa fa-times"></i></a>
+            </div>
+            <!--Right hidden  section close icon end-->
+            <!--Tab navigation start-->
+            <ul class="nav nav-tabs" id="setting-tab">
+                <li class="active"><a href="#chatTab" data-toggle="tab"><i class="fa fa-comment-o"></i>Chat</a></li>
+                <li><a href="#settingTab" data-toggle="tab"><i class="fa fa-cogs"></i>Setting</a></li>
+            </ul>
+            <!--Tab navigation end -->
+            <!--Tab content start-->
+            <div class="tab-content">
+                <div class="tab-pane active" id="chatTab">
+                    <div class="nano">
+                        <div class="nano-content">
+                            <div class="chat-group chat-group-fav">
+                                <h3 class="ls-header">Favorites</h3>
+                                <a href="javascript:void(0)">
+                                    <span class="user-status is-online"></span>
+                                    Catherine J. Watkins
+                                    <span class="badge badge-lightBlue">1</span>
+                                </a>
+                                <a href="javascript:void(0)">
+                                    <span class="user-status is-idle"></span>
+                                    Fernando G. Olson
+                                </a>
+                                <a href="javascript:void(0)">
+                                    <span class="user-status is-busy"></span>
+                                    Susan J. Best
+                                </a>
+                                <a href="javascript:void(0)">
+                                    <span class="user-status is-offline"></span>
+                                    Brandon S. Young
+                                </a>
+                            </div>
+                            <div class="chat-group chat-group-coll">
+                                <h3 class="ls-header">Colleagues</h3>
+                                <a href="javascript:void(0)">
+                                    <span class="user-status is-offline"></span>
+                                    Brandon S. Young
+                                </a>
+                                <a href="javascript:void(0)">
+                                    <span class="user-status is-idle"></span>
+                                    Fernando G. Olson
+                                </a>
+                                <a href="javascript:void(0)">
+                                    <span class="user-status is-online"></span>
+                                    Catherine J. Watkins
+                                    <span class="badge badge-lightBlue">3</span>
+                                </a>
+
+                                <a href="javascript:void(0)">
+                                    <span class="user-status is-busy"></span>
+                                    Susan J. Best
+                                </a>
+
+                            </div>
+                            <div class="chat-group chat-group-social">
+                                <h3 class="ls-header">Social</h3>
+                                <a href="javascript:void(0)">
+                                    <span class="user-status is-online"></span>
+                                    Catherine J. Watkins
+                                    <span class="badge badge-lightBlue">5</span>
+                                </a>
+                                <a href="javascript:void(0)">
+                                    <span class="user-status is-busy"></span>
+                                    Susan J. Best
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-box">
+                        <div class="chat-box-header">
+                            <h5>
+                                <span class="user-status is-online"></span>
+                                Catherine J. Watkins
+                            </h5>
+                        </div>
+
+                        <div class="chat-box-content">
+                            <div class="nano nano-chat">
+                                <div class="nano-content">
+
+                                    <ul>
+                                        <li>
+                                            <span class="user">Catherine</span>
+                                            <p>Are you here?</p>
+                                            <span class="time">10:10</span>
+                                        </li>
+                                        <li>
+                                            <span class="user">Catherine</span>
+                                            <p>Whohoo!</p>
+                                            <span class="time">10:12</span>
+                                        </li>
+                                        <li>
+                                            <span class="user">Catherine</span>
+                                            <p>This message is pre-queued.</p>
+                                            <span class="time">10:15</span>
+                                        </li>
+                                        <li>
+                                            <span class="user">Catherine</span>
+                                            <p>Do you like it?</p>
+                                            <span class="time">10:20</span>
+                                        </li>
+                                        <li>
+                                            <span class="user">Catherine</span>
+                                            <p>This message is pre-queued.</p>
+                                            <span class="time">11:00</span>
+                                        </li>
+                                        <li>
+                                            <span class="user">Catherine</span>
+                                            <p>Hi, you there ?</p>
+                                            <span class="time">12:00</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="chat-write">
+                        <textarea class="form-control autogrow" placeholder="Type your message"></textarea>
+                    </div>
+                </div>
+
+                <div class="tab-pane" id="settingTab">
+
+                    <div class="setting-box">
+                        <h3 class="ls-header">Account Setting</h3>
+                        <div class="setting-box-content">
+                            <ul>
+                                <li><span class="pull-left">Online status: </span>
+                                    <input type="checkbox" class="js-switch-red" checked /></li>
+                                <li><span class="pull-left">Show offline contact: </span>
+                                    <input type="checkbox" class="js-switch-light-blue" checked /></li>
+                                <li><span class="pull-left">Invisible mode: </span>
+                                    <input class="js-switch" type="checkbox" checked></li>
+                                <li><span class="pull-left">Log all message:</span><input class="js-switch-light-green" type="checkbox" checked></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="setting-box">
+                        <h3 class="ls-header">Maintenance</h3>
+                        <div class="setting-box-content">
+                            <div class="easy-pai-box">
+                                <span class="easyPieChart" data-percent="90">
+                                    <span class="easyPiePercent"></span>
+                                </span>
+                            </div>
+                            <div class="easy-pai-box">
+                                <button class="btn btn-xs ls-red-btn js_update">Update Data</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-box">
+                        <h3 class="ls-header">Progress</h3>
+                        <div class="setting-box-content">
+
+                            <h5>File uploading</h5>
+                            <div class="progress">
+                                <div class="progress-bar ls-light-blue-progress six-sec-ease-in-out"
+                                    aria-valuetransitiongoal="10">
+                                </div>
+                            </div>
+
+                            <h5>Plugin setup</h5>
+                            <div class="progress progress-striped active">
+                                <div class="progress-bar six-sec-ease-in-out ls-light-green-progress"
+                                    aria-valuetransitiongoal="20">
+                                </div>
+                            </div>
+                            <h5>Post New Article</h5>
+                            <div class="progress progress-striped active">
+                                <div class="progress-bar ls-yellow-progress six-sec-ease-in-out"
+                                    aria-valuetransitiongoal="80">
+                                </div>
+                            </div>
+                            <h5>Create New User</h5>
+                            <div class="progress progress-striped active">
+                                <div class="progress-bar ls-red-progress six-sec-ease-in-out"
+                                    aria-valuetransitiongoal="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Tab content -->
+        </section>
+        <!--Right hidden  section end -->
+    </section>
+	
+<script src="themes/classic/global/vendor/typeahead-js/typeahead.bundle.js"></script>
+<script src="themes/classic/global/vendor/typeahead-js/bloodhound.js"></script>
+<script src="themes/classic/global/vendor/bootstrap-tokenfield/bootstrap-tokenfield.min.js"></script>
+    <!--easing Library Script Start -->
+    <script src="Script/lib/jquery.easing.js"></script>
+    <!--easing Library Script End -->
+    <!--Nano Scroll Script Start -->
+    <script src="Script/jquery.nanoscroller.min.js"></script>
+    <!--Nano Scroll Script End -->
+    <!--switchery Script Start -->
+    <script src="Script/switchery.min.js"></script>
+    <!--switchery Script End -->
+    <!--bootstrap switch Button Script Start-->
+    <script src="Script/bootstrap-switch.js"></script>
+    <!--bootstrap switch Button Script End-->
+    <!--easypie Library Script Start -->
+    <script src="Script/jquery.easypiechart.min.js"></script>
+    <!--easypie Library Script Start -->
+    <!--bootstrap-progressbar Library script Start-->
+    <script src="Script/bootstrap-progressbar.min.js"></script>
+    <!--bootstrap-progressbar Library script End-->
+    <!--FLoat library Script Start -->
+    <script type="text/javascript" src="Script/chart/flot/jquery.flot.js"></script>
+    <script type="text/javascript" src="Script/chart/flot/jquery.flot.pie.js"></script>
+    <script type="text/javascript" src="Script/chart/flot/jquery.flot.resize.js"></script>
+    <!--FLoat library Script End -->
+    <!--Layout Script End -->
+
+    <script src="Script/countUp.min.js"></script>
+    <!-- skycons script start -->
+    <script src="Script/skycons.js"></script>
+    <!-- skycons script end   -->
+    <!--Vector map library start-->
+    <script src="Script/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>
+    <script src="Script/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+    <!--Vector map library end-->
+    <!--AmaranJS library script Start -->
+    <script src="Script/jquery.amaran.js"></script>
+    <!--AmaranJS library script End   -->
+    <script src="Script/icheck.min.js"></script>
+    <!--botbox library script-->
+    
+    <script src="Script/bootbox.js"></script>
+    <!--date time library script-->
+    <script src="Script/jquery.datetimepicker.js"></script>
+
+    <script src="Script/pages/layout.js"></script>
+    <script src="Script/pages/checkboxRadio.js"></script>
+
+    
+    <script src="Script/easyTree.js"></script>
+
+    <!--
+    <script src="Script/datatable.Editor/dataTables.tableTools.js"></script>
+    <script src="Script/datatable.Editor/dataTables.editor.js"></script>
+    <script src="Script/editable-table/jquery.dataTables.editable.js"></script>-->
+    <script src="Script/editable-table/jquery.validate.js"></script>
+    <script src="Script/jquery.mask.js"></script>
+
+
+
+    <!--Layout Script start -->
+    <script type="text/javascript" src="Script/color.js"></script>
+    <script type="text/javascript" src="Script/bootstrap.min.js"></script>
+    <link href="themes/classic/global/css/bootstrap-extend.css" rel="stylesheet" />
+    <script type="text/javascript" src="Script/multipleAccordion.js"></script>
+    <script src="themes/classic/global/vendor/intro-js/intro.js"></script>
+    <script src="themes/classic/global/vendor/multi-select/jquery.multi-select.js"></script>
+    <script src="themes/classic/global/vendor/ace/ace.js"></script>
+
+
+    <script src="Script/pages/notification.js"></script>
+    <script src="Script/notify.js"></script>
+    <script src="themes/classic/global/vendor/bootstrap-table/bootstrap-table.js"></script>
+    <script src="Script/framework/jquery.empresario.wizard.js"></script>
+    <script src="Script/core.js"></script>
+    <script src="themes/classic/base/assets/js/site.js"></script>
+    <script src="Script/matchheight/jquery.matchHeight-min.js"></script>
+    <script src="Script/jquery-wizard/jquery-wizard.js"></script>
+    <script src="Script/matchheight/matchheight.js"></script>
+    <script src="Script/jquery-wizard/jquery-wizard.extend.js"></script>
+    <script src="Script/formvalidation/formValidation.js"></script>
+    <script src="Script/formvalidation/framework/bootstrap.js"></script>
+    <script src="Script/magnific-popup/jquery.magnific-popup.js"></script>
+    <script src="Script/framework/jquery.empresario.lightbox.js"></script>
+    <script src="themes/classic/global/js/components/bootstrap-select.min.js"></script>
+    <script src="themes/classic/base/assets/examples/js/forms/advanced.min.js"></script>
+    <script src="Script/sorttable.js"></script>
+    <script src="framework/render.js"></script>
+    <script src="framework/general.js"></script>
+    <script src="framework/message.js"></script>
+
+    <!--plugin do treeView js  jstree-->
+    
+    
+
+    
+
+
+    <!-- plugin de ajuda -->
+    <script src="Script/sortable.js"></script>
+
+    <!-- SweetAlert - plugin para modal js -->
+    <script src="Script/sweetalert-dev.js"></script>
+
+    <script src="themes/classic/base/assets/js/configs/config-tour.js"></script>
+    <script src="themes/classic/global/js/components/ace.js"></script>
+
+
+    <script>
+        (function (document, window, $) {
+            'use strict';
+			//var Site = window.Site;
+
+            var Site = window.Site;
+            $(document).ready(function () {
+            Site.run()
+                createCookie("EnterpriseID", "f1495bcf-9258-4245-8edf-d0fac225412d", 5);
+                createCookie("UserID", "de5d2469-ae66-4696-9147-004f86f7d0d9", 5);
+                createCookie("urlPlataform", "http://localhost:3001", 5);
+
+                $.ajax({url: returnCookie("urlPlataform") + "/api/menu", success: function(result){	
+					
+						$("#menu1").replaceWith(result[0].html);						
+                        call_navigation();
+                        
+				}});
+
+                $(".dropdown-toggle").dropdown();
+				
+				$(window).keydown(function (event) {
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    return false;
+                }
+				});
+
+				console.log("");
+				$("#notificationNumber").change(function (event) {
+					event.preventDefault();
+					$("#notification").css("display", "block");
+				});
+				
+                call_navigation();
+                
+                
+
+            });
+        })(document, window, jQuery);
+    </script>
+
+
+
+
+    <div id="alertPopup" style="display: none;" class="humane-jackedup humane-jackedup-error">
+        <span class="fa fa-lock"></span>
+        " Locked !"
+    </div>
+
+    
+
+
+    <!--Modal init html -->
+
+    <div class="modal fade modal-3d-flip-horizontal" id="alertaModalShow" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header ">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">�</span>
+                    </button>
+                    <h5 class="modal-title" id="myModalLabelInfo"></h5>
+                    <label class="modal-body" id="mensagem"></label>
+                    <br>
+                    <br>
+                </div>
+                <div id="alertaModal">
+                    <div id="alertaModal_panel">
+                        <div class="panel-body">
+                        </div>
+                    </div>
+                </div>
+                <!--<div class="modal-footer">
+                    <button type="button" class="btn btn-info btn-xs" data-dismiss="modal">Close</button>
+                </div>-->
+            </div>
+        </div>
+    </div>
+
+    <!--Modal end html -->
+
+    <div class="modal fade modal-3d-flip-horizontal" id="ErroModalShow" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">�</span>
+                    </button>
+                    <h5 class="modal-title" id="H1">
+                        <br />
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div id="ErroModal"></div>
+                    <label id="ErroMensagem"></label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info btn-xs" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+
+       //$(window).load(function () {
+       //    saveActiveUser(globalEnterpriseID);
+       //});
+
+    </script>
+</body>
+</html>
+
+
+
+
+

@@ -1,0 +1,33 @@
+﻿/*@import url(https://fonts.googleapis.com/css?family=Dosis:200,300,400,500,600,700,800);*/
+/*@import url(https://fonts.googleapis.com/css?family=Roboto);*/
+/*@import url(https://fonts.googleapis.com/css?family=Cabin:400,500,600,700);*/
+
+/*@import url('../fonts/DinAlternate/dinAlternate.css');*/
+@import url('../fonts/Din/din.css');
+
+/*@font-face {
+   font-family: 'FF DIN Pro Medium';
+   font-weight: 300;
+}
+@font-face {
+   font-family: 'FF DIN Pro Light';
+   font-weight: 400;
+}
+@font-face {
+   font-family: 'FF DIN Pro Bold';
+   font-weight: 700;
+}*/
+
+body, select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input, label, input, button, select, textarea {
+
+    /*font-family: 'Dosis', sans-serif !important;*/
+    /*font-family: 'Roboto', sans-serif;*/
+    /*font-family: 'FF DIN Pro Medium','FF DIN Pro Light','FF DIN Pro Bold';*/
+    /*font-family: 'Cabin', sans-serif;*/
+    /*font-family: 'din_alternate';*/
+	font-family: 'din';
+}
+
+body {
+    font-size: 10px;
+}
