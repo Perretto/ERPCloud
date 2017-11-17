@@ -139,8 +139,8 @@ function getGlobalParameters(parametro) {
         var global = new Object();
     
         //Servidor homologação
-        global.urlPlataforma = "http://54.149.163.193"
-        global.urlInterface = "http://54.149.163.193"
+        //global.urlPlataforma = "http://54.149.163.193"
+        //global.urlInterface = "http://54.149.163.193"
     
         //global.urlPlataforma = "http://54.149.163.193:81"
         //global.urlInterface = "http://54.149.163.193:81"
@@ -160,7 +160,10 @@ function getGlobalParameters(parametro) {
         //global.urlPlataforma = "http://" + window.location.host
     
         //global.urlDesenvolvimento = "http://localhost:13886/";
-    
+        global.urlPlataform = "http://localhost:3001"
+        global.urlPlataforma = "http://homologa.empresariocloud.com.br"
+        global.urlInterface = "http://homologa.empresariocloud.com.br"
+
         global.urlSearch = "http://" + window.location.host + ":8983"
     
         if (parametro) {
@@ -485,4 +488,17 @@ if (firstTab) {
     
         
 }
+
+
+function loaderImage(id, on) {
+    container = $("#" + id)
+    if (on) {
+        //container.prepend("<div class=\"loadingBox\"></div>");
+        //$("#" + id).loader();
+    }
+    else {
+        container.find(".loadingBox").remove();
+        container.find(".loader").remove();
+    }
+  }
     

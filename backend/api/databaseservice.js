@@ -10,7 +10,7 @@ const router = express.Router()
 server.use('/api', router)
 // config for your database
 //var config = {user: 'sa', password: 'IntSql2015@', server: '52.89.63.119',  database: 'eCloud-homologa'};
-var config = {user: 'sa', password: '1nt3l3ct@', server: '54.149.163.193',  database: 'eCloud-roadmap'};
+var config = {user: 'sa', password: 'IntSql2015@', server: '52.89.63.119',  database: 'eCloud-homologa'};
 
 router.route('/listall/:id').get(function(req, res) {
     var MongoClient = require('mongodb').MongoClient;
@@ -333,6 +333,49 @@ function createUpdate(submit, index){
 
 }
 
+router.route('/RenderAutoComplete/:filter/:controlid').get(function(req, res) {
+    var MongoClient = require('mongodb').MongoClient;
+    var url = "mongodb://localhost:27017/erpcloud";
+    var id = req.param('filter');
+    var controlid = req.param('controlid');
+    var select = ""; //'select Id, nm_razaosocial, nr_codigo, dt_cadastro, nm_nomefantasia, sn_pessoafisica, nm_cpf, nm_cnpj FROM entidade'
+
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      db.collection("controls").find({"controlID": controlid}, { _id: false }).toArray(function(err, result) {
+        if (err) throw err;
+        if (result) {
+            if (result.length > 0) {
+                select = result[0].autocompleteChange;
+            }
+        }
+        
+        db.close();
+      });
+    });
+
+    sql.close()
+    // connect to your database
+    sql.connect(config, function (err) {    
+        if (err) console.log(err);
+
+        // create Request object
+        var request = new sql.Request();  
+        if (select) {            
+            select = select.replace("{{id}}", id)
+        }    
+        // query to the database and get the records
+        request.query(select, function (err, recordset) {            
+            //if (err) console.log(err)
+           
+            // send records as a response
+            res.send(recordset.recordsets[0])            
+        });
+    });    
+
+});
+
+
 
 router.route('/teste').get(function(req, res) {
     var Client = require('node-rest-client').Client;
@@ -353,6 +396,8 @@ router.route('/teste').get(function(req, res) {
            console.log(response);
        });
 });
+
+
 
 module.exports = database
 
