@@ -182,7 +182,7 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
                             if (containerObject.length > 0) {
                                 containerObject = containerObject[0];
                             }
-                            $(containerObject).find("#Gravar").click();
+                            //$(containerObject).find("#Gravar").click();
                         }
                     }
                     
@@ -224,7 +224,7 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
                         if (containerObject.length > 0) {
                             containerObject = containerObject[0];
                         }
-                        $(containerObject).find("#Gravar").click();
+                        //$(containerObject).find("#Gravar").click();
                     }
 
                     //if ($(".steps.steps-xs.row").find("span.step-title")[0].innerHTML == "Vendas") {
@@ -741,23 +741,36 @@ function editGridLine(button, containerID, ID) {
 
 
 function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSaving, onBeforeSaving){
+    loaderImage(form + "_panel", true);
+    var url = getGlobalParameters("urlPlataforma") + "/api/database/WriteData";
+    var retorno;
+    if (async != false) {
+        async = true;
+    };
     var isvalid = false;
-    var dirty = isDirty(instanceID);
-    if (dirty) {
-        //var formv = $("#" + form);
-        //var fv = formv.data('formValidation');
-        //isvalid = fv.validate();
-        isvalid = validateForm(form)
-        //if (isvalid.$invalidFields) {
-        //    if (isvalid.$invalidFields.length > 0) {
-        //        isvalid = false;
-        //    } else {
-        //        isvalid = true;
-        //    }
-        //} else {
-        //    isvalid = true;
-        //}
+   
+    if ($("#" + form).length == 0) {
+        form = form.replace(containerID,layoutID)
     }
+
+    var formv = $("#" + form);
+
+    
+
+    var fv = formv.data('formValidation');
+    isvalid = fv.validate();
+
+    if (isvalid.$invalidFields) {
+        if (isvalid.$invalidFields.length > 0) {
+            isvalid = false;
+        } else {
+            isvalid = true;
+        }
+    } else {
+        isvalid = true;
+    }
+
+  
 
 
     if (isvalid) {

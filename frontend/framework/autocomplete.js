@@ -61,7 +61,7 @@ function bindAutocomplete(controlID, nameLayout, LayoutID, TitleMenu, PropertyID
                 } else {
                     var item = $("#" + id);
                     if (item.attr("localAutoComplete") == "false") {
-                        filleditnavigation(chaveid,LayoutID, "" ,"960db7ed-e1bb-692f-03e9-df62d8c20e4e_nav" )
+                        filleditnavigation(chaveid,LayoutID, "" ,"36905f00-0531-f073-3701-c5719ec12ca6_nav" )
 
                         //$.ajax({
                         //    url: getGlobalParameters("urlPlataforma") + "/api/database/DataSearch",

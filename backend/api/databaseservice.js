@@ -308,6 +308,12 @@ function createUpdate(submit, index){
                     if (submit[index][key] == "" || submit[index][key] == "01/01/1900") {
                         submit[index][key] = "NULL"
                     }else{
+                        //if (submit[index][key].length == 10) {
+                        //    submit[index][key] = submit[index][key] + " 00:00:00"
+                        //}
+                        var dtsplit = submit[index][key].split("/")
+                        submit[index][key] = dtsplit[1] + "/" + dtsplit[0] + "/" + dtsplit[2]
+
                         submit[index][key] = "'" + submit[index][key] + "'"
                     }                  
                     break;
