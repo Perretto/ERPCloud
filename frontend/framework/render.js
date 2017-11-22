@@ -383,9 +383,9 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
 
 function openLayout(button, tabGenID) {
           
-
-        var formID = $(button).attr("data-tabgenlayout");
     
+        var formID = $(button).attr("data-tabgenlayout");
+        ClearForm(formID, true);
         var $tabNav = $(button).parents("form .panel.panel-nav");
         toogleColapseContainer($tabNav, true)
         $($tabNav).hide()

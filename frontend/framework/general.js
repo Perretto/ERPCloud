@@ -459,6 +459,10 @@ function ClearForm(formId, clearTable) {
     
 function onNew(form, id, instanceID, containerID, layoutID, async, onAfterSaving) {
     
+if ($("#" + form).length == 0) {
+    form = form.replace(containerID,layoutID)
+}
+
 //Verifica se deseja gravar antes de limpar a tela.
 var firstTab = false;
 var tabGen = "";
@@ -471,7 +475,7 @@ if (array) {
             var arrayform = $("#" + tabGen).find("form")
             if (arrayform) {
                 if (arrayform.length > 1) {
-                    if (form == arrayform[1].id) {
+                    if (form == arrayform[0].id) {
                         firstTab = true
                     }
                 }
