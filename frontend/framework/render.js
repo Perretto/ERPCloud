@@ -591,7 +591,7 @@ function fillScreen(data){
                 }     
             }else{
                 var value = p[i][key];
-                if (value) {
+                if (value != undefined && value != "undefined") {
                     if($("[data-table='" + table + "'][data-field='" + field + "']").length > 0){
                         if($("[data-table='" + table + "'][data-field='" + field + "']")[0].type === "select-one"){
                             value = value.toLowerCase();
@@ -599,12 +599,23 @@ function fillScreen(data){
 
                         var attribute = $("input[data-table='" + table + "'][data-field='" + field + "']").attr("data-nativedatatype");
 
-                        if(attribute === "Data"){
-                            var arrayvalue = value.split("T");
-                            if (arrayvalue.length > 0) {
-                                value = arrayvalue[0];
-                                value = formatDate(value);
-                            }                            
+                        switch (attribute) {
+                            case "Data":
+                                var arrayvalue = value.split("T");
+                                if (arrayvalue.length > 0) {
+                                    value = arrayvalue[0];
+                                    value = formatDate(value);
+                                }
+                                break;
+                            case "SimNao":
+                                if (value == true) {
+                                    $("[data-table='" + table + "'][data-field='" + field + "']").iCheck('check');
+                                }else{
+                                    $("[data-table='" + table + "'][data-field='" + field + "']").iCheck('uncheck');
+                                }
+                                break;
+                            default:
+                                break;
                         }
                     } 
                 }     
@@ -696,7 +707,7 @@ function fillContainer(data){
             var field = keyfield[1];
             var value = p[i][key];
 
-            if (value) {
+            if (value != undefined && value != "undefined") {
                 if($("[data-table='" + table + "'][data-field='" + field + "']").length > 0){
                     if($("[data-table='" + table + "'][data-field='" + field + "']")[0].type === "select-one"){
                         value = value.toLowerCase();
@@ -704,14 +715,26 @@ function fillContainer(data){
                     
                     var attribute = $("input[data-table='" + table + "'][data-field='" + field + "']").attr("data-nativedatatype");
                     
-                    if(attribute === "Data"){
-                        var arrayvalue = value.split("T");
-                        if (arrayvalue.length > 0) {
-                            value = arrayvalue[0];
-                            value = formatDate(value);
-                        }
-                        
+                    switch (attribute) {
+                        case "Data":
+                            var arrayvalue = value.split("T");
+                            if (arrayvalue.length > 0) {
+                                value = arrayvalue[0];
+                                value = formatDate(value);
+                            }
+                            break;
+                        case "SimNao":
+                            if (value == true) {
+                                $("[data-table='" + table + "'][data-field='" + field + "']").iCheck('check');
+                            }else{
+                                $("[data-table='" + table + "'][data-field='" + field + "']").iCheck('uncheck');
+                            }
+                            break;
+                        default:
+                            break;
                     }
+
+                    //$("[data-table='entidade'][data-field='sn_pessoafisica']").iCheck('check');
                 }
 
             }
