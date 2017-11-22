@@ -160,33 +160,22 @@
         cacheContent: false,
 
         validator: function (step) {
-            var formID = ""
             var form = $(".wizard-pane.active").find("form");
             if (form) {
                 if (form.length > 0) {
-                    formID = form[0].id;
                     if ($(form[0]).find("[data-template='MASTERDETAIL']").length > 0) {
                         return true;
                     }
                 }
             }
-            //var fv = form.data('formValidation');
-            //fv.validate();
+            var fv = form.data('formValidation');
+            fv.validate();
 
-            //if (!fv.isValid()) {
-            //    return false;
-            //}
-            var dirty = isDirty(formID);
-            if (dirty) {
-                if (validateForm(formID)) {
-                    return true;
-                }else{
-                    return false;
-                }
+            if (!fv.isValid()) {
+                return false;
             }
-            
-            
-            
+
+            return true;
 
         },
 
@@ -724,8 +713,7 @@
                 var tabgenid = $(current.$element[0]).attr("tabgenid");
                 var isvalid = !isDirty(containerid + "_" + tabgenid);
                 if (!isvalid) {
-                    isvalid = validateForm(containerid + "_" + tabgenid)
-                    //isvalid = current.validate();
+                    isvalid = current.validate();
                 }
 
                 if (!isvalid) {

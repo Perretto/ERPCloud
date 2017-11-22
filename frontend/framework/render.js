@@ -177,7 +177,7 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
                         }
                     }
                     //var formObject = $(".wizard-pane .active").find("form");
-                    if(containerObject){
+                    if (containerObject) {
                         if (containerObject.data('original_serialized_form') !== containerObject.serialize()) {
                             if (containerObject.length > 0) {
                                 containerObject = containerObject[0];
@@ -187,17 +187,17 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
                     }
                     
 
-                    $("html, body").animate({
-                        scrollTop: 0
-                    }, 600);
+                    //$("html, body").animate({
+                    //    scrollTop: 0
+                    //}, 600);
 
                 },
                 onBeforeHide: function () {
-                    $("html, body").animate({ scrollTop: 0 }, 600);
+                    //$("html, body").animate({ scrollTop: 0 }, 600);
                     //onSave(targetID, id, containerID, metadataContainerID, layoutID, false, form.onAfterSavingName);
                 },
                 onBack: function () {
-                    $("html, body").animate({ scrollTop: 0 }, 600);
+                    //$("html, body").animate({ scrollTop: 0 }, 600);
                 },
                 onFinish: function () {
                     var layout = $(".profile-tab .active");
@@ -227,6 +227,7 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
                         $(containerObject).find("#Gravar").click();
                     }
 
+                    //if ($(".steps.steps-xs.row").find("span.step-title")[0].innerHTML == "Vendas") {
                     if (layoutid.includes("ee5b8618-b239-49ca-86a9-6975134c8713")) {
                         bt_gerarVenda();
                     }
@@ -240,10 +241,10 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
                         f_aba('romaneio', '358188AE-0B11-438F-8A4A-9BEBB7943D44', 'Picking', 'false', returnCookie("EnterpriseID"));
                     }
                         //else if ($(".steps.steps-xs.row").find("span.step-title")[0].innerHTML == "Nota Fiscal") {
-                    //else if (layoutid.includes("07ca6db2-a587-4a59-aa82-95f1795bdf68")) {
+                        //else if (layoutid.includes("07ca6db2-a587-4a59-aa82-95f1795bdf68")) {
                         //LancaEstoqueNota();
                         //f_aba('layNFe', '7df84e2b-376c-4af9-8d16-42ad021b7542', 'Controle de NF-e', 'true', returnCookie("EnterpriseID"));
-                    //}
+                        //}
                         //else if ($(".steps.steps-xs.row").find("span.step-title")[0].innerHTML == "Picking") {
                     else if (layoutid.includes("358188ae-0b11-438f-8a4a-9bebb7943d44")) {
                         AlterStatusRomaneioJS();
@@ -274,10 +275,10 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
                 }
             });
 
-            $("#" + layoutID + "_" + tabGenID + ">.panel .wizard-buttons").html("");
-
-            var wizard = $("#" + layoutID + "_" + tabGenID + ">.panel").wizard(options).data('wizard');
-
+            $("#" +tabGenID + ">.panel .wizard-buttons").html("");
+            
+                        //var wizard = $("#" + layoutID + "_" + tabGenID + ">.panel").wizard(options).data('wizard');
+            var wizard = $("#" +tabGenID + ">.panel").wizard(options).data('wizard');
             
 
         }
@@ -387,6 +388,7 @@ function openLayout(button, tabGenID) {
     
         var $tabNav = $(button).parents("form .panel.panel-nav");
         toogleColapseContainer($tabNav, true)
+        $($tabNav).hide()
         $("#" + formID).show();
     
         var form = $(button).attr("data-formid");
@@ -421,7 +423,7 @@ function openLayout(button, tabGenID) {
 
     function clickSearch(tabGenID, layoutName, layoutID, load, listartodos){
         $.ajax({url: returnCookie("urlPlataform") + "/api/listall/" + layoutID, success: function(result){	
-            var id = "table_960db7ed-e1bb-692f-03e9-df62d8c20e4e_nav_table";
+            var id = "table_36905f00-0531-f073-3701-c5719ec12ca6_nav_table";
             var linehtml = "";
             if (result.recordsets) {
                 if (result.recordsets.length > 0) {
@@ -485,6 +487,7 @@ function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID) {
                 var formID = $(formTelaIDNavigation[0]).attr("data-tabgenlayout");
                 var $tabNav = $(formTelaIDNavigation[0]).parents("form .panel.panel-nav");
                 toogleColapseContainer($tabNav, true)
+                $($tabNav).hide();
                 $("#" + formID).show();
 
                 //        var onload = $("[tabgenid='" + formID + "']");
@@ -902,5 +905,39 @@ function atualizaAba(formID, layoutID, tabGenID, forcingTemplate, layoutType, ur
             //    //replaceTabControls(formID, layoutID, tabGenID, forcingTemplate, layoutType, urlRenderLayout, urlRenderLayoutData)
                 replaceTabControls(formID, layoutID, tabGenID, false, layoutType, urlRenderLayout, urlRenderLayoutData, titleMenu) 
             });
+    }
+}
+
+
+
+function OpenFormSearch(tabGenID) {
+    //$("#" + id + "_alertaModalFormSearchShow").modal('show');
+    var target = $("#" + tabGenID).parents().find(".panel-nav");
+    $(target).show()
+    $('html, body').animate({ scrollTop: target.offset().top }, 1000);
+    toogleColapseContainer(target, false)
+    return false;
+}
+
+
+function toogleColapseContainer(selectorContainer,close) {
+    var $elements = $(selectorContainer).children(".panel-body");
+    var $button = $(selectorContainer).find(".panel-heading .panel-control li a.minus");
+    if (close != true && close != false) {
+        close = $button.hasClass('active')
+    } 
+
+    if (close == true) {
+        $elements.slideUp(200);
+        $elements.parent().addClass("minimized");
+        //$button.children('i').removeClass('fa-minus');
+        //$button.children('i').addClass('fa-square-o');
+        $button.addClass('active');
+    } else if (close == false) {
+        $elements.slideDown(200);
+        $elements.parent().removeClass("minimized");
+        //$button.children('i').removeClass('fa-square-o');
+        //$button.children('i').addClass('fa-minus');
+        $button.removeClass('active');
     }
 }
