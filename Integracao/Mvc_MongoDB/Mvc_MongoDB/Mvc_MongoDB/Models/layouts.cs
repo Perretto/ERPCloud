@@ -17,5 +17,17 @@ namespace Mvc_MongoDB.Models
         [Required]
         [Display(Name = "html")]
         public String html { get; set; }
+
+        [Required]
+        [Display(Name = "tabgenid")]
+        public String tabgenid { get; set; }
+
+        [Required]
+        [Display(Name = "listall")]
+        public String listall { get; set; }
+
+        [Required]
+        [Display(Name = "finddata")]
+        public String finddata { get; set; }
     }
 }
