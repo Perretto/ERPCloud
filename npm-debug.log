@@ -2,8 +2,7 @@
 1 verbose cli [ 'C:\\nodejs\\node.exe',
 1 verbose cli   'C:\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
 1 verbose cli   'run',
-1 verbose cli   'dev',
-1 verbose cli   'backend' ]
+1 verbose cli   'dev' ]
 2 info using npm@3.10.10
 3 info using node@v6.11.3
 4 verbose stack Error: missing script: dev
@@ -13,12 +12,13 @@
 4 verbose stack     at checkBinReferences_ (C:\nodejs\node_modules\npm\node_modules\read-package-json\read-json.js:320:45)
 4 verbose stack     at final (C:\nodejs\node_modules\npm\node_modules\read-package-json\read-json.js:354:3)
 4 verbose stack     at then (C:\nodejs\node_modules\npm\node_modules\read-package-json\read-json.js:124:5)
-4 verbose stack     at ReadFileContext.<anonymous> (C:\nodejs\node_modules\npm\node_modules\read-package-json\read-json.js:295:20)
-4 verbose stack     at ReadFileContext.callback (C:\nodejs\node_modules\npm\node_modules\graceful-fs\graceful-fs.js:78:16)
-4 verbose stack     at FSReqWrap.readFileAfterOpen [as oncomplete] (fs.js:367:13)
+4 verbose stack     at C:\nodejs\node_modules\npm\node_modules\read-package-json\read-json.js:311:12
+4 verbose stack     at C:\nodejs\node_modules\npm\node_modules\graceful-fs\graceful-fs.js:78:16
+4 verbose stack     at tryToString (fs.js:457:3)
+4 verbose stack     at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:444:12)
 5 verbose cwd D:\ERPCloud
 6 error Windows_NT 10.0.15063
-7 error argv "C:\\nodejs\\node.exe" "C:\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "run" "dev" "backend"
+7 error argv "C:\\nodejs\\node.exe" "C:\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "run" "dev"
 8 error node v6.11.3
 9 error npm  v3.10.10
 10 error missing script: dev

@@ -115,25 +115,27 @@ router.route('/editGridLine/:id/:filtro').get(function(req, res) {
     });
 
     sql.close()
+    
 
     // connect to your database
     sql.connect(config, function (err) {    
         if (err) console.log(err);
-        
+         
         // create Request object
         var request = new sql.Request();
         
         select = select.replace("{{id}}", filtro)
          // query to the database and get the records
         request.query(select, function (err, recordset) {            
-            if (err) console.log(err)
-
-            // send records as a response
+            if (err) {
+                console.log(err)
+                res.send(err)
+            }
+            // send records as a response 
             res.send(recordset)            
         });
     });    
 });
-
 
 
 router.route('/save').post(function(req, res) {   
@@ -381,6 +383,66 @@ router.route('/RenderAutoComplete/:filter/:controlid').get(function(req, res) {
 
 });
 
+
+router.route('/DeleteData/:containerID/:id').get(function(req, res) {
+    var id = req.param('id');
+    var containerID = req.param('containerID');
+
+
+    var MongoClient = require('mongodb').MongoClient;
+    var url = "mongodb://localhost:27017/erpcloud";
+
+    var deletedata = "";
+    
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      db.collection("containers").find({"containerID": containerID}, { _id: false }).toArray(function(err, result) {
+        if (err) throw err;
+        if (result) {
+            
+            if (result.length > 0) {
+                deletedata = result[0].deletedata;
+              
+
+        if (deletedata) {            
+            deletedata = deletedata.split("{{id}}").join(id)
+        } 
+        console.log(deletedata)
+        
+        sql.close()
+        
+        sql.connect(config).then(function() {
+                request = new sql.Request();
+                request.query(deletedata).then(function(recordset) {
+                    console.log('Recordset: ' + recordset);
+                    console.log('Affected: ' + request.rowsAffected);
+                    var retorno = '{ "status": "success", "id": "' + id + '" }'
+                    var obj = JSON.parse(retorno)
+                    res.send(obj)
+                }).catch(function(err) {                    
+                    var retorno = "{ 'status': 'error', 'message': '" + err + "'}"
+                    console.log(retorno)
+                    //var obj = JSON.parse(retorno)
+                    
+                    //console.log(obj)
+                    res.send(err)
+                });
+        }).catch(function(err) {
+            if (err) {
+            console.log('SQL Connection Error: ' + err);
+            var obj = JSON.parse(err)
+            res.send(obj)
+            }
+        });
+        
+    }
+    }
+
+    db.close();
+    });
+    });
+
+});
 
 
 router.route('/teste').get(function(req, res) {

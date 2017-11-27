@@ -505,4 +505,56 @@ function loaderImage(id, on) {
         container.find(".loader").remove();
     }
   }
-    
+
+  
+function AjaxQuery(parameters) {
+    var retorno = false;
+    var dataType = (parameters.dataType) ? parameters.dataType : "json";
+    var type = (parameters.type) ? parameters.type : "";
+    var url = (parameters.url) ? parameters.url : "";
+    var dados = (parameters.dados) ? parameters.dados : "";
+    var callbackSuccess = (parameters.callbackSuccess) ? parameters.callbackSuccess : "";
+    var callbackError = (parameters.callbackError) ? parameters.callbackError : "";
+    var callbackComplete = (parameters.callbackComplete) ? parameters.callbackComplete : "";
+    var callBefore = (parameters.callBefore) ? parameters.callBefore : "";
+    var async = (parameters.async) ? parameters.async : false;
+    var contentType = (parameters.type == "POST") ? "application/json; charset=utf-8" : "";
+    var dataReturn;
+  
+    $.ajax({
+        //headers: {
+        //'Accept': 'application/json',
+        //'Content-Type': 'text/plain; charset=utf-8'
+        //},
+        type: type,
+        url: url,
+        dataType: dataType,
+        contentType: contentType,
+        async: async,
+        crossDomain: true,
+        data: dados,
+        beforeSend: function (result) {
+            if (callBefore) {
+                callBefore(result);
+            }
+        },
+        success: function (result) {
+            if (callbackSuccess) {
+                callbackSuccess(result);
+            }
+        },
+        error: function (result) {
+            if (callbackError) {
+                callbackError(result);
+            }
+        },
+        complete: function (result) {
+            if (callbackComplete) {
+                callbackComplete(result);
+            }
+            dataReturn = result
+        }
+    });
+    //console.log(dataReturn)
+    return dataReturn
+  }
