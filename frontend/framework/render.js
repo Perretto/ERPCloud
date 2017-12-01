@@ -490,6 +490,25 @@ function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID) {
                 $($tabNav).hide();
                 $("#" + formID).show();
 
+                if ($("#" + tabGenID).find("form")) {
+                    if ($("#" + tabGenID).find("form").length > 0) {
+                        var principaldt = $($("#" + tabGenID).find("form")[0]).attr("principaldatatypeid");
+
+                        if (principaldt) {
+                            var arrayFK = $( "input[name*='FK_" + principaldt + "']" )
+
+                            if (arrayFK) {
+                               for (let index = 0; index < arrayFK.length; index++) {
+                                   const element = arrayFK[index];
+                                   $(element).val(filtro)
+                               } 
+                            }
+                        }
+                    }
+                }
+                
+
+
                 //        var onload = $("[tabgenid='" + formID + "']");
                 //        if (onload) {
                 //            if (onload.length > 0) {
@@ -762,173 +781,6 @@ function editGridLine(button, containerID, ID) {
     }})
 }
 
-
-function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSaving, onBeforeSaving){
-    loaderImage(form + "_panel", true);
-    var url = getGlobalParameters("urlPlataforma") + "/api/database/WriteData";
-    var retorno;
-    if (async != false) {
-        async = true;
-    };
-    var isvalid = false;
-   
-    if ($("#" + form).length == 0) {
-        form = form.replace(containerID,layoutID)
-    }
-
-    var formv = $("#" + form);
-
-    
-
-    var fv = formv.data('formValidation');
-    isvalid = fv.validate();
-
-    if (isvalid.$invalidFields) {
-        if (isvalid.$invalidFields.length > 0) {
-            isvalid = false;
-        } else {
-            isvalid = true;
-        }
-    } else {
-        isvalid = true;
-    }
-
-  
-
-
-    if (isvalid) {
-        var data = SerializeFields({
-            formID: form,
-            containerID: containerID,
-            layoutID: layoutID,
-            returnString: false
-        });
-
-        $.ajax({
-            contentType: "application/json",
-            accepts: "application/json",
-            url: returnCookie("urlPlataform") + "/api/save/", 
-            type: "POST",
-            data:  data,
-            success: function(result){
-                if (result.status == "success") {
-                    notification({
-                        messageText: "Salvo com sucesso", messageTitle: "OK", fix: false, type: "ok", icon: "thumbs-up"
-                    });
-                }else{
-                    notification({
-                        messageText: result.message, messageTitle: "Ops", fix: false, type: "warning", icon: "thumbs-down"
-                    });
-                }                 
-            }
-        })
-    }
-}
-
-function SerializeFields(param){
-
-    var myJson = {};
-    var arrayObjs = [];
-    var formID = param.formID;
-    var returnString = (param.returnString) ? param.returnString : false;
-    var fillGrid = (param.fillGrid) ? param.fillGrid : false;
-    var containerID = param.containerID;
-    var layoutID = param.layoutID;
-
-    var form = document.getElementById(formID);
-    var elements = form.querySelectorAll('input,select,table,textarea');
-    
-    for (var i = 0; i < elements.length; i++) {
-        var serializable = elements[i].getAttribute("data-serializable");
-        myJson = {};
-        ///CRIA ARRAY DE VALORES
-        
-        if (elements[i].tagName === 'SELECT') {
-            try {
-                myJson["valor"] = elements[i].options[elements[i].selectedIndex].value;
-                //console.log(elements[i].options[elements[i].selectedIndex].text);
-            } catch (e) {
-
-            }
-        } else if (elements[i].tagName === 'TABLE' && returnString != true) {
-            continue;
-        }
-        else {
-            if ($(elements[i]).is(':checkbox')) {
-                myJson["valor"] = $(elements[i]).is(':checked')
-            } else {
-                myJson["valor"] = elements[i].value
-            }
-        }
-        
-        myJson["field"] = $(elements[i]).attr("data-field")
-        myJson["table"] = $(elements[i]).attr("data-table")  
-
-        arrayObjs.push(myJson);
-    }
-
-    arrayObjs = sortBy(arrayObjs, "table")
-
-    var json = ""    
-    json += '['
-    json += '    {'
-
-    var Arraytable = [];
-
-    for (var i = 0; i < arrayObjs.length; i++) { 
-        if (arrayObjs[i].table && arrayObjs[i].field) {            
-            if (Arraytable.indexOf(arrayObjs[i].table) < 0) {
-                if (Arraytable.length > 0) {
-                    json += '    }, {'
-                }
-    
-                Arraytable.push(arrayObjs[i].table)
-                json += '        "TABLE": "' + arrayObjs[i].table + '"'
-            }else{
-                json += '        ,"' + arrayObjs[i].field + '": "' + arrayObjs[i].valor + '" '
-            }
-        }         
-    }
-   
-    json += '    }'
-    json += ']'
-    
-    return json;
-}
-
-
-function sortBy(element, p) {
-    return element.slice(0).sort(function(a,b) {
-      return (a[p] > b[p]) ? 1 : (a[p] < b[p]) ? -1 : 0;
-    });
-  }
-
-  function validateForm(formID){
-    var retorno = true;    
-    var form = document.getElementById(formID);
-    var elements = form.querySelectorAll('input,select,table,textarea');
-    var arrayfieldsValidate = []
-    $(".summary-errors.alert.alert-danger.alert-dismissible").hide();
-    $(".summary-errors.alert.alert-danger.alert-dismissible").html("Lista de Erros: </br>")
-    for(var i=0; i < elements.length; i++){
-        if ($(elements[i]).hasClass("required")) {
-            if ($(elements[i]).val() == "") {
-                var nameField = "";
-                nameField = elements[i].placeholder;
-                $(".summary-errors.alert.alert-danger.alert-dismissible").show();
-                $(".summary-errors.alert.alert-danger.alert-dismissible").append("Campo " + nameField + " inválido </br>")
-                $(elements[i]).css("border-color","#ff0000")
-                retorno = false
-            }else{
-                $(elements[i]).css("border-color","#F7931E")
-            }            
-        }        
-    }
-    
-    
-
-    return retorno;
-  }
 
   
 function atualizaAba(formID, layoutID, tabGenID, forcingTemplate, layoutType, urlRenderLayout, urlRenderLayoutData, titleMenu) {

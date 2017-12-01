@@ -751,3 +751,13 @@ function mudaTotalGrid(containerID, parameters) {
         return;
 
 };
+
+function fillgrid(containerID, id){
+    
+    $.ajax({url: returnCookie("urlPlataform") + "/api/containergrid/" + containerID + "/" + id, success: function(result){
+        if (result) {
+            fillScreen(result);
+        }
+        
+    }});
+}

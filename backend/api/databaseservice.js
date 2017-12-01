@@ -398,33 +398,31 @@ router.route('/DeleteData/:containerID/:id').get(function(req, res) {
       if (err) throw err;
       db.collection("containers").find({"containerID": containerID}, { _id: false }).toArray(function(err, result) {
         if (err) throw err;
-        if (result) {
-            
+        if (result) {            
             if (result.length > 0) {
-                deletedata = result[0].deletedata;
-              
+                deletedata = result[0].deletedata;              
 
         if (deletedata) {            
             deletedata = deletedata.split("{{id}}").join(id)
         } 
         console.log(deletedata)
         
+        if (deletedata == "") {
+            var ret = '{ "status": "err", "message": "Script para deletar não foi inserido no banco"}'
+            var obje = JSON.parse(ret)
+            res.send(obje)
+        }
+
         sql.close()
         
         sql.connect(config).then(function() {
                 request = new sql.Request();
                 request.query(deletedata).then(function(recordset) {
-                    console.log('Recordset: ' + recordset);
-                    console.log('Affected: ' + request.rowsAffected);
                     var retorno = '{ "status": "success", "id": "' + id + '" }'
                     var obj = JSON.parse(retorno)
                     res.send(obj)
                 }).catch(function(err) {                    
-                    var retorno = "{ 'status': 'error', 'message': '" + err + "'}"
-                    console.log(retorno)
-                    //var obj = JSON.parse(retorno)
-                    
-                    //console.log(obj)
+                    //var retorno = "{ 'status': 'error', 'message': '" + err + "'}"
                     res.send(err)
                 });
         }).catch(function(err) {
@@ -442,6 +440,50 @@ router.route('/DeleteData/:containerID/:id').get(function(req, res) {
     });
     });
 
+});
+
+
+router.route('/containergrid/:id/:filtro').get(function(req, res) {
+    var MongoClient = require('mongodb').MongoClient;
+    var url = "mongodb://localhost:27017/erpcloud";
+    var id = req.param('id');
+    var filtro = req.param('filtro');
+    var select = ""; //'select Id, nm_razaosocial, nr_codigo, dt_cadastro, nm_nomefantasia, sn_pessoafisica, nm_cpf, nm_cnpj FROM entidade'
+
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      db.collection("containers").find({"containerID": id}, { _id: false }).toArray(function(err, result) {
+        if (err) throw err;
+        if (result) {
+            if (result.length > 0) {
+                select = result[0].fillgrid;                                
+            }
+        }
+        
+        db.close();
+      });
+    });
+
+    sql.close()    
+
+    // connect to your database
+    sql.connect(config, function (err) {    
+        if (err) console.log(err);
+         
+        // create Request object
+        var request = new sql.Request();
+        
+        select = select.replace("{{id}}", filtro)
+         // query to the database and get the records
+        request.query(select, function (err, recordset) {            
+            if (err) {
+                console.log(err)
+                res.send(err)
+            }
+            // send records as a response 
+            res.send(recordset)            
+        });
+    });    
 });
 
 
