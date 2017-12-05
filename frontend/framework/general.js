@@ -497,7 +497,7 @@ if (firstTab) {
 function loaderImage(id, on) {
     container = $("#" + id)
     if (on) {
-        //container.prepend("<div class=\"loadingBox\"></div>");
+        container.prepend("<div class=\"loadingBox\"></div>");
         //$("#" + id).loader();
     }
     else {

@@ -146,7 +146,7 @@ function onDeleteOld(formID, id, metadataContainerID, layoutID, instanceTela) {
 
 
 function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSaving, onBeforeSaving){
-    loaderImage(form + "_panel", true);
+    loaderImage(form, true);
     var url = getGlobalParameters("urlPlataforma") + "/api/database/WriteData";
     var retorno;
     if (async != false) {
@@ -200,19 +200,29 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                     
                     if (clear == false) {
                         ClearForm(form, true);
+                        var elementID = $($("#" + form.replace(containerID,layoutID))[0]).find("[name*='_PK']")
+                                            
+                        var id = "";
 
-                        var id = "63A28C99-3BC2-49E8-A2C8-01E734D9326D";
-                        fillgrid(containerID, id)
+                        if (elementID.length > 0) {
+                            id = $(elementID[0]).val()
+                            fillgrid(containerID, id)
+                        }
+                        ClearForm(form, false);
+                        loaderImage(form, false);
+                        
                     }
-                    notification({
-                        messageText: "Salvo com sucesso", messageTitle: "OK", fix: false, type: "ok", icon: "thumbs-up"
-                    });
+                    
 
                 }else{
                     notification({
                         messageText: result.message, messageTitle: "Ops", fix: false, type: "warning", icon: "thumbs-down"
                     });
-                }                 
+                } 
+                
+                notification({
+                    messageText: "Salvo com sucesso", messageTitle: "OK", fix: false, type: "ok", icon: "thumbs-up"
+                });
             }
         })
     }

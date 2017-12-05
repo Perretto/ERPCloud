@@ -564,7 +564,7 @@ function fillScreen(data){
                 }
             }
             
-            
+            var layoutID = $("#" + containerID).attr("layoutid");  
             var th = $("[data-table='" + table + "'][data-fielddata='" + field + "']");
 
             if(th.length > 0){              
@@ -577,9 +577,10 @@ function fillScreen(data){
                         if (index < 0) {
                             index = 0;
                         }  
-                                                
+                        containerID = containerID.replace(" ", "")   
+                                           
                         if (rownull == false) {   
-                            row["configuracao"] = "<div  style='white-space: nowrap;'><a type='button' title='editar' id='Edit' name='Edit' class='btn btn-primary btn btn-xs btn-warning ' onclick=editGridLine(this,'" + containerID + "','" + idGrid + "')><i class='fa fa-pencil'></i>  </a>  <a type='button' title='excluir' id='Delete' name='Delete' class='btn btn-primary btn btn-xs btn-danger ' onclick='deleteRowGrid(this,67310f48-6cf1-4ad6-8fdc-5fb8b4feb2d9_12dabdcd-7dea-e140-3a57-19837bbe368e, e31d2289-857e-4cd5-a9ab-ced917db810a)'><i class='fa fa-trash-o'></i>  </a></div>";
+                            row["configuracao"] = "<div  style='white-space: nowrap;'><a type='button' title='editar' id='Edit' name='Edit' class='btn btn-primary btn btn-xs btn-warning ' onclick=editGridLine(this,'" + containerID + "','" + idGrid + "')><i class='fa fa-pencil'></i>  </a>  <a type='button' title='excluir' id='Delete' name='Delete' class='btn btn-primary btn btn-xs btn-danger ' onclick=deleteRowGrid(this,'" + containerID + "','" + idGrid + "','" + layoutID + "')><i class='fa fa-trash-o'></i>  </a></div>";
                             idGrid = "";
                             containerID = "";
                             if(arraydataJSON[index].indexOf(JSON.stringify(row)) < 0){
@@ -657,7 +658,7 @@ function fillScreen(data){
             
             if (rownull == false) {               
 
-                row["configuracao"] = "<div  style='white-space: nowrap;'><a type='button' title='editar' id='Edit' name='Edit' class='btn btn-primary btn btn-xs btn-warning ' onclick=editGridLine(this,'" + containerID + "','" + idGrid + "')><i class='fa fa-pencil'></i>  </a>  <a type='button' title='excluir' id='Delete' name='Delete' class='btn btn-primary btn btn-xs btn-danger ' onclick='deleteRowGrid(this,67310f48-6cf1-4ad6-8fdc-5fb8b4feb2d9_12dabdcd-7dea-e140-3a57-19837bbe368e, e31d2289-857e-4cd5-a9ab-ced917db810a)'><i class='fa fa-trash-o'></i>  </a></div>";
+                row["configuracao"] = "<div  style='white-space: nowrap;'><a type='button' title='editar' id='Edit' name='Edit' class='btn btn-primary btn btn-xs btn-warning ' onclick=editGridLine(this,'" + containerID + "','" + idGrid + "','" + layoutID + "')><i class='fa fa-pencil'></i>  </a>  <a type='button' title='excluir' id='Delete' name='Delete' class='btn btn-primary btn btn-xs btn-danger ' onclick=deleteRowGrid(this,'" + containerID + "','" + idGrid + "','" + layoutID + "')><i class='fa fa-trash-o'></i>  </a></div>";
                 idGrid = "";
                 containerID = "";
                 if(arraydataJSON[index].indexOf(JSON.stringify(row)) < 0){

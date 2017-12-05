@@ -204,7 +204,7 @@ function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
                         });
                         lines += "  ";
                         lines += CreateButton({
-                            titulo: "", nome: "Delete", tooltip: "excluir", onClick: "deleteRowGrid(this,\"" + containerID + "\", \"" + valueID + "\")", classe: "btn btn-xs btn-danger", icone: '<i class="fa fa-trash-o"></i>', returnString: true
+                            titulo: "", nome: "Delete", tooltip: "excluir", onClick: "deleteRowGrid(this,'" + containerID + "','" + valueID + "')", classe: "btn btn-xs btn-danger", icone: '<i class="fa fa-trash-o"></i>', returnString: true
                         });
                     }
                     if (table == "venda_produtos_impostos") {
@@ -754,10 +754,72 @@ function mudaTotalGrid(containerID, parameters) {
 
 function fillgrid(containerID, id){
     
-    $.ajax({url: returnCookie("urlPlataform") + "/api/containergrid/" + containerID + "/" + id, success: function(result){
+    $.ajax({
+        url: returnCookie("urlPlataform") + "/api/containergrid/" + containerID + "/" + id, 
+        async: false,
+        success: function(result){
         if (result) {
             fillScreen(result);
         }
         
     }});
+}
+
+function deleteRowGrid(button, containerID ,valueID, layoutID){
+    var formID = containerID;
+
+    if (containerID) {
+        var arrayFormID = containerID.split("_");
+        containerID = arrayFormID[0];
+    }
+
+    var url = getGlobalParameters("urlPlataform") + "/api/DeleteData";
+      
+    loaderImage(formID, true);
+   
+    if (valueID) {
+        var id = valueID;
+
+        $.ajax({
+            contentType: "application/json",
+            accepts: "application/json",
+            url: url + "/" + containerID + "/" + id + "/", 
+            type: "GET",
+            success: function(result){                    
+                if (result.status) {
+                    if (result.status == "success") {
+                        notification({
+                            messageText: "Deletado com sucesso", messageTitle: "OK", fix: false, type: "ok", icon: "thumbs-up"
+                        });
+
+                        ClearForm(formID, true);
+                        if (layoutID == undefined || layoutID == "undefined" || layoutID == "") {
+                            layoutID = $("#" + formID).attr("layoutid");
+                        }
+                        var elementID = $($("#" + formID.replace(containerID,layoutID))[0]).find("[name*='_PK']")
+                        
+                        var id = "";
+
+                        if (elementID.length > 0) {
+                            id = $(elementID[0]).val()
+                            fillgrid(containerID, id)
+                        }
+                        //editGridLine("", metadataContainerID, id)
+
+                    }else{
+                        notification({
+                            messageText: result.message, messageTitle: "Ops", fix: false, type: "warning", icon: "thumbs-down"
+                        });
+                    }
+                } else{
+                    notification({
+                        messageText: result.originalError.info.message, messageTitle: "Ops", fix: false, type: "warning", icon: "thumbs-down"
+                    });
+                }      
+            }
+        })
+    }
+
+    loaderImage(formID,false);
+
 }
