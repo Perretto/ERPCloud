@@ -49,14 +49,15 @@ function onDelete(formID, id, metadataContainerID, layoutID, instanceTela) {
                         notification({
                             messageText: result.originalError.info.message, messageTitle: "Ops", fix: false, type: "warning", icon: "thumbs-down"
                         });
-                    }      
+                    }   
+                    loaderImage(formID,false);   
                 }
             })
 
         }
     }
 
-    loaderImage(formID,false);
+    
 }
 
 
@@ -206,26 +207,27 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
 
                         if (elementID.length > 0) {
                             id = $(elementID[0]).val()
-                            fillgrid(containerID, id)
+                            fillgrid(containerID, id, layoutID)
                         }
                         ClearForm(form, false);
-                        loaderImage(form, false);
                         
                     }
                     
+                    notification({
+                        messageText: "Salvo com sucesso", messageTitle: "OK", fix: false, type: "ok", icon: "thumbs-up"
+                    });
 
                 }else{
                     notification({
                         messageText: result.message, messageTitle: "Ops", fix: false, type: "warning", icon: "thumbs-down"
                     });
                 } 
-                
-                notification({
-                    messageText: "Salvo com sucesso", messageTitle: "OK", fix: false, type: "ok", icon: "thumbs-up"
-                });
+                loaderImage(form, false);
             }
         })
     }
+    
+    
 }
 
 function SerializeFields(param){
@@ -332,3 +334,40 @@ function sortBy(element, p) {
 
     return retorno;
   }
+
+  
+function onNew(form, id, instanceID, containerID, layoutID, async, onAfterSaving) {
+    
+if ($("#" + form).length == 0) {
+    form = form.replace(containerID,layoutID)
+}
+
+//Verifica se deseja gravar antes de limpar a tela.
+var firstTab = false;
+var tabGen = "";
+var array = form.split("_");
+if (array) {
+    if (array.length > 1) {
+        tabGen = array[1];
+        tabGen = tabGen.replace("_","")
+        if (tabGen) {
+            var arrayform = $("#" + tabGen).find("form")
+            if (arrayform) {
+                if (arrayform.length > 1) {
+                    if (form == arrayform[0].id) {
+                        firstTab = true
+                    }
+                }
+            }
+        }
+    }
+}
+
+if (firstTab) {
+    ClearForm(tabGen, true);
+}else{
+    ClearForm(form, false);
+}
+    
+        
+}

@@ -524,7 +524,7 @@ function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID) {
     }})
 }
 
-function fillScreen(data){
+function fillScreen(data, template, layoutID){
     var arraytable = [];
     var arraydatagrid = [[]];
     var arraydataJSON = [[]];
@@ -536,8 +536,10 @@ function fillScreen(data){
     var rownull = true;
     var idGrid = "";
     var containerID = "";
-
     var p = data.recordsets[0];
+
+    
+
     for (var i = 0; i < p.length; i++) {        
         for (var key in p[i]) {
             var keyfield = key.split('.')
@@ -564,7 +566,10 @@ function fillScreen(data){
                 }
             }
             
-            var layoutID = $("#" + containerID).attr("layoutid");  
+            if (layoutID == "" || layoutID == "undefined" || layoutID == undefined) {
+                layoutID = $("#" + containerID).attr("layoutid"); 
+            }
+             
             var th = $("[data-table='" + table + "'][data-fielddata='" + field + "']");
 
             if(th.length > 0){              
@@ -609,7 +614,7 @@ function fillScreen(data){
                     }
                     row[idfield] = p[i][key]; 
                 }     
-            }else{
+            }else if(template != "MASTERDETAIL" && template != "GRID"){
                 var value = p[i][key];
                 if (value != undefined && value != "undefined") {
                     if($("[data-table='" + table + "'][data-field='" + field + "']").length > 0){
@@ -672,6 +677,7 @@ function fillScreen(data){
         
         arraytable = [];
     }
+
 
     var arrayT = [];
 
@@ -770,15 +776,16 @@ function fillContainer(data){
 function editGridLine(button, containerID, ID) {
     var arrayContainerID = [];
     arrayContainerID = containerID.split('_')
-    
+    var form = containerID;
     if (arrayContainerID) {
         if (arrayContainerID.length > 0) {
             containerID = arrayContainerID[0];
         }
     }
-
+    loaderImage(form, true);
     $.ajax({url: returnCookie("urlPlataform") + "/api/editGridLine/" + containerID + "/" + ID, success: function(result){
         fillContainer(result);
+        loaderImage(form, false);
     }})
 }
 

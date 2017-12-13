@@ -7088,7 +7088,7 @@ div.widget-title {
 }
 .step {
   position: relative;
-  padding: 8px 10px;
+  padding: 1px 15px;
   margin: 0;
   font-size: inherit;
   color: #a3afb7;
@@ -7242,6 +7242,7 @@ div.widget-title {
 .steps-xs .step-number ~ .step-desc {
   min-height: 24px;
   margin-left: 24px;
+  padding-top: 2%;
 }
 .pearls {
   margin-bottom: 22px;

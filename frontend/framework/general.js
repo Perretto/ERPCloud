@@ -160,7 +160,7 @@ function getGlobalParameters(parametro) {
         //global.urlPlataforma = "http://" + window.location.host
     
         //global.urlDesenvolvimento = "http://localhost:13886/";
-        global.urlPlataform = "http://localhost:3001"
+        global.urlPlataform = "http://"+ window.location.hostname +":3001"
         global.urlPlataforma = "http://homologa.empresariocloud.com.br"
         global.urlInterface = "http://homologa.empresariocloud.com.br"
 
@@ -410,6 +410,10 @@ function ClearForm(formId, clearTable) {
                     default:
                         break;
                 }
+
+                if (elements[i].value == "undefined" || elements[i].value == undefined) {
+                    elements[i].value = ""
+                }
             }
     
             var thisTable = $("#" + formId + "_table")
@@ -457,42 +461,6 @@ function ClearForm(formId, clearTable) {
 
 
     
-function onNew(form, id, instanceID, containerID, layoutID, async, onAfterSaving) {
-    
-if ($("#" + form).length == 0) {
-    form = form.replace(containerID,layoutID)
-}
-
-//Verifica se deseja gravar antes de limpar a tela.
-var firstTab = false;
-var tabGen = "";
-var array = form.split("_");
-if (array) {
-    if (array.length > 1) {
-        tabGen = array[1];
-        tabGen = tabGen.replace("_","")
-        if (tabGen) {
-            var arrayform = $("#" + tabGen).find("form")
-            if (arrayform) {
-                if (arrayform.length > 1) {
-                    if (form == arrayform[0].id) {
-                        firstTab = true
-                    }
-                }
-            }
-        }
-    }
-}
-
-if (firstTab) {
-    ClearForm(tabGen, true);
-}else{
-    ClearForm(form, false);
-}
-    
-        
-}
-
 
 function loaderImage(id, on) {
     container = $("#" + id)
@@ -557,4 +525,8 @@ function AjaxQuery(parameters) {
     });
     //console.log(dataReturn)
     return dataReturn
+  }
+
+  function getObjMessageJS(numero){
+    return "";
   }

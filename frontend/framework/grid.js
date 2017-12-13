@@ -752,14 +752,14 @@ function mudaTotalGrid(containerID, parameters) {
 
 };
 
-function fillgrid(containerID, id){
+function fillgrid(containerID, id, layoutID){
     
     $.ajax({
         url: returnCookie("urlPlataform") + "/api/containergrid/" + containerID + "/" + id, 
         async: false,
         success: function(result){
         if (result) {
-            fillScreen(result);
+            fillScreen(result, "MASTERDETAIL", layoutID);
         }
         
     }});
@@ -815,11 +815,12 @@ function deleteRowGrid(button, containerID ,valueID, layoutID){
                     notification({
                         messageText: result.originalError.info.message, messageTitle: "Ops", fix: false, type: "warning", icon: "thumbs-down"
                     });
-                }      
+                }
+                loaderImage(formID,false);      
             }
         })
     }
 
-    loaderImage(formID,false);
+    
 
 }
