@@ -802,7 +802,7 @@ function deleteRowGrid(button, containerID ,valueID, layoutID){
 
                         if (elementID.length > 0) {
                             id = $(elementID[0]).val()
-                            fillgrid(containerID, id)
+                            fillgrid(containerID, id, layoutID)
                         }
                         //editGridLine("", metadataContainerID, id)
 
