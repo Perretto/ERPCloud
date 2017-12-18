@@ -650,11 +650,6 @@
     <script src="framework/toolbar.js"></script>
 
     <!--plugin do treeView js  jstree-->
-    
-    
-
-    
-
 
     <!-- plugin de ajuda -->
     <script src="Script/sortable.js"></script>
@@ -689,10 +684,10 @@
                 $(".dropdown-toggle").dropdown();
 				
 				$(window).keydown(function (event) {
-                if (event.keyCode == 13) {
-                    event.preventDefault();
-                    return false;
-                }
+                    if (event.keyCode == 13) {
+                        event.preventDefault();
+                        return false;
+                    }
 				});
 
 				console.log("");
@@ -702,8 +697,6 @@
 				});
 				
                 call_navigation();
-                
-                
 
             });
         })(document, window, jQuery);

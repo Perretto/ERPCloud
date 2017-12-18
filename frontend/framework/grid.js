@@ -777,6 +777,7 @@ function deleteRowGrid(button, containerID ,valueID, layoutID){
       
     loaderImage(formID, true);
    
+    confirm("Deseja deletar este item?",function(){
     if (valueID) {
         var id = valueID;
 
@@ -820,6 +821,9 @@ function deleteRowGrid(button, containerID ,valueID, layoutID){
             }
         })
     }
+},function(){
+    loaderImage(formID,false); 
+})
 
     
 

@@ -530,3 +530,29 @@ function AjaxQuery(parameters) {
   function getObjMessageJS(numero){
     return "";
   }
+
+  
+function confirm(message, callback, callbackfalse) {
+    
+    swal({
+        title: message,
+        text: "",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#e4eaeb",
+        confirmButtonText: "Sim",
+        cancelButtonText: "Não",
+        closeOnConfirm: true,
+        closeOnCancel: true
+    },
+    function (isConfirm) {
+        if (isConfirm) {
+            //swal("OK!", "Operação realizada com sucesso.", "success");
+            callback();
+        } else {
+            //swal("Cancelado", "", "error");
+            if (callbackfalse)
+                callbackfalse();
+        }
+    });
+}

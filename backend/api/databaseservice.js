@@ -157,7 +157,7 @@ router.route('/save').post(function(req, res) {
     var guid = general.guid(); 
     
     for (var index = 0; index < submit.length; index++) {
-        if (submit[index]["id"] == "") {
+        if (submit[index]["id"] == "" || !submit[index]["id"]) {
             insertOrUpdate = createInsert(submit, index, guid)
         }else{
             guid = submit[index]["id"];

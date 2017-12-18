@@ -9,7 +9,7 @@ function onDelete(formID, id, metadataContainerID, layoutID, instanceTela) {
     }
 
     loaderImage(formID, true);
-
+    confirm("Deseja deletar este item?",function(){
     var retorno = SerializeFields({
         formID: formID,
         containerID: metadataContainerID,
@@ -56,7 +56,9 @@ function onDelete(formID, id, metadataContainerID, layoutID, instanceTela) {
 
         }
     }
-
+},function(){
+    loaderImage(formID,false); 
+})
     
 }
 
@@ -148,6 +150,8 @@ function onDeleteOld(formID, id, metadataContainerID, layoutID, instanceTela) {
 
 function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSaving, onBeforeSaving){
     loaderImage(form, true);
+
+    confirm("Deseja salvar este registro?",function(){
     var url = getGlobalParameters("urlPlataforma") + "/api/database/WriteData";
     var retorno;
     if (async != false) {
@@ -226,7 +230,9 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
             }
         })
     }
-    
+},function(){
+    loaderImage(form, false);
+})
     
 }
 
@@ -289,6 +295,7 @@ function SerializeFields(param){
     
                 Arraytable.push(arrayObjs[i].table)
                 json += '        "TABLE": "' + arrayObjs[i].table + '"'
+                json += '        ,"' + arrayObjs[i].field + '": "' + arrayObjs[i].valor + '" '
             }else{
                 json += '        ,"' + arrayObjs[i].field + '": "' + arrayObjs[i].valor + '" '
             }
