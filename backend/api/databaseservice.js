@@ -137,6 +137,19 @@ router.route('/editGridLine/:id/:filtro').get(function(req, res) {
     });    
 });
 
+function incremento(submit,index, table, field, callback){
+    sql.close()
+    var select = "SELECT nr_incremento FROM incremento WHERE nm_tabela = '" + table + "' AND nm_campo='" + field + "'"
+   
+    sql.connect(config).then(function() { 
+        request = new sql.Request();
+        request.query(select, function (err, recordset) {  
+            if (err) console.log(err)
+            
+            callback(recordset.recordset[0],submit,index); 
+        });
+    });  
+}
 
 router.route('/save').post(function(req, res) {   
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -152,45 +165,95 @@ router.route('/save').post(function(req, res) {
     var submit = req.body;
     var insertOrUpdate = ""
     var request = new sql.Request();
-    sql.close()
 
     var guid = general.guid(); 
     
     for (var index = 0; index < submit.length; index++) {
         if (submit[index]["id"] == "" || !submit[index]["id"]) {
-            insertOrUpdate = createInsert(submit, index, guid)
+            var indexIncrement = -1;
+            var fieldincrement = "";
+
+            for (var key in submit[index]) {
+                indexIncrement = key.indexOf("_INCREMENT");
+                
+                if (indexIncrement >= 0) {
+                    fieldincrement = key;
+                    break;
+                }
+            }
+
+            incremento(submit,index,submit[index]["TABLE"], fieldincrement.replace("_INCREMENT",""), function(resultado, submit, index){
+                var numberincrement;
+                var updateincrement = ""
+                if(resultado){
+                    if(resultado.nr_incremento){                                                  
+                        submit[index][fieldincrement] = parseInt(resultado.nr_incremento) + 1
+                        numberincrement = parseInt(resultado.nr_incremento) + 1 
+                        updateincrement = "UPDATE incremento SET nr_incremento=" + numberincrement + " WHERE nm_tabela='" + submit[index]["TABLE"] + "' AND nm_campo='" + fieldincrement.replace("_INCREMENT","") + "'"
+                    }
+                }
+
+                insertOrUpdate = createInsert(submit, index, guid)
+                insertOrUpdate += updateincrement;
+                sql.close()
+                console.log(insertOrUpdate)
+                sql.connect(config).then(function() {
+                        request = new sql.Request();
+                        request.query(insertOrUpdate).then(function(recordset) {
+                        console.log('Recordset: ' + recordset);
+                        console.log('Affected: ' + request.rowsAffected);
+                        var retorno = '{ "status": "success", "id": "' + guid + '" }'
+                        if (numberincrement) {
+                            retorno = '{ "status": "success", "id": "' + guid + '", "increment": "' + numberincrement + '", "incrementfield": "' + submit[index]["TABLE"] + "." + fieldincrement.replace("_INCREMENT","") + '"}'
+                        }else{
+                            retorno = '{ "status": "success", "id": "' + guid + '" }'
+                        }
+                        var obj = JSON.parse(retorno)
+                        res.send(obj)
+                    }).catch(function(err) {
+                        console.log('Request error: ' + err);
+                        var retorno = '{ "status": "error", "message": "' + err + '" }'
+                        var obj = JSON.parse(retorno)
+                        res.send(obj)
+                    });
+                }).catch(function(err) {
+                    if (err) {
+                    console.log('SQL Connection Error: ' + err);
+                    var retorno = '{ "status": "error", "message": "' + err + '" }'
+                    var obj = JSON.parse(retorno)
+                    res.send(obj)
+                    }
+                }); 
+            })  
         }else{
             guid = submit[index]["id"];
             insertOrUpdate = createUpdate(submit, index)
-        }
-    }
+            sql.close()
 
-    console.log(insertOrUpdate)
-        sql.close()
-
-        sql.connect(config).then(function() {
-                request = new sql.Request();
-                request.query(insertOrUpdate).then(function(recordset) {
-                console.log('Recordset: ' + recordset);
-                console.log('Affected: ' + request.rowsAffected);
-                var retorno = '{ "status": "success", "id": "' + guid + '" }'
-                var obj = JSON.parse(retorno)
-                res.send(obj)
+            sql.connect(config).then(function() {
+                    request = new sql.Request();
+                    request.query(insertOrUpdate).then(function(recordset) {
+                    console.log('Recordset: ' + recordset);
+                    console.log('Affected: ' + request.rowsAffected);
+                    var retorno = '{ "status": "success", "id": "' + guid + '" }'
+                    var obj = JSON.parse(retorno)
+                    res.send(obj)
+                }).catch(function(err) {
+                    console.log('Request error: ' + err);
+                    var retorno = '{ "status": "error", "message": "' + err + '" }'
+                    var obj = JSON.parse(retorno)
+                    res.send(obj)
+                });
             }).catch(function(err) {
-                console.log('Request error: ' + err);
+                if (err) {
+                console.log('SQL Connection Error: ' + err);
                 var retorno = '{ "status": "error", "message": "' + err + '" }'
                 var obj = JSON.parse(retorno)
                 res.send(obj)
-            });
-        }).catch(function(err) {
-            if (err) {
-            console.log('SQL Connection Error: ' + err);
-            var retorno = '{ "status": "error", "message": "' + err + '" }'
-            var obj = JSON.parse(retorno)
-            res.send(obj)
-            }
-        }); 
-    
+                }
+            }); 
+        }
+    }    
 });
 
 function createInsert(submit, index, guid){
@@ -204,9 +267,12 @@ function createInsert(submit, index, guid){
     ind = 0;
         
     sqlfields = "( "
-    sqlvalues = " VALUES( "
+    sqlvalues = " VALUES( ";
 
-    for (var key in submit[index]) {            
+    for (var key in submit[index]) { 
+        
+        
+        
         if (key === "TABLE") {
             table = submit[index][key]
         }else{
@@ -238,8 +304,13 @@ function createInsert(submit, index, guid){
                     if (submit[index][key] == "" || submit[index][key] == "01/01/1900") {
                         submit[index][key] = "NULL"
                     }else{
+                        var dts = submit[index][key].split('/');
+                        if (dts.length > 0) {
+                            submit[index][key] = dts[1] + "/" + dts[0] + "/" + dts[2];
+                        }
                         submit[index][key] = "'" + submit[index][key] + "'"
-                    }                     
+                    }
+
                     break;
                 default:
                     break;
@@ -247,11 +318,17 @@ function createInsert(submit, index, guid){
 
 
             if (ind == 0) {
-                sqlfields += key                    
                 sqlvalues += "" + submit[index][key] + " "
+                if (key.includes("_INCREMENT")) {
+                    key = key.replace("_INCREMENT","")
+                 }
+                sqlfields += key                    
             }else{
-                sqlfields = sqlfields + ", " + key
                 sqlvalues = sqlvalues + ", " + submit[index][key] + " "
+                if (key.includes("_INCREMENT")) {
+                    key = key.replace("_INCREMENT","")
+                }
+                sqlfields = sqlfields + ", " + key
             }
 
             ind += 1
@@ -486,6 +563,23 @@ router.route('/containergrid/:id/:filtro').get(function(req, res) {
     });    
 });
 
+
+function refreshIncrement(table, field){
+    sql = "SELECT nr_incremento FROM incremento WHERE nm_tabela = '" + table + "' AND nm_campo='" + field + "'"
+    var retorno = select(sql);
+    if (retorno) {
+        if (retorno.recordsets.length > 0) {
+            return retorno.recordsets[0]
+        }
+    }
+    return retorno;
+}
+
+function select(select){
+      
+        
+        return null;
+}
 
 router.route('/teste').get(function(req, res) {
     var Client = require('node-rest-client').Client;

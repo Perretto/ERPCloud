@@ -213,8 +213,12 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                             id = $(elementID[0]).val()
                             fillgrid(containerID, id, layoutID)
                         }
-                        ClearForm(form, false);
-                        
+                        ClearForm(form, false);                        
+                    }else if(result.increment){
+                        var arrayfield = result.incrementfield.split('.');
+                        var table = arrayfield[0];
+                        var field = arrayfield[1];
+                        $("input[data-table='" + table + "'][data-field='" + field + "']").val(result.increment)
                     }
                     
                     notification({
@@ -274,6 +278,10 @@ function SerializeFields(param){
         
         myJson["field"] = $(elements[i]).attr("data-field")
         myJson["table"] = $(elements[i]).attr("data-table")  
+
+        if ($(elements[i]).attr('data-nativedatatype') == 'INCREMENT') {
+            myJson["field"] += "_INCREMENT"
+        }
 
         arrayObjs.push(myJson);
     }
