@@ -271,7 +271,12 @@ function createInsert(submit, index, guid){
 
     for (var key in submit[index]) { 
         
-        
+        if (submit[index][key]) {
+            var valor = String(submit[index][key]);
+            if (valor.includes("'") >= 0) {
+                submit[index][key] = valor.replace("'","")
+            }
+        }
         
         if (key === "TABLE") {
             table = submit[index][key]

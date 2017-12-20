@@ -149,7 +149,7 @@ function onDeleteOld(formID, id, metadataContainerID, layoutID, instanceTela) {
 
 
 function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSaving, onBeforeSaving){
-    loaderImage(form, true);
+   
 
     confirm("Deseja salvar este registro?",function(){
     var url = getGlobalParameters("urlPlataforma") + "/api/database/WriteData";
@@ -164,7 +164,7 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
     if ($("#" + form).length == 0) {
         form = form.replace(containerID,layoutID)
     }
-
+    loaderImage(form, true);
     var formv = $("#" + form);
 
     var template = $("#" + form + "_table").attr("data-template");
@@ -202,11 +202,11 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
             data:  data,
             success: function(result){
                 if (result.status == "success") {
-                    
+                    var elementID = $($("#" + form.replace(containerID,layoutID))[0]).find("[name*='_PK']")
+                          
                     if (clear == false) {
                         ClearForm(form, true);
-                        var elementID = $($("#" + form.replace(containerID,layoutID))[0]).find("[name*='_PK']")
-                                            
+                                          
                         var id = "";
 
                         if (elementID.length > 0) {
@@ -219,8 +219,18 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                         var table = arrayfield[0];
                         var field = arrayfield[1];
                         $("input[data-table='" + table + "'][data-field='" + field + "']").val(result.increment)
+                        
                     }
                     
+                    for (let index = 0; index < elementID.length; index++) {
+                        var tableelement = $(elementID[index]).attr("data-table")
+                        if (!$("[data-table='" + tableelement + "'][data-field='id']").val()) {
+                            $("[data-table='" + tableelement + "'][data-field='id']").val(result.id)
+                            $("[data-derivedfrom='" + tableelement + "'][data-field='id_" + tableelement + "']").val(result.id)
+    
+                        }
+                    }
+
                     notification({
                         messageText: "Salvo com sucesso", messageTitle: "OK", fix: false, type: "ok", icon: "thumbs-up"
                     });
