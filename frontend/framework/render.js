@@ -30,9 +30,8 @@ function atualizaAba(formID, layoutID, tabGenID, forcingTemplate, layoutType, ur
     var enterpriseID = "";
     fillTab(formID,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
 }
-
 function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID){
-    $.ajax({url: returnCookie("urlPlataform") + "/api/layouts?layoutID=" + layoutID, success: function(result){	
+    $.ajax({url: returnCookie("urlPlataform") + "/api/layout/" + layoutID, success: function(result){	
         var tabGenID2 = guid();
         result[0].html = replaceAll(result[0].html, result[0].tabgenid, tabGenID2)
         
@@ -423,7 +422,7 @@ function openLayout(button, tabGenID) {
 
     function clickSearch(tabGenID, layoutName, layoutID, load, listartodos){
         $.ajax({url: returnCookie("urlPlataform") + "/api/listall/" + layoutID, success: function(result){	
-            var id = "table_36905f00-0531-f073-3701-c5719ec12ca6_nav_table";
+            var id = "table_" + tabGenID + "_table";
             var linehtml = "";
             if (result.recordsets) {
                 if (result.recordsets.length > 0) {
@@ -441,18 +440,45 @@ function openLayout(button, tabGenID) {
                                 element.sn_pessoafisica = '<i class="fa fa-times"></i>';
                             }
                             
-                            element.Id = element.Id.replace(" ","");
+                               
+                            var row = {};
 
-                            var row = {
-                                "0":"<a type='button' title='editar' id='Edit' name='Edit' class='btn btn-primary btn btn-xs btn-warning 6420a34d-9c8b-fcc5-b8f3-930d33ee8ea7_edit' onclick='filleditnavigation(\"" + element.Id + "\",\"" + layoutID + "\", \"\" ,\"" + tabGenID + "\" )' data-tabgenlayout='6420a34d-9c8b-fcc5-b8f3-930d33ee8ea7_nav'><i class='fa fa-pencil'></i></a>",
-                                "nm_razaosocial":element.nm_razaosocial,
-                                "nr_codigo":element.nr_codigo,
-                                "dt_cadastro":element.dt_cadastro,
-                                "nm_nomefantasia":element.nm_nomefantasia,
-                                "sn_pessoafisica":element.sn_pessoafisica,
-                                "nm_cpf":element.nm_cpf,
-                                "nm_cnpj":element.nm_cnpj
-                            }
+                            for (var key in element) { 
+                                var arraykey = key.split('.');
+                                var keyfield = ""
+                                if (arraykey.length > 1) {
+                                    keyfield = arraykey[1];
+                                }
+                                if (keyfield) {
+                                    
+
+                                    if(keyfield.toLowerCase() == "id"){
+                                        if (!element.Id) {
+                                            element.Id = element[key].replace(" ","");
+                                            row = {
+                                                "0":"<a type='button' title='editar' id='Edit' name='Edit' class='btn btn-primary btn btn-xs btn-warning 6420a34d-9c8b-fcc5-b8f3-930d33ee8ea7_edit' onclick='filleditnavigation(\"" + element.Id + "\",\"" + layoutID + "\", \"\" ,\"" + tabGenID + "\" )' data-tabgenlayout='6420a34d-9c8b-fcc5-b8f3-930d33ee8ea7_nav'><i class='fa fa-pencil'></i></a>"
+                                            } 
+                                        }                                        
+                                    }else{
+                                        row[keyfield] = element[key];
+                                    }
+                                }
+                               
+                            }  
+
+                            
+
+                            
+                         //   var row = {
+                         //       "0":"<a type='button' title='editar' id='Edit' name='Edit' class='btn btn-primary btn btn-xs btn-warning 6420a34d-9c8b-fcc5-b8f3-930d33ee8ea7_edit' onclick='filleditnavigation(\"" + element.Id + "\",\"" + layoutID + "\", \"\" ,\"" + tabGenID + "\" )' data-tabgenlayout='6420a34d-9c8b-fcc5-b8f3-930d33ee8ea7_nav'><i class='fa fa-pencil'></i></a>",
+                         //       "nm_razaosocial":element.nm_razaosocial,
+                         //       "nr_codigo":element.nr_codigo,
+                         //       "dt_cadastro":element.dt_cadastro,
+                         //       "nm_nomefantasia":element.nm_nomefantasia,
+                         //       "sn_pessoafisica":element.sn_pessoafisica,
+                         //       "nm_cpf":element.nm_cpf,
+                         //       "nm_cnpj":element.nm_cnpj
+                         //   }
 
                             data.push(row);
 
@@ -472,7 +498,7 @@ function openLayout(button, tabGenID) {
     
 function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID) {
 
-    $.ajax({url: returnCookie("urlPlataform") + "/api/findid/" + filtro, success: function(result){
+    $.ajax({url: returnCookie("urlPlataform") + "/api/findid2/" + filtro + "/" + LayoutID, success: function(result){
         var EnterpriseID = returnCookie("EnterpriseID");
 
         var formTelaIDNavigation = $("#table_" + tabGenID + "_btnnovo");
@@ -524,6 +550,7 @@ function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID) {
     }})
 }
 
+
 function fillScreen(data, template, layoutID){
     var arraytable = [];
     var arraydatagrid = [[]];
@@ -536,7 +563,200 @@ function fillScreen(data, template, layoutID){
     var rownull = true;
     var idGrid = "";
     var containerID = "";
-    var p = data.recordsets[0];
+    var p = data;
+
+    
+
+    for (var i = 0; i < p.length; i++) {        
+        for (var key in p[i]) {
+            var keyfield = key.split('.')
+            var table = keyfield[0];
+            var field = keyfield[1];
+
+            tablegrid = $("[data-table='" + table + "'][data-fielddata='" + field + "']").closest('table');
+            var idfield = $("[data-table='" + table + "'][data-fielddata='" + field + "']").attr("data-field");        
+
+            if (field.toLowerCase() === "id") {
+                idGrid = p[i][key];                
+            }                    
+
+            if (containerID === "") {
+                if ($(tablegrid[0]).parents(".sharpGrid")) {
+                    var div = $(tablegrid[0]).parents(".sharpGrid");
+                    if (div.length > 0) {
+                        containerID = div[0].id;
+    
+                        if (containerID) {
+                            containerID = containerID.replace("_sharpGrid", "")
+                        }
+                    }
+                }
+            }
+            
+            if (layoutID == "" || layoutID == "undefined" || layoutID == undefined) {
+                layoutID = $("#" + containerID).attr("layoutid"); 
+            }
+             
+            var th = $("[data-table='" + table + "'][data-fielddata='" + field + "']");
+
+            if(th.length > 0){              
+               
+                if(arraytable.indexOf(table) < 0){
+                    arraytablegrid.push(tablegrid[0]);                    
+
+                    if (row != null) {
+                        var index = arraytable.indexOf(beforeTable);
+                        if (index < 0) {
+                            index = 0;
+                        }  
+                        containerID = containerID.replace(" ", "")   
+                                           
+                        if (rownull == false) {   
+                            row["configuracao"] = "<div  style='white-space: nowrap;'><a type='button' title='editar' id='Edit' name='Edit' class='btn btn-primary btn btn-xs btn-warning ' onclick=editGridLine(this,'" + containerID + "','" + idGrid + "')><i class='fa fa-pencil'></i>  </a>  <a type='button' title='excluir' id='Delete' name='Delete' class='btn btn-primary btn btn-xs btn-danger ' onclick=deleteRowGrid(this,'" + containerID + "','" + idGrid + "','" + layoutID + "')><i class='fa fa-trash-o'></i>  </a></div>";
+                            idGrid = "";
+                            containerID = "";
+                            if(arraydataJSON[index].indexOf(JSON.stringify(row)) < 0){
+                                arraydatagrid[index].push(row);
+                                arraydataJSON[index].push(JSON.stringify(row));
+                            }                            
+                        } 
+                    }   
+                    
+                    rownull = true;
+                    if (p[i][key]) {
+                        rownull = false;
+                    }
+                                  
+                    row = {};
+                    arraytable.push(table)
+                    row[idfield] = p[i][key]; 
+
+                    arraydatagrid.push([]);
+                    arraydataJSON.push([]);
+                    beforeTable = table;
+                }else{                   
+
+                    if (p[i][key]) {
+                        rownull = false;
+                    }
+
+                    if(row == null){
+                        row = {}
+                    }
+                    row[idfield] = p[i][key]; 
+                }     
+            }else if(template != "MASTERDETAIL" && template != "GRID"){
+                var value = p[i][key];
+                if (value != undefined && value != "undefined") {
+                    if($("[data-table='" + table + "'][data-field='" + field + "']").length > 0){
+                        if($("[data-table='" + table + "'][data-field='" + field + "']")[0].type === "select-one"){
+                            value = value.toLowerCase();
+                        }
+
+                        var attribute = $("input[data-table='" + table + "'][data-field='" + field + "']").attr("data-nativedatatype");
+
+                        switch (attribute) {
+                            case "Data":
+                                var arrayvalue = value.split("T");
+                                if (arrayvalue.length > 0) {
+                                    value = arrayvalue[0];
+                                    value = formatDate(value);
+                                }
+                                break;
+                            case "SimNao":
+                                if (value == true) {
+                                    $("[data-table='" + table + "'][data-field='" + field + "']").iCheck('check');
+                                }else{
+                                    $("[data-table='" + table + "'][data-field='" + field + "']").iCheck('uncheck');
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    } 
+                }     
+                
+                //if (field == "id_empresa") {
+                //    value = returnCookie("EnterpriseID");
+                //}
+                
+                $("[data-table='" + table + "'][data-field='" + field + "'][data-fielddata!='" + field + "']").val(value)
+                $("[data-table='" + table + "'][data-field='" + field + "'][data-fielddata!='" + field + "']").attr("data-oldvalue", value)            
+                
+            }             
+        }
+
+        if (row != null) {
+            var index = arraytable.indexOf(beforeTable);
+            if (index < 0) {
+                index = 0;
+            }
+            
+            if (rownull == false) {               
+
+                row["configuracao"] = "<div  style='white-space: nowrap;'><a type='button' title='editar' id='Edit' name='Edit' class='btn btn-primary btn btn-xs btn-warning ' onclick=editGridLine(this,'" + containerID + "','" + idGrid + "','" + layoutID + "')><i class='fa fa-pencil'></i>  </a>  <a type='button' title='excluir' id='Delete' name='Delete' class='btn btn-primary btn btn-xs btn-danger ' onclick=deleteRowGrid(this,'" + containerID + "','" + idGrid + "','" + layoutID + "')><i class='fa fa-trash-o'></i>  </a></div>";
+                idGrid = "";
+                containerID = "";
+                if(arraydataJSON[index].indexOf(JSON.stringify(row)) < 0){
+                    arraydatagrid[index].push(row);
+                    arraydataJSON[index].push(JSON.stringify(row));
+                }
+                
+            }       
+            row = null; 
+        }
+        
+        //arraytable = [];
+    }
+
+
+    var arrayT = [];
+
+    for (var k = 0; k < arraytablegrid.length; k++) {
+        arrayT.push($(arraytablegrid[k]).find("th"));
+        $(arraytablegrid[k]).bootstrapTable('destroy');
+    }
+
+
+    for (var k = 0; k < arraytablegrid.length; k++) {
+        var tableGrid = arrayT[k];
+
+        if (arraydatagrid[k]) {
+            if (arraydatagrid[k].length > 0) {
+                $(arraytablegrid[k]).bootstrapTable('destroy').bootstrapTable({
+                    data: arraydatagrid[k]
+                });
+        
+                for (var i = 0; i < tableGrid.length; i++) {
+                    var x = tableGrid[i].attributes;
+            
+                    if (x) {
+                        if (x.length > 0) {
+                            for (var j = 0; j < x.length; j++) {
+                                $("[data-field='" + $(tableGrid[i]).attr("data-field") + "']").attr(x[j].name, x[j].value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }    
+}
+
+
+function fillScreenOLD(data, template, layoutID){
+    var arraytable = [];
+    var arraydatagrid = [[]];
+    var arraydataJSON = [[]];
+    var datagrid = [];
+    var tablegrid;
+    var arraytablegrid = [];
+    var row = null;
+    var beforeTable = "";
+    var rownull = true;
+    var idGrid = "";
+    var containerID = "";
+    var p = data;
 
     
 
@@ -714,6 +934,7 @@ function fillScreen(data, template, layoutID){
 
 
 
+
 function fillContainer(data){
     var arraytable = [];
     var arraydatagrid = [[]];
@@ -836,4 +1057,8 @@ function toogleColapseContainer(selectorContainer,close) {
         //$button.children('i').addClass('fa-minus');
         $button.removeClass('active');
     }
+}
+
+function getDropdownHTML(LayoutID, tabGenID){
+
 }

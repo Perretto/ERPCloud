@@ -15,7 +15,7 @@ var config = {user: 'sa', password: 'IntSql2015@', server: '52.89.63.119',  data
 router.route('/listall/:id').get(function(req, res) {
     var MongoClient = require('mongodb').MongoClient;
     var url = "mongodb://localhost:27017/erpcloud";
-    var id = "d82d11c8-ea16-47c7-be04-10423467f04e"; //req.param('id');
+    var id = req.param('id');
     var select = ""; //'select Id, nm_razaosocial, nr_codigo, dt_cadastro, nm_nomefantasia, sn_pessoafisica, nm_cpf, nm_cnpj FROM entidade'
 
     MongoClient.connect(url, function(err, db) {
@@ -93,6 +93,131 @@ router.route('/findid/:id').get(function(req, res) {
     });    
 });
 
+
+router.route('/findid2/:id/:layoutid').get(function(req, res) {
+    var MongoClient = require('mongodb').MongoClient;
+    var url = "mongodb://localhost:27017/erpcloud";
+    var id = req.param('id');
+    var layoutid = req.param('layoutid');
+    var select = ""; //'select Id, nm_razaosocial, nr_codigo, dt_cadastro, nm_nomefantasia, sn_pessoafisica, nm_cpf, nm_cnpj FROM entidade'
+
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      db.collection("layouts").find({"layoutID": layoutid}, { _id: false }).toArray(function(err, result) {
+        if (err) throw err;
+        if (result) {
+            if (result.length > 0) {
+                select = result[0].finddata;                                
+            }
+        }
+        
+        db.close();
+      });
+    });
+
+    sql.close()
+
+    // connect to your database
+    sql.connect(config, function (err) {    
+        if (err) console.log(err);
+        
+        var id = req.param('id');
+
+        // create Request object
+        var request = new sql.Request();
+        
+        select = select.replace("{{id}}", id)
+         // query to the database and get the records
+        request.query(select, function (err, recordset) {            
+            if (err) console.log(err)
+            var retorno = [];
+            var retornoFinal = {};
+            var arraydataJSON = [];
+            var tableorder = [];
+            var table;
+            var field;
+            if (recordset.recordsets) {
+                if (recordset.recordsets.length > 0) {
+                    var array = recordset.recordsets[0];
+                    
+                    var arrayindex = [];
+                    row = null;
+                    var j = 0;
+                    for (let i = 0; i < array.length; i++) {
+                        var arraytable = [];
+                        
+                        var row = null;
+                        for (var key in array[i]) {
+                            var keyvalue = "";
+                            
+                            var keyfield = key.split('.')
+                            table = keyfield[0];
+                            field = keyfield[1];
+                            keyvalue = key + ":" + array[i][key];
+
+                            if (arraytable.indexOf(table) == -1 ) { 
+                                if(j == 0){
+                                    tableorder.push(table);
+                                }
+
+                                if (row) {
+                                    if(arraydataJSON.indexOf(JSON.stringify(row)) == -1){
+                                        var arrayRow = [];
+                                        arrayRow.push(row);
+                                        retorno.push(row)
+                                        arraydataJSON.push(JSON.stringify(row));
+                                    }                                    
+                                }
+
+                                arraytable.push(table);                     
+                                row = {};
+                                row[key] = array[i][key];
+                            }else{
+                                row[key] = array[i][key];
+                            }
+
+                            j++
+                        }
+                        if (row) {
+                            if(arraydataJSON.indexOf(JSON.stringify(row)) == -1){
+                                var arrayRow = [];
+                                arrayRow.push(row);
+                                retorno.push(row)
+                                arraydataJSON.push(JSON.stringify(row));
+                            }                                    
+                        }
+                    }                    
+                }
+            }
+           
+
+            retorno.sort(compare);
+            //retorno = [];
+            //retorno.push(retornoFinal);
+            // send records as a response
+            res.send(retorno)            
+        });
+    });    
+});
+function compare(a,b) {
+    var c;
+    var d;
+
+    for (var keya in a) {
+        for (var keyb in b) {
+            console.log(keya)
+            break;
+        }
+        break;
+    }
+    
+    
+    if (keya < keyb)
+       return -1;
+    if (keya > keyb)
+      return 1;
+    return 0;
+  }
 router.route('/editGridLine/:id/:filtro').get(function(req, res) {
     var MongoClient = require('mongodb').MongoClient;
     var url = "mongodb://localhost:27017/erpcloud";
@@ -605,6 +730,23 @@ router.route('/teste').get(function(req, res) {
 });
 
 
+
+router.route('/layout/:id').get(function(req, res) {
+    var MongoClient = require('mongodb').MongoClient;
+    var url = "mongodb://localhost:27017/erpcloud";
+    var id = req.param('id');
+
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      db.collection("layouts").find({"layoutID": id}, { _id: false }).toArray(function(err, result) {
+        if (err) throw err;
+        
+        db.close();
+        res.send(result)  
+      });
+    });
+
+});
 
 module.exports = database
 
