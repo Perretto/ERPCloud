@@ -670,7 +670,7 @@
             Site.run()
                 createCookie("EnterpriseID", "561bf579-5655-42de-a290-038c6f76b974", 99);
                 createCookie("UserID", "de5d2469-ae66-4696-9147-004f86f7d0d9", 99);
-				var url = "http://" + window.location.hostname + ":3001";
+				var url = "http://" + window.location.hostname + ":3002";
                 createCookie("urlPlataform", url, 99);
 
                 $.ajax({url: returnCookie("urlPlataform") + "/api/menu", success: function(result){	

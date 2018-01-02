@@ -259,10 +259,12 @@ function SerializeFields(param){
     var fillGrid = (param.fillGrid) ? param.fillGrid : false;
     var containerID = param.containerID;
     var layoutID = param.layoutID;
+    var arraycaracter = ["a","b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p","q","r","s","t","u","v","x","z","y","w","_"]
 
     var form = document.getElementById(formID);
     var elements = form.querySelectorAll('input,select,table,textarea');
-    
+    var arrayfield = [];
+
     for (var i = 0; i < elements.length; i++) {
         var serializable = elements[i].getAttribute("data-serializable");
         myJson = {};
@@ -287,13 +289,34 @@ function SerializeFields(param){
         }
         
         myJson["field"] = $(elements[i]).attr("data-field")
-        myJson["table"] = $(elements[i]).attr("data-table")  
+        myJson["table"] = $(elements[i]).attr("data-table") 
+
+        var campo =  myJson["field"];
+        var newfield = "";
+        
+        if (campo) {          
+            for (let index = 0; index < campo.length; index++) {
+                var carac = campo.charAt(index) 
+                if (arraycaracter.indexOf(carac) >= 0) {
+                    newfield +=  carac;
+                }         
+            }  
+        }
+
+        if (newfield) {
+            myJson["field"] = newfield;
+        }
+        
 
         if ($(elements[i]).attr('data-nativedatatype') == 'INCREMENT') {
             myJson["field"] += "_INCREMENT"
         }
 
-        arrayObjs.push(myJson);
+        if (serializable && arrayfield.indexOf(myJson["field"]) == -1) {
+            arrayObjs.push(myJson);
+            arrayfield.push(myJson["field"]);            
+        }
+        
     }
 
     arrayObjs = sortBy(arrayObjs, "table")

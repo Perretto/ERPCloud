@@ -302,6 +302,7 @@ router.route('/save').post(function(req, res) {
                 indexIncrement = key.indexOf("_INCREMENT");
                 
                 if (indexIncrement >= 0) {
+                    console.log(key)
                     fieldincrement = key;
                     break;
                 }
@@ -474,7 +475,7 @@ function createInsert(submit, index, guid){
     insertOrUpdate +=  sqlfields + " " + sqlvalues
 
     //}
-
+console.log(insertOrUpdate)
     return insertOrUpdate;
 }
 
@@ -531,10 +532,10 @@ function createUpdate(submit, index){
             }
 
 
-            if (ind == 0) {                  
-                sqlvalues += key + "=" + submit[index][key] + " "
+            if (ind == 0) {                                
+                sqlvalues += key.replace("_INCREMENT","") + "=" + submit[index][key] + " "
             }else{
-                sqlvalues += ", " + key + "=" + submit[index][key] + " "
+                sqlvalues += ", " + key.replace("_INCREMENT","") + "=" + submit[index][key] + " "
             }
 
             ind += 1
@@ -543,7 +544,7 @@ function createUpdate(submit, index){
     }
     
     update = "UPDATE " + table + " SET " + sqlvalues + " WHERE id=" + id;
-    
+    console.log(update)
     return update;
 
 }
