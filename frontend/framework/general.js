@@ -160,7 +160,7 @@ function getGlobalParameters(parametro) {
         //global.urlPlataforma = "http://" + window.location.host
     
         //global.urlDesenvolvimento = "http://localhost:13886/";
-        global.urlPlataform = "http://"+ window.location.hostname +":3001"
+        global.urlPlataform = "http://"+ window.location.hostname +":3002"
         global.urlPlataforma = "http://homologa.empresariocloud.com.br"
         global.urlInterface = "http://homologa.empresariocloud.com.br"
 

@@ -225,6 +225,7 @@ router.route('/editGridLine/:id/:filtro').get(function(req, res) {
     var filtro = req.param('filtro');
     var select = ""; //'select Id, nm_razaosocial, nr_codigo, dt_cadastro, nm_nomefantasia, sn_pessoafisica, nm_cpf, nm_cnpj FROM entidade'
 
+    id = id.toUpperCase();
     MongoClient.connect(url, function(err, db) {
       if (err) throw err;
       db.collection("containers").find({"containerID": id}, { _id: false }).toArray(function(err, result) {
@@ -250,6 +251,8 @@ router.route('/editGridLine/:id/:filtro').get(function(req, res) {
         var request = new sql.Request();
         
         select = select.replace("{{id}}", filtro)
+
+        console.log(select)
          // query to the database and get the records
         request.query(select, function (err, recordset) {            
             if (err) {
@@ -596,7 +599,7 @@ router.route('/DeleteData/:containerID/:id').get(function(req, res) {
     var id = req.param('id');
     var containerID = req.param('containerID');
 
-
+    containerID = containerID.toUpperCase();
     var MongoClient = require('mongodb').MongoClient;
     var url = "mongodb://localhost:27017/erpcloud";
 
@@ -657,6 +660,7 @@ router.route('/containergrid/:id/:filtro').get(function(req, res) {
     var id = req.param('id');
     var filtro = req.param('filtro');
     var select = ""; //'select Id, nm_razaosocial, nr_codigo, dt_cadastro, nm_nomefantasia, sn_pessoafisica, nm_cpf, nm_cnpj FROM entidade'
+    id = id.toUpperCase();
 
     MongoClient.connect(url, function(err, db) {
       if (err) throw err;
@@ -682,6 +686,7 @@ router.route('/containergrid/:id/:filtro').get(function(req, res) {
         var request = new sql.Request();
         
         select = select.replace("{{id}}", filtro)
+        console.log(select)
          // query to the database and get the records
         request.query(select, function (err, recordset) {            
             if (err) {

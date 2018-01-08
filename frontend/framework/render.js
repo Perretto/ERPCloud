@@ -486,10 +486,22 @@ function openLayout(button, tabGenID) {
 
                         }, this);
 
+                        
                         $(".pull-right.search").html("");
                         $("#" + id + " table").bootstrapTable('destroy').bootstrapTable({
                             data: data
                         });
+
+                        var idfiltergen = $("#table_" + tabGenID + "_btnnovo").attr("data-tabgenlayout")
+                        var buttonNew = $("[data-tabgenlayout='" + idfiltergen + "']").clone();                        
+                        $(".pull-right.search").prepend(buttonNew);
+                        $("[data-tabgenlayout='" + idfiltergen + "']").hide()
+                        buttonNew.show();
+                        
+                        $(".panel-heading").remove();
+                        $(".pull-right.search").css("display", "flex")
+                        loaderImage(tabGenID + "_sharpGrid",false)
+
                     }
                 }
             }
@@ -565,9 +577,13 @@ function fillScreen(data, template, layoutID){
     var rownull = true;
     var idGrid = "";
     var containerID = "";
-    var p = data;
+    var p=data;
 
-    
+    if (data.recordsets) {
+        if (data.recordsets.length > 0) {
+            p = data.recordsets[0];
+        }
+    }
 
     for (var i = 0; i < p.length; i++) {        
         for (var key in p[i]) {
@@ -695,7 +711,7 @@ function fillScreen(data, template, layoutID){
             }
             
             if (rownull == false) {               
-
+                containerID = containerID.toLowerCase();
                 row["configuracao"] = "<div  style='white-space: nowrap;'><a type='button' title='editar' id='Edit' name='Edit' class='btn btn-primary btn btn-xs btn-warning ' onclick=editGridLine(this,'" + containerID + "','" + idGrid + "','" + layoutID + "')><i class='fa fa-pencil'></i>  </a>  <a type='button' title='excluir' id='Delete' name='Delete' class='btn btn-primary btn btn-xs btn-danger ' onclick=deleteRowGrid(this,'" + containerID + "','" + idGrid + "','" + layoutID + "')><i class='fa fa-trash-o'></i>  </a></div>";
                 idGrid = "";
                 containerID = "";
@@ -1030,8 +1046,22 @@ function atualizaAba(formID, layoutID, tabGenID, forcingTemplate, layoutType, ur
 
 
 function OpenFormSearch(tabGenID) {
+
+    $(".columns.columns-right.btn-group.pull-right").hide();
     //$("#" + id + "_alertaModalFormSearchShow").modal('show');
     var target = $("#" + tabGenID).parents().find(".panel-nav");
+    
+    if (target) {
+        if ($(target).find("#Filtrar")) {
+            if ($(target).find("#Filtrar").length > 0) {
+                var idfiltergen = $("[data-tabgenlayout='" + tabGenID + "']").attr("id")
+                idfiltergen = idfiltergen.replace("table_", "").replace("_nav_btnnovo", "_nav_sharpGrid");
+                loaderImage(idfiltergen,true)
+                $(target).find("#Filtrar").click();
+                //loaderImage(idfiltergen,false)
+            }
+        }
+    }
     $(target).show()
     $('html, body').animate({ scrollTop: target.offset().top }, 1000);
     toogleColapseContainer(target, false)
