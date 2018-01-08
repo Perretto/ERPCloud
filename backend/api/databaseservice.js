@@ -295,7 +295,7 @@ router.route('/save').post(function(req, res) {
     var request = new sql.Request();
 
     var guid = general.guid(); 
-    
+    console.log(submit)
     for (var index = 0; index < submit.length; index++) {
         if (submit[index]["id"] == "" || !submit[index]["id"]) {
             var indexIncrement = -1;
