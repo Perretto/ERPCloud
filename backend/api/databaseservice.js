@@ -388,8 +388,6 @@ router.route('/save').post(function(req, res) {
 
                         arrayretorno.push(retorno);
                         
-
-
                         countfor +=1;
                         console.log("countfor == " + countfor + " --- submit.length==" + submit.length)
                         if (submit.length == (countfor + 1)) {
