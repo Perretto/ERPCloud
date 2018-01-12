@@ -9,8 +9,9 @@ const ObjectID = require('mongodb').ObjectID
 const router = express.Router()
 server.use('/api', router)
 // config for your database
-//var config = {user: 'sa', password: 'IntSql2015@', server: '52.89.63.119',  database: 'eCloud-homologa'};
 var config = {user: 'sa', password: 'IntSql2015@', server: '52.89.63.119',  database: 'eCloud-homologa'};
+//var config = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'eCloud-homologa'};
+
 
 router.route('/listall/:id').get(function(req, res) {
     var MongoClient = require('mongodb').MongoClient;
@@ -265,18 +266,64 @@ router.route('/editGridLine/:id/:filtro').get(function(req, res) {
     });    
 });
 
-function incremento(submit,index, table, field, callback){
-    sql.close()
-    var select = "SELECT nr_incremento FROM incremento WHERE nm_tabela = '" + table + "' AND nm_campo='" + field + "'"
-   
-    sql.connect(config).then(function() { 
-        request = new sql.Request();
-        request.query(select, function (err, recordset) {  
-            if (err) console.log(err)
+function incremento(submit, callback){
+	var arrayRetorno = [];
+    var countFor = 0;
+
+    sql.close();
+    sql.connect(config, function (err) {  
+        for (var index = 0; index < submit.length; index++) {
+            var table;
+            var field;
+            var indexIncrement = -1;
+            var fieldincrement = "";
+
+            for (var key in submit[index]) {
+                indexIncrement = key.indexOf("_INCREMENT");
+                
+                if (indexIncrement >= 0) {
+                    console.log(key)
+                    fieldincrement = key;
+                    break;
+                }
+            }
             
-            callback(recordset.recordset[0],submit,index); 
-        });
-    });  
+            field = fieldincrement.replace("_INCREMENT","");
+            table = submit[index]["TABLE"];
+      
+            var select = "SELECT nr_incremento, nm_campo FROM incremento WHERE nm_tabela = '" + table + "' AND nm_campo='" + field + "'"
+            console.log(select)
+        
+            console.log("for = " + index);
+
+            request = new sql.Request();
+
+            console.log("Ok" + table)
+            console.log("OKKK " +  field)
+            
+            request.query(select, function (err, recordset) {	
+                if (err) console.log(err)
+                
+                console.log("recordSET - ")
+                console.log(recordset)
+                if (recordset) {
+                    if (recordset.recordset) {
+                        arrayRetorno.push(recordset.recordset[0]);
+                    }else{
+                        arrayRetorno.push(null);
+                    } 
+                }else{
+                    arrayRetorno.push(null);
+                }
+                countFor += 1;
+                
+                if(submit.length == countFor){
+                    callback(arrayRetorno, submit); 						
+                }             
+            
+            });     
+        }
+    });
 }
 
 router.route('/save').post(function(req, res) {   
@@ -295,95 +342,124 @@ router.route('/save').post(function(req, res) {
     var request = new sql.Request();
 
     var guid = general.guid(); 
-    console.log(submit)
-    for (var index = 0; index < submit.length; index++) {
-        if (submit[index]["id"] == "" || !submit[index]["id"]) {
-            var indexIncrement = -1;
-            var fieldincrement = "";
+    var countfor = 0;
+    var arrayretorno = [];
 
-            for (var key in submit[index]) {
-                indexIncrement = key.indexOf("_INCREMENT");
-                
-                if (indexIncrement >= 0) {
-                    console.log(key)
-                    fieldincrement = key;
-                    break;
-                }
-            }
-
-            incremento(submit,index,submit[index]["TABLE"], fieldincrement.replace("_INCREMENT",""), function(resultado, submit, index){
+    incremento(submit, function(resultado, submit){
+        sql.close()
+        sql.connect(config).then(function() {
+        for (var index = 0; index < submit.length; index++) {
+            
+            if (submit[index]["id"] == "" || !submit[index]["id"]) {
+                    
                 var numberincrement;
                 var updateincrement = ""
-                if(resultado){
-                    if(resultado.nr_incremento){                                                  
-                        submit[index][fieldincrement] = parseInt(resultado.nr_incremento) + 1
-                        numberincrement = parseInt(resultado.nr_incremento) + 1 
-                        updateincrement = "UPDATE incremento SET nr_incremento=" + numberincrement + " WHERE nm_tabela='" + submit[index]["TABLE"] + "' AND nm_campo='" + fieldincrement.replace("_INCREMENT","") + "'"
-                    }
-                }
 
+                console.log("retorno ------  ")
+                console.log(resultado)
+
+                if(resultado){
+                    if (resultado.length > 0) {
+                        if (resultado[index] != null) {
+                            if(resultado[index].nr_incremento){ 
+                                                                            
+                                submit[index][resultado[index].nm_campo + "_INCREMENT"] = parseInt(resultado[index].nr_incremento) + 1
+                                numberincrement = parseInt(resultado[index].nr_incremento) + 1 
+                                updateincrement = "UPDATE incremento SET nr_incremento=" + numberincrement + " WHERE nm_tabela='" + submit[index]["TABLE"] + "' AND nm_campo='" + resultado[index].nm_campo + "'"
+                            }
+                        }                        
+                    }                    
+                }
+                
                 insertOrUpdate = createInsert(submit, index, guid)
                 insertOrUpdate += updateincrement;
-                sql.close()
                 console.log(insertOrUpdate)
-                sql.connect(config).then(function() {
-                        request = new sql.Request();
-                        request.query(insertOrUpdate).then(function(recordset) {
+                
+                    request = new sql.Request();
+                    request.query(insertOrUpdate).then(function(recordset) {
                         console.log('Recordset: ' + recordset);
                         console.log('Affected: ' + request.rowsAffected);
                         var retorno = '{ "status": "success", "id": "' + guid + '" }'
-                        if (numberincrement) {
-                            retorno = '{ "status": "success", "id": "' + guid + '", "increment": "' + numberincrement + '", "incrementfield": "' + submit[index]["TABLE"] + "." + fieldincrement.replace("_INCREMENT","") + '"}'
+                        if (resultado[countfor]) {
+                            retorno = '{ "status": "success", "id": "' + guid + '", "increment": "' + numberincrement + '", "incrementfield": "' + submit[countfor]["TABLE"] + "." + resultado[countfor].nm_campo.replace("_INCREMENT","") + '"}'
                         }else{
                             retorno = '{ "status": "success", "id": "' + guid + '" }'
                         }
-                        var obj = JSON.parse(retorno)
-                        res.send(obj)
-                    }).catch(function(err) {
-                        console.log('Request error: ' + err);
-                        var retorno = '{ "status": "error", "message": "' + err + '" }'
-                        var obj = JSON.parse(retorno)
-                        res.send(obj)
-                    });
-                }).catch(function(err) {
-                    if (err) {
-                    console.log('SQL Connection Error: ' + err);
-                    var retorno = '{ "status": "error", "message": "' + err + '" }'
-                    var obj = JSON.parse(retorno)
-                    res.send(obj)
-                    }
-                }); 
-            })  
-        }else{
-            guid = submit[index]["id"];
-            insertOrUpdate = createUpdate(submit, index)
-            sql.close()
 
-            sql.connect(config).then(function() {
-                    request = new sql.Request();
-                    request.query(insertOrUpdate).then(function(recordset) {
+                        arrayretorno.push(retorno);
+                        
+
+
+                        countfor +=1;
+                        console.log("countfor == " + countfor + " --- submit.length==" + submit.length)
+                        if (submit.length == (countfor + 1)) {
+                            var obj = JSON.parse(arrayretorno)
+                            console.log("arrayretorno" + arrayretorno)
+                            res.send(obj)
+                        }
+                        
+                    }).catch(function(err) {
+                        console.log('Request error: ' + err + " -- " + insertOrUpdate);
+                        var retorno = '{ "status": "error", "message": "' + err + '" }'
+                        
+                        arrayretorno.push(retorno);
+                        countfor +=1;
+                        console.log("countfor == " + countfor + " --- submit.length==" + submit.length)
+                        if (submit.length == countfor) {
+                            var obj = JSON.parse(arrayretorno)
+                            res.send(obj)
+                        }
+                    });
+                
+                
+            }else{
+                guid = submit[index]["id"];
+                insertOrUpdate = createUpdate(submit, index)             
+           
+                request = new sql.Request();
+                request.query(insertOrUpdate).then(function(recordset) {
                     console.log('Recordset: ' + recordset);
                     console.log('Affected: ' + request.rowsAffected);
-                    var retorno = '{ "status": "success", "id": "' + guid + '" }'
-                    var obj = JSON.parse(retorno)
-                    res.send(obj)
+                    var retorno = '{ "status": "success", "id": "' + guid + '" }'                    
+                    arrayretorno.push(retorno);
+                    countfor +=1;
+                    console.log("countfor == " + countfor + " --- submit.length==" + submit.length)
+                    if (submit.length == countfor) {
+                        var obj = JSON.parse(arrayretorno)
+                        res.send(obj)
+                    }
                 }).catch(function(err) {
                     console.log('Request error: ' + err);
                     var retorno = '{ "status": "error", "message": "' + err + '" }'
-                    var obj = JSON.parse(retorno)
-                    res.send(obj)
+                    arrayretorno.push(retorno);
+                    arrayretorno.push(arrayretorno);
+                    countfor +=1;
+                    console.log("countfor == " + countfor + " --- submit.length==" + submit.length)
+                    if (submit.length == countfor) {
+                        var obj = JSON.parse(arrayretorno)
+                        res.send(obj)
+                    }
                 });
-            }).catch(function(err) {
-                if (err) {
-                console.log('SQL Connection Error: ' + err);
-                var retorno = '{ "status": "error", "message": "' + err + '" }'
-                var obj = JSON.parse(retorno)
+                
+            }
+        }  
+      
+    }).catch(function(err) {
+        if (err) {
+            console.log('SQL Connection Error: ' + err);
+            var retorno = '{ "status": "error", "message": "' + err + '" }'
+            
+            arrayretorno.push(retorno);
+            countfor +=1;
+                console.log("countfor == " + countfor + " --- submit.length==" + submit.length)
+            if (submit.length == countfor) {
+                var obj = JSON.parse(arrayretorno)
                 res.send(obj)
-                }
-            }); 
+            }
         }
-    }    
-});
+    }); 
+})
+})
 
 function createInsert(submit, index, guid){
     var insertOrUpdate = ""
@@ -397,7 +473,7 @@ function createInsert(submit, index, guid){
         
     sqlfields = "( "
     sqlvalues = " VALUES( ";
-
+console.log("teste - " + index) 
     for (var key in submit[index]) { 
         
         if (submit[index][key]) {
@@ -446,6 +522,21 @@ function createInsert(submit, index, guid){
                     }
 
                     break;
+                case "vl":
+                    if (submit[index][key] == "") {
+                        submit[index][key] = "0"
+                    }
+                    
+                    var decimal = submit[index][key].indexOf(','); //1.000,00  ou 1,000.00
+                    var unidade = submit[index][key].indexOf('.');
+                    
+                    if (unidade < decimal) {
+                        submit[index][key] = submit[index][key].replace(".","").replace(",",".");
+                    }else{
+                        submit[index][key] = submit[index][key].replace(",","");
+                    }
+
+                    break;
                 default:
                     break;
             }
@@ -474,7 +565,7 @@ function createInsert(submit, index, guid){
     sqlfields += ") "
     sqlvalues += ") "
 
-    insertOrUpdate += " INSERT INTO " + table
+    insertOrUpdate += " INSERT INTO " + table + " ";
     insertOrUpdate +=  sqlfields + " " + sqlvalues
 
     //}
@@ -530,6 +621,21 @@ function createUpdate(submit, index){
                         submit[index][key] = "'" + submit[index][key] + "'"
                     }                  
                     break;
+                case "vl":
+                    if (submit[index][key] == "") {
+                        submit[index][key] = "0"
+                    }
+                    
+                    var decimal = submit[index][key].indexOf(','); //1.000,00  ou 1,000.00
+                    var unidade = submit[index][key].indexOf('.');
+                    
+                    if (unidade < decimal) {
+                        submit[index][key] = submit[index][key].replace(".","").replace(",",".");
+                    }else{
+                        submit[index][key] = submit[index][key].replace(",","");
+                    }
+            
+                    break;
                 default:
                     break;
             }
@@ -561,36 +667,49 @@ router.route('/RenderAutoComplete/:filter/:controlid').get(function(req, res) {
 
     MongoClient.connect(url, function(err, db) {
       if (err) throw err;
+      
       db.collection("controls").find({"controlID": controlid}, { _id: false }).toArray(function(err, result) {
+       
         if (err) throw err;
         if (result) {
             if (result.length > 0) {
                 select = result[0].autocompleteChange;
             }
         }
-        
+       
         db.close();
       });
     });
 
-    sql.close()
-    // connect to your database
-    sql.connect(config, function (err) {    
-        if (err) console.log(err);
+    if (sql) {
+        sql.close()
+        // connect to your database
+        sql.connect(config, function (err) {    
+            if (err) console.log(err);
 
-        // create Request object
-        var request = new sql.Request();  
-        if (select) {            
-            select = select.replace("{{id}}", id)
-        }    
-        // query to the database and get the records
-        request.query(select, function (err, recordset) {            
-            //if (err) console.log(err)
-           
-            // send records as a response
-            res.send(recordset.recordsets[0])            
-        });
-    });    
+            // create Request object
+            var request = new sql.Request();  
+            if (select) {            
+                select = select.replace("{{id}}", id)
+            }    
+            console.log(select)
+            // query to the database and get the records
+            request.query(select, function (err, recordset) {            
+                if (err) console.log(err)
+            
+                if (recordset) {
+                    if (recordset.recordsets) {
+                        if (recordset.recordsets.length > 0) {
+                            // send records as a response
+                            res.send(recordset.recordsets[0]);
+                        }
+                    }
+                }           
+            });
+        });    
+    }
+
+    
 
 });
 

@@ -224,11 +224,12 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                     
                     for (let index = 0; index < elementID.length; index++) {
                         var tableelement = $(elementID[index]).attr("data-table")
-                        if (!$("[data-table='" + tableelement + "'][data-field='id']").val()) {
+                        var idPrincipal = $(elementID[index]).val();
+                        if (idPrincipal == "") {
                             $("[data-table='" + tableelement + "'][data-field='id']").val(result.id)
-                            $("[data-derivedfrom='" + tableelement + "'][data-field='id_" + tableelement + "']").val(result.id)
-    
+                            idPrincipal = result.id;                    
                         }
+                        $("[data-derivedfrom='" + tableelement + "'][data-field='id_" + tableelement + "']").val(idPrincipal);
                     }
 
                     notification({
@@ -312,9 +313,9 @@ function SerializeFields(param){
             myJson["field"] += "_INCREMENT"
         }
 
-        if (serializable && arrayfield.indexOf(myJson["field"]) == -1) {
+        if (serializable && arrayfield.indexOf(myJson["field"] + "." + myJson["table"]) == -1) {
             arrayObjs.push(myJson);
-            arrayfield.push(myJson["field"]);            
+            arrayfield.push(myJson["field"] + "." + myJson["table"]);            
         }
         
     }
@@ -328,18 +329,20 @@ function SerializeFields(param){
     var Arraytable = [];
 
     for (var i = 0; i < arrayObjs.length; i++) { 
-        if (arrayObjs[i].table && arrayObjs[i].field) {            
-            if (Arraytable.indexOf(arrayObjs[i].table) < 0) {
-                if (Arraytable.length > 0) {
-                    json += '    }, {'
+        if (arrayObjs[i].table && arrayObjs[i].field) { 
+            if (arrayObjs[i].table != "null") {
+                if (Arraytable.indexOf(arrayObjs[i].table) < 0) {
+                    if (Arraytable.length > 0) {
+                        json += '    }, {'
+                    }
+        
+                    Arraytable.push(arrayObjs[i].table)
+                    json += '        "TABLE": "' + arrayObjs[i].table + '"'
+                    json += '        ,"' + arrayObjs[i].field + '": "' + arrayObjs[i].valor + '" '
+                }else{
+                    json += '        ,"' + arrayObjs[i].field + '": "' + arrayObjs[i].valor + '" '
                 }
-    
-                Arraytable.push(arrayObjs[i].table)
-                json += '        "TABLE": "' + arrayObjs[i].table + '"'
-                json += '        ,"' + arrayObjs[i].field + '": "' + arrayObjs[i].valor + '" '
-            }else{
-                json += '        ,"' + arrayObjs[i].field + '": "' + arrayObjs[i].valor + '" '
-            }
+            }               
         }         
     }
    
