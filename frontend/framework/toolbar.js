@@ -201,7 +201,9 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
             type: "POST",
             data:  data,
             success: function(result){
-                if (result.status == "success") {
+                for (let i = 0; i < result.length; i++) {
+                  
+                if (result[i].status == "success") {
                     var elementID = $($("#" + form.replace(containerID,layoutID))[0]).find("[name*='_PK']")
                           
                     if (clear == false) {
@@ -214,11 +216,11 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                             fillgrid(containerID, id, layoutID)
                         }
                         ClearForm(form, false);                        
-                    }else if(result.increment){
-                        var arrayfield = result.incrementfield.split('.');
+                    }else if(result[i].increment){
+                        var arrayfield = result[i].incrementfield.split('.');
                         var table = arrayfield[0];
                         var field = arrayfield[1];
-                        $("input[data-table='" + table + "'][data-field='" + field + "']").val(result.increment)
+                        $("input[data-table='" + table + "'][data-field='" + field + "']").val(result[i].increment)
                         
                     }
                     
@@ -226,8 +228,8 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                         var tableelement = $(elementID[index]).attr("data-table")
                         var idPrincipal = $(elementID[index]).val();
                         if (idPrincipal == "") {
-                            $("[data-table='" + tableelement + "'][data-field='id']").val(result.id)
-                            idPrincipal = result.id;                    
+                            $("[data-table='" + tableelement + "'][data-field='id']").val(result[i].id)
+                            idPrincipal = result[i].id;                    
                         }
                         $("[data-derivedfrom='" + tableelement + "'][data-field='id_" + tableelement + "']").val(idPrincipal);
                     }
@@ -243,6 +245,8 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                 } 
                 loaderImage(form, false);
             }
+              
+        }
         })
     }
 },function(){
