@@ -181,10 +181,10 @@ router.route('/findid2/:id/:layoutid').get(function(req, res) {
                         }
                         if (row) {
                             if(arraydataJSON.indexOf(JSON.stringify(row)) == -1){
-                                var arrayRow = [];
-                                arrayRow.push(row);
-                                retorno.push(row)
-                                arraydataJSON.push(JSON.stringify(row));
+                                    var arrayRow = [];
+                                    arrayRow.push(row);
+                                    retorno.push(row)
+                                    arraydataJSON.push(JSON.stringify(row));                                
                             }                                    
                         }
                     }                    
@@ -192,7 +192,7 @@ router.route('/findid2/:id/:layoutid').get(function(req, res) {
             }
            
 
-            retorno.sort(compare);
+            retorno = retorno.sort(compare);
             //retorno = [];
             //retorno.push(retornoFinal);
             // send records as a response
@@ -200,6 +200,7 @@ router.route('/findid2/:id/:layoutid').get(function(req, res) {
         });
     });    
 });
+
 function compare(a,b) {
     var c;
     var d;
@@ -263,7 +264,7 @@ router.route('/editGridLine/:id/:filtro').get(function(req, res) {
             // send records as a response 
             res.send(recordset)            
         });
-    });    
+    });        
 });
 
 function incremento(submit, callback){
@@ -338,6 +339,7 @@ router.route('/save').post(function(req, res) {
     var error = "";
 
     var submit = req.body;
+    console.log(submit)
     var insertOrUpdate = ""
     var request = new sql.Request();
 
@@ -355,32 +357,24 @@ router.route('/save').post(function(req, res) {
                 var numberincrement;
                 var updateincrement = ""
 
-                console.log("retorno ------  ")
-                console.log(resultado)
-
                 if(resultado){
                     if (resultado.length > 0) {
                         if (resultado[index] != null) {
                             if(resultado[index].nr_incremento){ 
-                                                                            
-                                submit[index][resultado[index].nm_campo + "_INCREMENT"] = parseInt(resultado[index].nr_incremento) + 1
-                                numberincrement = parseInt(resultado[index].nr_incremento) + 1 
-                                updateincrement = "UPDATE incremento SET nr_incremento=" + numberincrement + " WHERE nm_tabela='" + submit[index]["TABLE"] + "' AND nm_campo='" + resultado[index].nm_campo + "'"
+                                if (resultado[index].nm_campo) {
+                                    submit[index][resultado[index].nm_campo + "_INCREMENT"] = parseInt(resultado[index].nr_incremento) + 1
+                                    numberincrement = parseInt(resultado[index].nr_incremento) + 1 
+                                    updateincrement = "UPDATE incremento SET nr_incremento=" + numberincrement + " WHERE nm_tabela='" + submit[index]["TABLE"] + "' AND nm_campo='" + resultado[index].nm_campo + "'"
+                                }
                             }
                         }                        
                     }                    
                 }
                 
                 insertOrUpdate = createInsert(submit, index, guid)
-                insertOrUpdate += updateincrement;
-                console.log(insertOrUpdate)
-                
+                insertOrUpdate += updateincrement;                
                     request = new sql.Request();
                     request.query(insertOrUpdate).then(function(recordset) {
-                        console.log('Recordset: ' + recordset);
-                        console.log('Affected: ' + request.rowsAffected);
-
-                        //retorno = '{ "status": "success", "id": "' + guid + '" }'
                         if (countfor > 0) {
                             retorno += ",";
                         }
@@ -391,25 +385,25 @@ router.route('/save').post(function(req, res) {
                             retorno += '{ "status": "success", "id": "' + guid + '" }'
                         }
 
-                        //arrayretorno.push(retorno);
+
                         countfor +=1;
-                        console.log("countfor == " + countfor + " --- submit.length==" + submit.length)
-                        console.log(submit.length == countfor);
                         if (submit.length == (countfor)) {
+                            console.log(retorno)
                             retorno += "]"
                             var obj = JSON.parse(retorno)
-                            //console.log("arrayretorno" + obj)
                             res.send(obj)
                         }
                         
                     }).catch(function(err) {
                         console.log('Request error: ' + err);
-                        var retorno = '{ "status": "error", "message": "' + err + '" }'
+                        if (countfor > 0) {
+                            retorno += ",";
+                        }
+                        retorno += '{ "status": "error", "message": "' + err + '" }'
                         
-                        arrayretorno.push(retorno);
                         countfor +=1;
-                        console.log("countfor == " + countfor + " --- submit.length==" + submit.length)
                         if (submit.length == countfor) {
+                            retorno += "]"
                             var obj = JSON.parse(retorno)
                             res.send(obj)
                         }
@@ -419,30 +413,31 @@ router.route('/save').post(function(req, res) {
             }else{
                 guid = submit[index]["id"];
                 insertOrUpdate = createUpdate(submit, index)             
-           
+                
+                
                 request = new sql.Request();
                 request.query(insertOrUpdate).then(function(recordset) {
-                    console.log('Recordset: ' + recordset);
-                    console.log('Affected: ' + request.rowsAffected);
-                    var retorno = '{ "status": "success", "id": "' + guid + '" }'                    
-                    arrayretorno.push(retorno);
+                    if (countfor > 0) {
+                        retorno += ",";
+                    }
+                    retorno += '{ "status": "success", "id": "' + guid + '" }'  
                     countfor +=1;
-                    console.log("countfor == " + countfor + " --- submit.length==" + submit.length)
                     
                     if (submit.length == countfor) {
-                        
-                        var obj = JSON.parse(arrayretorno)
+                        retorno += "]"
+                        var obj = JSON.parse(retorno)
                         res.send(obj)
                     }
                 }).catch(function(err) {
                     console.log('Request error: ' + err);
-                    var retorno = '{ "status": "error", "message": "' + err + '" }'
-                    arrayretorno.push(retorno);
-                    arrayretorno.push(arrayretorno);
+                    if (countfor > 0) {
+                        retorno += ",";
+                    }
+                    retorno += '{ "status": "error", "message": "' + err + '" }'
                     countfor +=1;
-                    console.log("countfor == " + countfor + " --- submit.length==" + submit.length)
-                    if (submit.length == countfor) {
-                        var obj = JSON.parse(arrayretorno)
+                    if (submit.length == countfor) { 
+                        retorno += "]"
+                        var obj = JSON.parse(retorno)
                         res.send(obj)
                     }
                 });
@@ -453,13 +448,15 @@ router.route('/save').post(function(req, res) {
     }).catch(function(err) {
         if (err) {
             console.log('SQL Connection Error: ' + err);
-            var retorno = '{ "status": "error", "message": "' + err + '" }'
+            if (countfor > 0) {
+                retorno += ",";
+            }
+            retorno += '{ "status": "error", "message": "' + err + '" }'
             
-            arrayretorno.push(retorno);
             countfor +=1;
-                console.log("countfor == " + countfor + " --- submit.length==" + submit.length)
             if (submit.length == countfor) {
-                var obj = JSON.parse(arrayretorno)
+                retorno += "]"
+                var obj = JSON.parse(retorno)
                 res.send(obj)
             }
         }
@@ -658,7 +655,12 @@ function createUpdate(submit, index){
         
     }
     
-    update = "UPDATE " + table + " SET " + sqlvalues + " WHERE id=" + id;
+    if (sqlvalues) {
+        update = "UPDATE " + table + " SET " + sqlvalues + " WHERE id=" + id;
+    }else{
+        update = "";
+    }
+    
     console.log(update)
     return update;
 

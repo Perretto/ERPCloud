@@ -1,4 +1,10 @@
 
+function CreateAba(nameLayout, layoutID, titleMenu, dados, navigation, containerType, forcingTemplate, layoutType, callInstance) {
+    var enterpriseID = returnCookie("EnterpriseID");
+    f_aba(nameLayout,layoutID,titleMenu,false, enterpriseID);
+}
+
+
 function f_aba(nameLayout,layoutID,titleMenu,loadData, enterpriseID){
     var tabGenID = guid();
     var EnterpriseName = "";
@@ -62,6 +68,10 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
                     //document.getElementById(wizard[i].id).innerHTML = "<form id='" + idform + "' >" + htmldiv + "</form>";
                     //sharpGrid(idform);
                 }
+            }
+
+            if ($(wizard[i]).attr("containeronload")) {
+                eval($(wizard[i]).attr("containeronload"));
             }
         }
 
@@ -547,6 +557,13 @@ function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID) {
                     }
                 }
                 
+                var wizard = $("[data-guidwizard='" + tabGenID + "']");
+        
+                for (var i = 0; i < wizard.length; i++) {  
+                    if ($(wizard[i]).attr("containeronload")) {
+                        eval($(wizard[i]).attr("containeronload"));
+                    }
+                }
 
 
                 //        var onload = $("[tabgenid='" + formID + "']");
@@ -671,7 +688,20 @@ function fillScreen(data, template, layoutID){
                             value = value.toLowerCase();
                         }
 
+                        var autocomplete = $("input[data-table='" + table + "'][data-field='" + field + "']").attr("localautocomplete");
+
+                        if(autocomplete){
+                            var valueAutocomplete = p[i][key + "_FK"];
+                            var idAutocomplete = $("input[data-table='" + table + "'][data-field='" + field + "']").attr("id");
+                            if (!valueAutocomplete) {
+                                valueAutocomplete = "";
+                            }
+                            
+                            $("#" + idAutocomplete + "_autocomplete").val(valueAutocomplete);
+                        }
+
                         var attribute = $("input[data-table='" + table + "'][data-field='" + field + "']").attr("data-nativedatatype");
+
 
                         switch (attribute) {
                             case "Data":
@@ -978,6 +1008,18 @@ function fillContainer(data){
                         value = value.toLowerCase();
                     }
                     
+                    var autocomplete = $("input[data-table='" + table + "'][data-field='" + field + "']").attr("localautocomplete");
+
+                    if(autocomplete){
+                        var valueAutocomplete = p[i][key + "_FK"];
+                        var idAutocomplete = $("input[data-table='" + table + "'][data-field='" + field + "']").attr("id");
+                        if (!valueAutocomplete) {
+                            valueAutocomplete = "";
+                        }
+                        
+                        $("#" + idAutocomplete + "_autocomplete").val(valueAutocomplete);
+                    }
+
                     var attribute = $("input[data-table='" + table + "'][data-field='" + field + "']").attr("data-nativedatatype");
                     
                     switch (attribute) {

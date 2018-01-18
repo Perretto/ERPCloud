@@ -179,6 +179,7 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
     if (isvalid.$invalidFields) {
         if (isvalid.$invalidFields.length > 0) {
             isvalid = false;
+            loaderImage(form, false);
         } else {
             isvalid = true;
         }
@@ -314,7 +315,9 @@ function SerializeFields(param){
         
 
         if ($(elements[i]).attr('data-nativedatatype') == 'INCREMENT') {
-            myJson["field"] += "_INCREMENT"
+            if (myJson["field"]) {
+                myJson["field"] += "_INCREMENT"
+            }            
         }
 
         if (serializable && arrayfield.indexOf(myJson["field"] + "." + myJson["table"]) == -1) {
