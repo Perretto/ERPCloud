@@ -672,7 +672,7 @@ router.route('/RenderAutoComplete/:filter/:controlid').get(function(req, res) {
     var id = req.param('filter');
     var controlid = req.param('controlid');
     var select = ""; //'select Id, nm_razaosocial, nr_codigo, dt_cadastro, nm_nomefantasia, sn_pessoafisica, nm_cpf, nm_cnpj FROM entidade'
-
+    controlid = controlid.toUpperCase();
     MongoClient.connect(url, function(err, db) {
       if (err) throw err;
       
@@ -682,6 +682,7 @@ router.route('/RenderAutoComplete/:filter/:controlid').get(function(req, res) {
         if (result) {
             if (result.length > 0) {
                 select = result[0].autocompleteChange;
+                console.log(select)
             }
         }
        
@@ -689,7 +690,7 @@ router.route('/RenderAutoComplete/:filter/:controlid').get(function(req, res) {
       });
     });
 
-    if (sql) {
+    //if (sql) {
         sql.close()
         // connect to your database
         sql.connect(config, function (err) {    
@@ -715,7 +716,7 @@ router.route('/RenderAutoComplete/:filter/:controlid').get(function(req, res) {
                 }           
             });
         });    
-    }
+     //}
 
     
 
