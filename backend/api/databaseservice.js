@@ -342,7 +342,6 @@ router.route('/save').post(function(req, res) {
     var error = "";
 
     var submit = req.body;
-    console.log(submit)
     var insertOrUpdate = ""
     var request = new sql.Request();
 
@@ -350,103 +349,129 @@ router.route('/save').post(function(req, res) {
     var countfor = 0;
     var arrayretorno = [];
     var retorno = "["
+
+    var EnterpriseID = "";
+    var UserID = "";
+
+    
+   var ind = -1;
+
     incremento(submit, function(resultado, submit){
         sql.close()
         sql.connect(config).then(function() {
         for (var index = 0; index < submit.length; index++) {
-            
-            if (submit[index]["id"] == "" || !submit[index]["id"]) {
-                    
-                var numberincrement;
-                var updateincrement = ""
+            beforeSave(submit[index], function(retornoBefore){
+                ind += 1;
+                if (retornoBefore) {
+                    if (submit) {
+                        if (submit.length > 0) {
+                            EnterpriseID = submit[ind]["EnterpriseID"];
+                            UserID = submit[ind]["UserID"];
+                
+                            delete submit[ind]['EnterpriseID'];
+                            delete submit[ind]['UserID'];
+                        }
+                    }
 
-                if(resultado){
-                    if (resultado.length > 0) {
-                        if (resultado[index] != null) {
-                            if(resultado[index].nr_incremento){ 
-                                if (resultado[index].nm_campo) {
-                                    submit[index][resultado[index].nm_campo + "_INCREMENT"] = parseInt(resultado[index].nr_incremento) + 1
-                                    numberincrement = parseInt(resultado[index].nr_incremento) + 1 
-                                    updateincrement = "UPDATE incremento SET nr_incremento=" + numberincrement + " WHERE nm_tabela='" + submit[index]["TABLE"] + "' AND nm_campo='" + resultado[index].nm_campo + "'"
+                    
+                    if (submit[ind]["id"] == "" || !submit[ind]["id"]) {
+                        
+                        var numberincrement;
+                        var updateincrement = ""
+        
+                        if(resultado){
+                            if (resultado.length > 0) {
+                                if (resultado[ind] != null) {
+                                    if(resultado[ind].nr_incremento){ 
+                                        if (resultado[ind].nm_campo) {
+                                            submit[ind][resultado[ind].nm_campo + "_INCREMENT"] = parseInt(resultado[ind].nr_incremento) + 1
+                                            numberincrement = parseInt(resultado[ind].nr_incremento) + 1 
+                                            updateincrement = "UPDATE incremento SET nr_incremento=" + numberincrement + " WHERE nm_tabela='" + submit[ind]["TABLE"] + "' AND nm_campo='" + resultado[ind].nm_campo + "'"
+                                        }
+                                    }
+                                }                        
+                            }                    
+                        }
+                        
+                        insertOrUpdate = createInsert(submit, ind, guid)
+                        insertOrUpdate += updateincrement;                
+                            request = new sql.Request();
+                            request.query(insertOrUpdate).then(function(recordset) {
+                                if (countfor > 0) {
+                                    retorno += ",";
                                 }
+        
+                                if (resultado[countfor]) {
+                                    retorno += '{ "status": "success", "id": "' + guid + '", "increment": "' + numberincrement + '", "incrementfield": "' + submit[countfor]["TABLE"] + "." + resultado[countfor].nm_campo.replace("_INCREMENT","") + '"}'
+                                }else{
+                                    retorno += '{ "status": "success", "id": "' + guid + '" }'
+                                }
+        
+        
+                                countfor +=1;
+                                if (submit.length == (countfor)) {
+                                    retorno += "]"
+                                    var obj = JSON.parse(retorno)
+                                    res.send(obj)
+                                }
+                                
+                            }).catch(function(err) {
+                                console.log('Request error: ' + err);
+                                if (countfor > 0) {
+                                    retorno += ",";
+                                }
+                                retorno += '{ "status": "error", "message": "' + err + '" }'
+                                
+                                countfor +=1;
+                                if (submit.length == countfor) {
+                                    retorno += "]"
+                                    var obj = JSON.parse(retorno)
+                                    res.send(obj)
+                                }
+                            });
+                        
+                        
+                    }else{
+                        guid = submit[ind]["id"];
+                        insertOrUpdate = createUpdate(submit, ind)             
+                        
+                        
+                        request = new sql.Request();
+                        request.query(insertOrUpdate).then(function(recordset) {
+                            if (countfor > 0) {
+                                retorno += ",";
                             }
-                        }                        
-                    }                    
+                            retorno += '{ "status": "success", "id": "' + guid + '" }'  
+                            countfor +=1;
+                            
+                            if (submit.length == countfor) {
+                                retorno += "]"
+                                var obj = JSON.parse(retorno)
+                                res.send(obj)
+                            }
+                        }).catch(function(err) {
+                            console.log('Request error: ' + err);
+                            if (countfor > 0) {
+                                retorno += ",";
+                            }
+                            retorno += '{ "status": "error", "message": "' + err + '" }'
+                            countfor +=1;
+                            if (submit.length == countfor) { 
+                                retorno += "]"
+                                var obj = JSON.parse(retorno)
+                                res.send(obj)
+                            }
+                        })
+                    }
                 }
-                
-                insertOrUpdate = createInsert(submit, index, guid)
-                insertOrUpdate += updateincrement;                
-                    request = new sql.Request();
-                    request.query(insertOrUpdate).then(function(recordset) {
-                        if (countfor > 0) {
-                            retorno += ",";
-                        }
-
-                        if (resultado[countfor]) {
-                            retorno += '{ "status": "success", "id": "' + guid + '", "increment": "' + numberincrement + '", "incrementfield": "' + submit[countfor]["TABLE"] + "." + resultado[countfor].nm_campo.replace("_INCREMENT","") + '"}'
-                        }else{
-                            retorno += '{ "status": "success", "id": "' + guid + '" }'
-                        }
-
-
-                        countfor +=1;
-                        if (submit.length == (countfor)) {
-                            console.log(retorno)
-                            retorno += "]"
-                            var obj = JSON.parse(retorno)
-                            res.send(obj)
-                        }
                         
-                    }).catch(function(err) {
-                        console.log('Request error: ' + err);
-                        if (countfor > 0) {
-                            retorno += ",";
-                        }
-                        retorno += '{ "status": "error", "message": "' + err + '" }'
-                        
-                        countfor +=1;
-                        if (submit.length == countfor) {
-                            retorno += "]"
-                            var obj = JSON.parse(retorno)
-                            res.send(obj)
-                        }
-                    });
-                
-                
-            }else{
-                guid = submit[index]["id"];
-                insertOrUpdate = createUpdate(submit, index)             
-                
-                
-                request = new sql.Request();
-                request.query(insertOrUpdate).then(function(recordset) {
-                    if (countfor > 0) {
-                        retorno += ",";
-                    }
-                    retorno += '{ "status": "success", "id": "' + guid + '" }'  
-                    countfor +=1;
-                    
-                    if (submit.length == countfor) {
-                        retorno += "]"
-                        var obj = JSON.parse(retorno)
-                        res.send(obj)
-                    }
-                }).catch(function(err) {
-                    console.log('Request error: ' + err);
-                    if (countfor > 0) {
-                        retorno += ",";
-                    }
-                    retorno += '{ "status": "error", "message": "' + err + '" }'
-                    countfor +=1;
-                    if (submit.length == countfor) { 
-                        retorno += "]"
-                        var obj = JSON.parse(retorno)
-                        res.send(obj)
-                    }
-                });
-                
-            }
-        }  
+
+            })
+
+        } 
+
+           
+          
       
     }).catch(function(err) {
         if (err) {
@@ -466,6 +491,43 @@ router.route('/save').post(function(req, res) {
     }); 
 })
 })
+
+function beforeSave(submit, callback){
+    var retorno = false;
+    var SubmitObject = {};
+    var arraySubmitObject = [];
+
+    for (var key in submit) {
+        SubmitObject["table"] = submit["TABLE"];
+        SubmitObject["field"] = key;
+        SubmitObject["newValue"] = [];
+        SubmitObject["oldValue"] = [];
+        SubmitObject["newValue"].push(submit[key]);
+        SubmitObject["oldValue"].push(submit[key]);
+        SubmitObject["EnterpriseID"] = submit["EnterpriseID"];
+        SubmitObject["UserID"] = submit["UserID"];
+
+        SubmitObject["nativeDataType"] = "";
+        SubmitObject["sequenceRecording"] = "0";
+        SubmitObject["controlID"] = "";
+        SubmitObject["derivedFrom"] = "";
+        SubmitObject["ContainerID"] = "";
+        SubmitObject["LayoutID"] = "";
+        SubmitObject["title"] = "";
+        SubmitObject["message"] = [];
+        SubmitObject["visibleGrid"] = false;
+
+
+
+        arraySubmitObject.push(SubmitObject)
+    }
+    
+    callWebAPI(arraySubmitObject, function(retorno){
+        callback(retorno)
+    })
+    
+
+}
 
 function createInsert(submit, index, guid){
     var insertOrUpdate = ""
@@ -882,7 +944,25 @@ router.route('/teste').get(function(req, res) {
    //    });
 });
 
+function callWebAPI(dados, callback){
+    var Client = require('node-rest-client').Client;
+    
+   // direct way 
+   var client = new Client();   
 
+   var args = {
+    data: dados,
+    headers: { "Content-Type": "application/json" }
+    };
+
+
+   client.post("http://localhost:2444/api/DataBase/BeforeSave", args,
+       function (data, response) {
+            console.log(data);
+            callback(data);
+       }
+    );
+}
 
 router.route('/layout/:id').get(function(req, res) {
     var MongoClient = require('mongodb').MongoClient;

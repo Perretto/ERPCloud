@@ -355,6 +355,8 @@ function SerializeFields(param){
     json += '['
     json += '    {'
 
+    
+
     var Arraytable = [];
 
     for (var i = 0; i < arrayObjs.length; i++) { 
@@ -366,6 +368,8 @@ function SerializeFields(param){
                     }
         
                     Arraytable.push(arrayObjs[i].table)
+                    json += '"EnterpriseID": "' + returnCookie("EnterpriseID") + '", '
+                    json += '"UserID": "' + returnCookie("UserID") + '", '
                     json += '        "TABLE": "' + arrayObjs[i].table + '"'
                     json += '        ,"' + arrayObjs[i].field + '": "' + arrayObjs[i].valor + '" '
                 }else{
@@ -375,6 +379,7 @@ function SerializeFields(param){
         }         
     }
    
+
     json += '    }'
     json += ']'
     
