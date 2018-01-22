@@ -137,59 +137,62 @@ router.route('/findid2/:id/:layoutid').get(function(req, res) {
             var tableorder = [];
             var table;
             var field;
-            if (recordset.recordsets) {
-                if (recordset.recordsets.length > 0) {
-                    var array = recordset.recordsets[0];
-                    
-                    var arrayindex = [];
-                    row = null;
-                    var j = 0;
-                    for (let i = 0; i < array.length; i++) {
-                        var arraytable = [];
+            if (recordset) {
+                if (recordset.recordsets) {
+                    if (recordset.recordsets.length > 0) {
+                        var array = recordset.recordsets[0];
                         
-                        var row = null;
-                        for (var key in array[i]) {
-                            var keyvalue = "";
+                        var arrayindex = [];
+                        row = null;
+                        var j = 0;
+                        for (let i = 0; i < array.length; i++) {
+                            var arraytable = [];
                             
-                            var keyfield = key.split('.')
-                            table = keyfield[0];
-                            field = keyfield[1];
-                            keyvalue = key + ":" + array[i][key];
-
-                            if (arraytable.indexOf(table) == -1 ) { 
-                                if(j == 0){
-                                    tableorder.push(table);
+                            var row = null;
+                            for (var key in array[i]) {
+                                var keyvalue = "";
+                                
+                                var keyfield = key.split('.')
+                                table = keyfield[0];
+                                field = keyfield[1];
+                                keyvalue = key + ":" + array[i][key];
+    
+                                if (arraytable.indexOf(table) == -1 ) { 
+                                    if(j == 0){
+                                        tableorder.push(table);
+                                    }
+    
+                                    if (row) {
+                                        if(arraydataJSON.indexOf(JSON.stringify(row)) == -1){
+                                            var arrayRow = [];
+                                            arrayRow.push(row);
+                                            retorno.push(row)
+                                            arraydataJSON.push(JSON.stringify(row));
+                                        }                                    
+                                    }
+    
+                                    arraytable.push(table);                     
+                                    row = {};
+                                    row[key] = array[i][key];
+                                }else{
+                                    row[key] = array[i][key];
                                 }
-
-                                if (row) {
-                                    if(arraydataJSON.indexOf(JSON.stringify(row)) == -1){
+    
+                                j++
+                            }
+                            if (row) {
+                                if(arraydataJSON.indexOf(JSON.stringify(row)) == -1){
                                         var arrayRow = [];
                                         arrayRow.push(row);
                                         retorno.push(row)
-                                        arraydataJSON.push(JSON.stringify(row));
-                                    }                                    
-                                }
-
-                                arraytable.push(table);                     
-                                row = {};
-                                row[key] = array[i][key];
-                            }else{
-                                row[key] = array[i][key];
+                                        arraydataJSON.push(JSON.stringify(row));                                
+                                }                                    
                             }
-
-                            j++
-                        }
-                        if (row) {
-                            if(arraydataJSON.indexOf(JSON.stringify(row)) == -1){
-                                    var arrayRow = [];
-                                    arrayRow.push(row);
-                                    retorno.push(row)
-                                    arraydataJSON.push(JSON.stringify(row));                                
-                            }                                    
-                        }
-                    }                    
+                        }                    
+                    }
                 }
             }
+            
            
 
             retorno = retorno.sort(compare);
@@ -540,7 +543,15 @@ console.log("teste - " + index)
                     }
 
                     break;
+                case "nr":
+                if (submit[index][key] == "") {
+                    submit[index][key] = "0"
+                }
+                break;
                 default:
+                    if (submit[index][key]) {
+                        submit[index][key] = "NULL"
+                    }
                     break;
             }
 
@@ -639,7 +650,15 @@ function createUpdate(submit, index){
                     }
             
                     break;
+                case "nr":
+                if (submit[index][key] == "") {
+                    submit[index][key] = "0"
+                }
+                break;
                 default:
+                    if (submit[index][key]) {
+                        submit[index][key] = "NULL"
+                    }
                     break;
             }
 

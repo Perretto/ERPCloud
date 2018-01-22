@@ -195,6 +195,16 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
             returnString: false
         });
 
+        if (onBeforeSaving) {
+            if (onBeforeSaving != "null") {
+                var result_before = executeFunctionByName(onBeforeSaving.substring(0, onBeforeSaving.indexOf("(")), window, result);
+                if (!result_before) {
+                    loaderImage(form + "_panel", false);
+                    return;
+                }
+            }
+        }
+
         $.ajax({
             contentType: "application/json",
             accepts: "application/json",
@@ -202,6 +212,13 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
             type: "POST",
             data:  data,
             success: function(result){
+
+                if (onAfterSaving) {
+                    if (onAfterSaving != "null") {
+                        executeFunctionByName(onAfterSaving.substring(0, onAfterSaving.indexOf("(")), window, result);
+                    }
+                }
+
                 for (let i = 0; i < result.length; i++) {
                   
                 if (result[i].status == "success") {
@@ -235,9 +252,12 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                         $("[data-derivedfrom='" + tableelement + "'][data-field='id_" + tableelement + "']").val(idPrincipal);
                     }
 
-                    notification({
-                        messageText: "Salvo com sucesso", messageTitle: "OK", fix: false, type: "ok", icon: "thumbs-up"
-                    });
+                    if (i == 0) {
+                        notification({
+                            messageText: "Salvo com sucesso", messageTitle: "OK", fix: false, type: "ok", icon: "thumbs-up"
+                        });
+                    }
+                   
 
                 }else{
                     notification({
@@ -275,55 +295,57 @@ function SerializeFields(param){
         var serializable = elements[i].getAttribute("data-serializable");
         myJson = {};
         ///CRIA ARRAY DE VALORES
-        
-        if (elements[i].tagName === 'SELECT') {
-            try {
-                myJson["valor"] = elements[i].options[elements[i].selectedIndex].value;
-                //console.log(elements[i].options[elements[i].selectedIndex].text);
-            } catch (e) {
-
+        if (serializable == "true") {
+            if (elements[i].tagName === 'SELECT') {
+                try {
+                    myJson["valor"] = elements[i].options[elements[i].selectedIndex].value;
+                    //console.log(elements[i].options[elements[i].selectedIndex].text);
+                } catch (e) {
+    
+                }
+            } else if (elements[i].tagName === 'TABLE' && returnString != true) {
+                continue;
             }
-        } else if (elements[i].tagName === 'TABLE' && returnString != true) {
-            continue;
-        }
-        else {
-            if ($(elements[i]).is(':checkbox')) {
-                myJson["valor"] = $(elements[i]).is(':checked')
-            } else {
-                myJson["valor"] = elements[i].value
+            else {
+                if ($(elements[i]).is(':checkbox')) {
+                    myJson["valor"] = $(elements[i]).is(':checked')
+                } else {
+                    myJson["valor"] = elements[i].value
+                }
+            }
+            
+            myJson["field"] = $(elements[i]).attr("data-field")
+            myJson["table"] = $(elements[i]).attr("data-table") 
+    
+            var campo =  myJson["field"];
+            var newfield = "";
+            
+            if (campo) {          
+                for (let index = 0; index < campo.length; index++) {
+                    var carac = campo.charAt(index) 
+                    if (arraycaracter.indexOf(carac) >= 0) {
+                        newfield +=  carac;
+                    }         
+                }  
+            }
+    
+            if (newfield) {
+                myJson["field"] = newfield;
+            }
+            
+    
+            if ($(elements[i]).attr('data-nativedatatype') == 'INCREMENT') {
+                if (myJson["field"]) {
+                    myJson["field"] += "_INCREMENT"
+                }            
+            }
+    
+            if (serializable && arrayfield.indexOf(myJson["field"] + "." + myJson["table"]) == -1) {
+                arrayObjs.push(myJson);
+                arrayfield.push(myJson["field"] + "." + myJson["table"]);            
             }
         }
         
-        myJson["field"] = $(elements[i]).attr("data-field")
-        myJson["table"] = $(elements[i]).attr("data-table") 
-
-        var campo =  myJson["field"];
-        var newfield = "";
-        
-        if (campo) {          
-            for (let index = 0; index < campo.length; index++) {
-                var carac = campo.charAt(index) 
-                if (arraycaracter.indexOf(carac) >= 0) {
-                    newfield +=  carac;
-                }         
-            }  
-        }
-
-        if (newfield) {
-            myJson["field"] = newfield;
-        }
-        
-
-        if ($(elements[i]).attr('data-nativedatatype') == 'INCREMENT') {
-            if (myJson["field"]) {
-                myJson["field"] += "_INCREMENT"
-            }            
-        }
-
-        if (serializable && arrayfield.indexOf(myJson["field"] + "." + myJson["table"]) == -1) {
-            arrayObjs.push(myJson);
-            arrayfield.push(myJson["field"] + "." + myJson["table"]);            
-        }
         
     }
 
