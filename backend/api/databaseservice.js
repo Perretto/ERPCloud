@@ -362,7 +362,26 @@ router.route('/save').post(function(req, res) {
         for (var index = 0; index < submit.length; index++) {
             beforeSave(submit[index], function(retornoBefore){
                 ind += 1;
+                var booleanBefore = true;
+
                 if (retornoBefore) {
+                    if (retornoBefore.length > 0) {
+                        booleanBefore = retornoBefore[0].success;
+                        if (retornoBefore[0].title) {
+                            if (retornoBefore[0].title.length > 0) {
+                                for (let i = 0; i < retornoBefore.length; i++) {
+                                    if (i > 0) {
+                                        retorno += ",";
+                                    }
+                                    retorno += '{ "status": "error", "message": "' + retornoBefore[i].title[0].toolTip + '" }'                                    
+                                    booleanBefore = false;
+                                }                               
+                            }
+                        }                        
+                    }
+                }
+
+                if (booleanBefore) {
                     if (submit) {
                         if (submit.length > 0) {
                             EnterpriseID = submit[ind]["EnterpriseID"];
@@ -406,7 +425,10 @@ router.route('/save').post(function(req, res) {
                                 }else{
                                     retorno += '{ "status": "success", "id": "' + guid + '" }'
                                 }
-        
+                                
+                                submit[countfor]["EnterpriseID"] = EnterpriseID;
+                                submit[countfor]["UserID"] = UserID;
+                                afterSave(submit[countfor])
         
                                 countfor +=1;
                                 if (submit.length == (countfor)) {
@@ -463,9 +485,17 @@ router.route('/save').post(function(req, res) {
                             }
                         })
                     }
-                }
-                        
-
+                }else{
+                    if (countfor > 0) {
+                        retorno += ",";
+                    }
+                    countfor +=1;
+                    if (submit.length == countfor) { 
+                        retorno += "]"
+                        var obj = JSON.parse(retorno)
+                        res.send(obj)
+                    }
+                }   
             })
 
         } 
@@ -494,10 +524,11 @@ router.route('/save').post(function(req, res) {
 
 function beforeSave(submit, callback){
     var retorno = false;
-    var SubmitObject = {};
+    
     var arraySubmitObject = [];
-
+    
     for (var key in submit) {
+        var SubmitObject = {};
         SubmitObject["table"] = submit["TABLE"];
         SubmitObject["field"] = key;
         SubmitObject["newValue"] = [];
@@ -521,10 +552,45 @@ function beforeSave(submit, callback){
 
         arraySubmitObject.push(SubmitObject)
     }
-    
-    callWebAPI(arraySubmitObject, function(retorno){
+    callWebAPI(arraySubmitObject,"http://homologa.empresariocloud.com.br/api/DataBase/BeforeSave", function(retorno){
         callback(retorno)
     })
+    
+
+}
+
+
+function afterSave(submit){
+    var retorno = false;
+    
+    var arraySubmitObject = [];
+    
+    for (var key in submit) {
+        var SubmitObject = {};
+        SubmitObject["table"] = submit["TABLE"];
+        SubmitObject["field"] = key;
+        SubmitObject["newValue"] = [];
+        SubmitObject["oldValue"] = [];
+        SubmitObject["newValue"].push(submit[key]);
+        SubmitObject["oldValue"].push(submit[key]);
+        SubmitObject["EnterpriseID"] = submit["EnterpriseID"];
+        SubmitObject["UserID"] = submit["UserID"];
+
+        SubmitObject["nativeDataType"] = "";
+        SubmitObject["sequenceRecording"] = "0";
+        SubmitObject["controlID"] = "";
+        SubmitObject["derivedFrom"] = "";
+        SubmitObject["ContainerID"] = "";
+        SubmitObject["LayoutID"] = "";
+        SubmitObject["title"] = "";
+        SubmitObject["message"] = [];
+        SubmitObject["visibleGrid"] = false;
+
+
+
+        arraySubmitObject.push(SubmitObject)
+    }
+    callWebAPI(arraySubmitObject, "http://homologa.empresariocloud.com.br/api/DataBase/AfterSave")
     
 
 }
@@ -944,7 +1010,7 @@ router.route('/teste').get(function(req, res) {
    //    });
 });
 
-function callWebAPI(dados, callback){
+function callWebAPI(dados,url, callback){
     var Client = require('node-rest-client').Client;
     
    // direct way 
@@ -955,11 +1021,12 @@ function callWebAPI(dados, callback){
     headers: { "Content-Type": "application/json" }
     };
 
-
-   client.post("http://localhost:2444/api/DataBase/BeforeSave", args,
+   client.post(url, args,
        function (data, response) {
-            console.log(data);
-            callback(data);
+           if (callback) {
+                callback(data);
+           }
+            
        }
     );
 }

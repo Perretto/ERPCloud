@@ -570,3 +570,13 @@ function executeFunctionByName(functionName, context, args) {
     return context[func].apply(this, args);
 
 }
+
+
+function ConvertToNumberFixed(string) {
+    var number = 0;
+    if (string) {
+        number = string.replace(".", "").replace(",", ".").replace(/[^0-9\.-]+/g, "");
+        number = parseFloat(number).toFixed(2);
+    }
+    return number;
+}

@@ -260,9 +260,23 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                    
 
                 }else{
-                    notification({
-                        messageText: result.message, messageTitle: "Ops", fix: false, type: "warning", icon: "thumbs-down"
-                    });
+                    if (result) {
+                        if (result.length > 0) {
+                           // for (let i = 0; i < result.length; i++) {
+                                notification({
+                                    messageText: result[i].message, messageTitle: "Ops", fix: false, type: "warning", icon: "thumbs-down"
+                                });
+                                
+                            //}
+                        }else{
+                            notification({
+                                messageText: result.message, messageTitle: "Ops", fix: false, type: "warning", icon: "thumbs-down"
+                            });
+                        }
+                    }
+
+                   
+                    loaderImage(form, false);
                 } 
                 loaderImage(form, false);
             }
