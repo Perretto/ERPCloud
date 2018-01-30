@@ -44,7 +44,7 @@ var filtro = "";
 function f_aba(nameLayout,layoutID,titleMenu,loadData, enterpriseID){
     var tabGenID = guid();
     var EnterpriseName = "";
-
+    layoutID = layoutID.toUpperCase();
     $("#controls-recipient > .active").removeClass("active");
     $("#controls-tabs .active").removeClass("active");
     var tab = "<li layoutid='" + layoutID + "_" + tabGenID + "' class='active'><a href='#" + tabGenID + "' data-toggle='tab' title='" + EnterpriseName + "'>" + titleMenu + "&nbsp&nbsp<img src='images/loader.gif' height='15px' /></a></li>";
