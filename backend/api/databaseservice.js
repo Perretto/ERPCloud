@@ -18,7 +18,7 @@ router.route('/listall/:id').get(function(req, res) {
     var url = "mongodb://localhost:27017/erpcloud";
     var id = req.param('id');
     var select = ""; //'select Id, nm_razaosocial, nr_codigo, dt_cadastro, nm_nomefantasia, sn_pessoafisica, nm_cpf, nm_cnpj FROM entidade'
-
+    id = id.toUpperCase();
     MongoClient.connect(url, function(err, db) {
       if (err) throw err;
       db.collection("layouts").find({"layoutID": id}, { _id: false }).toArray(function(err, result) {
