@@ -213,11 +213,6 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
             data:  data,
             success: function(result){
 
-                if (onAfterSaving) {
-                    if (onAfterSaving != "null") {
-                        executeFunctionByName(onAfterSaving.substring(0, onAfterSaving.indexOf("(")), window, result);
-                    }
-                }
 
                 for (let i = 0; i < result.length; i++) {
                   
@@ -281,6 +276,12 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                 loaderImage(form, false);
             }
               
+            
+            if (onAfterSaving) {
+                if (onAfterSaving != "null") {
+                    executeFunctionByName(onAfterSaving.substring(0, onAfterSaving.indexOf("(")), window, result);
+                }
+            }
         }
         })
     }
