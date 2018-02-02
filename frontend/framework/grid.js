@@ -273,7 +273,7 @@ function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
                      "<span class=\"cellData\" data-spanid='" + controls[i2].controlID + "_" + valueID + "_span'" + "onClick='showMessage()'" + ">" + dadoCelula + "<span>" +
                     "</td>";
 
-                    dadoCelula = "<td " +
+                    dadoCelula = "<div " +
                     "id='" + controls[i2].controlID + "_" + valueID + "' " +
                     "data-controlid='" + controls[i2].controlID + "' " +
                     "data-field='" + controls[i2].field + "' " +
@@ -287,7 +287,7 @@ function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
                     isVisible + " " +
                     isCentered + ">" +
                      "<span class=\"cellData\" data-spanid='" + controls[i2].controlID + "_" + valueID + "_span'" + "onClick='showMessage()'" + ">" + dadoCelula + "<span>" +
-                    "</td>";
+                    "</div>";
 
                 if (controls[i2].controlID) {
                     row[controls[i2].controlID] = dadoCelula;
