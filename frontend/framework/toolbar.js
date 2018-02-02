@@ -197,7 +197,7 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
 
         if (onBeforeSaving) {
             if (onBeforeSaving != "null") {
-                var result_before = executeFunctionByName(onBeforeSaving.substring(0, onBeforeSaving.indexOf("(")), window, result);
+                var result_before = executeFunctionByName(onBeforeSaving.substring(0, onBeforeSaving.indexOf("(")), window);
                 if (!result_before) {
                     loaderImage(form + "_panel", false);
                     return;

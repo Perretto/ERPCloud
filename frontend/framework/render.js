@@ -1,3 +1,4 @@
+var gridButtons = new Object();
 
 function CreateAba(nameLayout, layoutID, titleMenu, dados, navigation, containerType, forcingTemplate, layoutType, callInstance) {
     var enterpriseID = returnCookie("EnterpriseID");
@@ -5,6 +6,7 @@ function CreateAba(nameLayout, layoutID, titleMenu, dados, navigation, container
 
     var tabGenID = guid();
     var EnterpriseName = "";
+    layoutID = layoutID.toUpperCase();
 
     $("#controls-recipient > .active").removeClass("active");
     $("#controls-tabs .active").removeClass("active");
@@ -73,6 +75,8 @@ function atualizaAba(formID, layoutID, tabGenID, forcingTemplate, layoutType, ur
     fillTab(formID,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
 }
 function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID){
+    
+    layoutID = layoutID.toUpperCase();
     $.ajax({async:false, url: returnCookie("urlPlataform") + "/api/layout/" + layoutID, success: function(result){	
         var tabGenID2 = guid();
         result[0].html = replaceAll(result[0].html, result[0].tabgenid, tabGenID2)
@@ -94,6 +98,8 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
         tabGenID = tabGenID2;
         var wizard = $("[data-guidwizard='" + tabGenID + "']");
         
+        gridButtons = fillButtonGrid("194536c8-48b0-43de-b464-cb9b5da4683e_" + tabGenID + "_table", tabGenID);
+
         for (var i = 0; i < wizard.length; i++) {
             if ($("#" + wizard[i].id).attr("data-guidwizard")) {
                 if ($("#" + wizard[i].id).html().indexOf("<form") < 0) {
@@ -1177,4 +1183,19 @@ function toogleColapseContainer(selectorContainer,close) {
 
 function getDropdownHTML(LayoutID, tabGenID){
 
+}
+
+function fillButtonGrid(id, tabgen){
+    var retorno = new Object();
+    $.ajax({url: returnCookie("urlPlataform") + "/api/buttongrid/" + tabgen , 
+    async: false,
+    success: function(result){
+        for (let index = 0; index < result.length; index++) {
+            result[index]["scriptEvents"] =  replaceAll(result[index]["scriptEvents"],"f8af21d6-e280-060a-1d92-0e7948ad107f" , tabgen)
+        }
+        
+        retorno[id] = result;
+    }})
+
+    return retorno;
 }

@@ -580,3 +580,7 @@ function ConvertToNumberFixed(string) {
     }
     return number;
 }
+
+function gerarGUID(){
+    return guid();
+}

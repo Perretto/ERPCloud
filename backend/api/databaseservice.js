@@ -1048,6 +1048,64 @@ router.route('/layout/:id').get(function(req, res) {
 
 });
 
+
+router.route('/buttongrid/:tabgen').get(function(req, res) {
+    var obj = {};
+    var result = [];
+    var tabgen = req.param('tabgen');
+    var code = " function editarProdutoXml(botao) {var idTela='f8af21d6-e280-060a-1d92-0e7948ad107f_'; console.log(botao); var NomeProduto = $('#7ee809e2-fe73-4b0e-b741-198df26a414f_'+$(botao).attr('data-referenceid')).attr('data-newvalue'); $('#' + idTela + 'CoImportarXML_txtNome').val(NomeProduto); $('#' + idTela + 'CoImportarXML_txtProdutoVinculado_autocomplete').attr('data-iddata',$(botao).attr('data-referenceid')); } "
+   
+    obj["FormID"]="c6bd6c44-6546-4700-954d-e22c61a20979_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["classe"]="hidden"
+    obj["containerID"]="194536c8-48b0-43de-b464-cb9b5da4683e_f8af21d6-e280-060a-1d92-0e7948ad107f .panel-body #3818d7aa-e57f-40da-bb26-e93a9aaa28bf_controlgroup"
+    obj["containerIDScreen"]="194536c8-48b0-43de-b464-cb9b5da4683e_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["controlID"]="3818d7aa-e57f-40da-bb26-e93a9aaa28bf"
+    obj["controlType"]="BUTTONGRID"
+    obj["derivedFrom"]=null
+    obj["field"]=null
+    obj["fill1PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["fill2PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["icon"]=""
+    obj["id"]="f8af21d6-e280-060a-1d92-0e7948ad107f_CoImportarXML_chkok"
+    obj["layoutID"]="00000000-0000-0000-0000-000000000000"
+    obj["layoutName"]="lyImportarXML"
+    obj["layoutScreen"]="c6bd6c44-6546-4700-954d-e22c61a20979"
+    obj["localAutoComplete"]=false
+    obj["mask"]=""
+    obj["nameLayout"]=""
+    obj["nativeDataType"]=null
+    obj["newValue"]=""
+    obj["nome"]=""
+    obj["onClickName"]="editarProdutoXml"
+    obj["ownerFieldTreeView"]=false
+    obj["propertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["readOnly"]=false
+    obj["required"]=false
+    obj["scriptEvents"]= code;
+    obj["sequenceRecording"]=0
+    obj["serializable"]=false
+    obj["symbol"]=""
+    obj["tabGenID"]="f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["table"]=null
+    obj["tamanho"]="col-md-9"
+    obj["tamanhofield"]=""
+    obj["tamanholabel"]=""
+    obj["template"]="MASTERDETAIL"
+    obj["text"]=""
+    obj["textList"]=""
+    obj["titleMenu"]=""
+    obj["titulo"]="Editar"
+    obj["tooltip"]="Editar"
+    obj["typeOpeningLayout"]=""
+    obj["valueList"]=""
+    obj["visibleGrid"]=false
+    result.push(obj);
+
+    res.send(result);
+});
+
+
+
 module.exports = database
 
 

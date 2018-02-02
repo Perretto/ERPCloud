@@ -6,8 +6,8 @@ var $vl_qt_itens = $('[data-field="vl_qt_itens"]');
 
 function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
     var grid = false;
-
-    if ($("#" + containerID + "_table").attr("data-template") == "GRID") {
+      
+    if ($("#" + containerID + "_table").attr("data-template") == "GRID" || $("#" + containerID + "_table").attr("data-template") == "MASTERDETAIL" ) {
         grid = true;
     }
 
@@ -206,9 +206,14 @@ function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
                         lines += CreateButton({
                             titulo: "", nome: "Delete", tooltip: "excluir", onClick: "deleteRowGrid(this,'" + containerID + "','" + valueID + "')", classe: "btn btn-xs btn-danger", icone: '<i class="fa fa-trash-o"></i>', returnString: true
                         });
+
+
+
                     }
                     if (table == "venda_produtos_impostos") {
                         lines += "<a class=\"btn btn-primary btn-outline popup-modal-ajax\" title=\"Memória de Cálculo\" href=\"http://" + window.location.host + "/WorkFlowVendas/MemoriaCalculo.aspx?id=" + valueID + "\"><i class=\"fa fa-superscript\"></i></a>";
+                        defaultcolumn += "<a class=\"btn btn-primary btn-outline popup-modal-ajax\" title=\"Memória de Cálculo\" href=\"http://" + window.location.host + "/WorkFlowVendas/MemoriaCalculo.aspx?id=" + valueID + "\"><i class=\"fa fa-superscript\"></i></a>";
+                        
                     }
                 }
 
@@ -253,6 +258,22 @@ function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
                     dadoCelula = (controls[i2].text[i]) ? controls[i2].text[i] : controls[i2].newValue[i];
                 }
                 lines += "<td " +
+                    "id='" + controls[i2].controlID + "_" + valueID + "' " +
+                    "data-controlid='" + controls[i2].controlID + "' " +
+                    "data-field='" + controls[i2].field + "' " +
+                    "data-table='" + controls[i2].table + "' " +
+                    "data-nativeDataType='" + controls[i2].nativeDataType + "' " +
+                    "data-derivedFrom='" + controls[i2].derivedFrom + "' " +
+                    "data-newValue='" + dadoCelula + "'" + "' " +
+                    "data-oldValue='" + dadoCelula + "'" + "' " +
+                    "data-registerID='" + valueID + "'" +
+                    "data-layoutID='" + layoutID + "'" +
+                    isVisible + " " +
+                    isCentered + ">" +
+                     "<span class=\"cellData\" data-spanid='" + controls[i2].controlID + "_" + valueID + "_span'" + "onClick='showMessage()'" + ">" + dadoCelula + "<span>" +
+                    "</td>";
+
+                    dadoCelula = "<td " +
                     "id='" + controls[i2].controlID + "_" + valueID + "' " +
                     "data-controlid='" + controls[i2].controlID + "' " +
                     "data-field='" + controls[i2].field + "' " +
@@ -587,9 +608,6 @@ function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
 
 
 
-
-
-
     var url = window.location.search.replace("?", "");
     var items = url.split("&");
 
@@ -659,11 +677,11 @@ function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
 
     }
     //sharpGridPager(containerID)
-    if (clearFormIgnore == true) {
+    //if (clearFormIgnore == true) {
 
-    } else {
-        ClearForm(containerID, false);
-    }
+    //} else {
+        //ClearForm(containerID, false);
+    //}
 
     if (containerID.split("_")[0] == "474181e6-f8d3-4a8e-9bdb-a12528941aff" || containerID.split("_")[0] == "2e9ecdc9-9d91-4750-958f-d8f530e77e13" || containerID.split("_")[0] == "b63c19ea-dba3-411f-a5c0-fed30483abac" || containerID.split("_")[0] == "87cc1ae4-a188-498b-83a6-ae137b91c76b" || containerID.split("_")[0] == "9ce79fa0-fd8a-4cd1-b1be-3878e455409b" || containerID.split("_")[0] == "2d03e5da-ef21-4f65-9dee-de305246c737") {
         (function (document, window, $) {
