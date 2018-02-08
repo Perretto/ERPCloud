@@ -817,10 +817,17 @@ function deleteRowGrid(button, containerID ,valueID, layoutID){
                         }
                         var elementID = $($("#" + formID.replace(containerID,layoutID))[0]).find("[name*='_PK']")
                         
+                        if (elementID.length == 0) {
+                            elementID = $("#" + formID + "_panel").find("[name*='_PK']");
+                        }
+
                         var id = "";
 
                         if (elementID.length > 0) {
                             id = $(elementID[0]).val()
+                            if (!id) {
+                                id = "*";
+                            }
                             fillgrid(containerID, id, layoutID)
                         }
                         //editGridLine("", metadataContainerID, id)

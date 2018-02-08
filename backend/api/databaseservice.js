@@ -12,6 +12,8 @@ server.use('/api', router)
 var config = {user: 'sa', password: 'IntSql2015@', server: '52.89.63.119',  database: 'eCloud-homologa'};
 //var config = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'eCloud-homologa'};
 
+var EnterpriseID = "";
+var UserID = "";
 
 router.route('/listall/:id').get(function(req, res) {
     var MongoClient = require('mongodb').MongoClient;
@@ -126,8 +128,13 @@ router.route('/findid2/:id/:layoutid').get(function(req, res) {
 
         // create Request object
         var request = new sql.Request();
-        
-        select = select.replace("{{id}}", id)
+        if (id == "*") {
+            select = select.substr(0,select.lastIndexOf("WHERE"));
+        }else{
+            select = select.replace("{{id}}", id)
+        }
+
+
          // query to the database and get the records
         request.query(select, function (err, recordset) {            
             if (err) console.log(err)
@@ -210,7 +217,6 @@ function compare(a,b) {
 
     for (var keya in a) {
         for (var keyb in b) {
-            console.log(keya)
             break;
         }
         break;
@@ -257,7 +263,6 @@ router.route('/editGridLine/:id/:filtro').get(function(req, res) {
         
         select = select.replace("{{id}}", filtro)
 
-        console.log(select)
          // query to the database and get the records
         request.query(select, function (err, recordset) {            
             if (err) {
@@ -286,7 +291,6 @@ function incremento(submit, callback){
                 indexIncrement = key.indexOf("_INCREMENT");
                 
                 if (indexIncrement >= 0) {
-                    console.log(key)
                     fieldincrement = key;
                     break;
                 }
@@ -296,20 +300,16 @@ function incremento(submit, callback){
             table = submit[index]["TABLE"];
       
             var select = "SELECT nr_incremento, nm_campo FROM incremento WHERE nm_tabela = '" + table + "' AND nm_campo='" + field + "'"
-            console.log(select)
+           
         
-            console.log("for = " + index);
 
             request = new sql.Request();
 
-            console.log("Ok" + table)
-            console.log("OKKK " +  field)
             
             request.query(select, function (err, recordset) {	
                 if (err) console.log(err)
                 
                 console.log("recordSET - ")
-                console.log(recordset)
                 if (recordset) {
                     if (recordset.recordset) {
                         arrayRetorno.push(recordset.recordset[0]);
@@ -350,8 +350,6 @@ router.route('/save').post(function(req, res) {
     var arrayretorno = [];
     var retorno = "["
 
-    var EnterpriseID = "";
-    var UserID = "";
 
     
    var ind = -1;
@@ -380,17 +378,18 @@ router.route('/save').post(function(req, res) {
                         }                        
                     }
                 }
+                if (submit) {
+                    if (submit.length > 0) {
+                        EnterpriseID = submit[ind]["EnterpriseID"];
+                        UserID = submit[ind]["UserID"];
+            
+                        delete submit[ind]['EnterpriseID'];
+                        delete submit[ind]['UserID'];
+                    }
+                }
 
                 if (booleanBefore) {
-                    if (submit) {
-                        if (submit.length > 0) {
-                            EnterpriseID = submit[ind]["EnterpriseID"];
-                            UserID = submit[ind]["UserID"];
-                
-                            delete submit[ind]['EnterpriseID'];
-                            delete submit[ind]['UserID'];
-                        }
-                    }
+                    
 
                     
                     if (submit[ind]["id"] == "" || !submit[ind]["id"]) {
@@ -428,6 +427,7 @@ router.route('/save').post(function(req, res) {
                                 
                                 submit[countfor]["EnterpriseID"] = EnterpriseID;
                                 submit[countfor]["UserID"] = UserID;
+                                submit[countfor]["id"] = guid;
                                 afterSave(submit[countfor])
         
                                 countfor +=1;
@@ -464,8 +464,13 @@ router.route('/save').post(function(req, res) {
                                 retorno += ",";
                             }
                             retorno += '{ "status": "success", "id": "' + guid + '" }'  
-                            countfor +=1;
                             
+
+                            submit[countfor]["EnterpriseID"] = EnterpriseID;
+                            submit[countfor]["UserID"] = UserID;
+                            
+                            afterSave(submit[countfor])
+                            countfor +=1;
                             if (submit.length == countfor) {
                                 retorno += "]"
                                 var obj = JSON.parse(retorno)
@@ -586,13 +591,10 @@ function afterSave(submit){
         SubmitObject["message"] = [];
         SubmitObject["visibleGrid"] = false;
 
-
-
         arraySubmitObject.push(SubmitObject)
     }
     callWebAPI(arraySubmitObject, "http://homologa.empresariocloud.com.br/api/DataBase/AfterSave")
     
-
 }
 
 function createInsert(submit, index, guid){
@@ -607,7 +609,7 @@ function createInsert(submit, index, guid){
         
     sqlfields = "( "
     sqlvalues = " VALUES( ";
-console.log("teste - " + index) 
+    
     for (var key in submit[index]) { 
         
         if (submit[index][key]) {
@@ -711,7 +713,7 @@ console.log("teste - " + index)
     insertOrUpdate +=  sqlfields + " " + sqlvalues
 
     //}
-console.log(insertOrUpdate)
+    
     return insertOrUpdate;
 }
 
@@ -731,7 +733,7 @@ function createUpdate(submit, index){
             }            
         }else{            
             var prefixo = key[0] + key[1];
-            console.log(prefixo)
+            
             switch (prefixo) {
                 case "id":
                     if (submit[index][key] == "" || submit[index][key] == undefined || submit[index][key] == "undefined") {
@@ -808,7 +810,7 @@ function createUpdate(submit, index){
         update = "";
     }
     
-    console.log(update)
+    
     return update;
 
 }
@@ -829,7 +831,6 @@ router.route('/RenderAutoComplete/:filter/:controlid').get(function(req, res) {
         if (result) {
             if (result.length > 0) {
                 select = result[0].autocompleteChange;
-                console.log(select)
             }
         }
        
@@ -848,7 +849,7 @@ router.route('/RenderAutoComplete/:filter/:controlid').get(function(req, res) {
             if (select) {            
                 select = select.replace("{{id}}", id)
             }    
-            console.log(select)
+            
             // query to the database and get the records
             request.query(select, function (err, recordset) {            
                 if (err) console.log(err)
@@ -891,7 +892,7 @@ router.route('/DeleteData/:containerID/:id').get(function(req, res) {
         if (deletedata) {            
             deletedata = deletedata.split("{{id}}").join(id)
         } 
-        console.log(deletedata)
+        
         
         if (deletedata == "") {
             var ret = '{ "status": "err", "message": "Script para deletar não foi inserido no banco"}'
@@ -960,8 +961,13 @@ router.route('/containergrid/:id/:filtro').get(function(req, res) {
         // create Request object
         var request = new sql.Request();
         
-        select = select.replace("{{id}}", filtro)
-        console.log(select)
+        
+        if (filtro == "*") {
+            select = select.substr(0,select.lastIndexOf("WHERE"));
+        }else{
+            select = select.replace("{{id}}", filtro);
+        }
+        
          // query to the database and get the records
         request.query(select, function (err, recordset) {            
             if (err) {
@@ -1002,7 +1008,6 @@ router.route('/teste').get(function(req, res) {
    //client.get("http://localhost:2444/api/compiler/CsharpCompiler?EnterpriseID=f1495bcf-9258-4245-8edf-d0fac225412d&Class=CadCliente&Function=ConsultaCNPJ&ValueParameters[0]=07.361.429/0001-53",
    //    function (data, response) {
         var objectId = new ObjectID();
-        console.log(objectId)
            // parsed response body as js object 
            res.send(objectId)
            // raw response 
@@ -1020,7 +1025,7 @@ function callWebAPI(dados,url, callback){
     data: dados,
     headers: { "Content-Type": "application/json" }
     };
-
+    
    client.post(url, args,
        function (data, response) {
            if (callback) {

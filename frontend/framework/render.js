@@ -34,7 +34,10 @@ var filtro = "";
     }
     if (filtro) {
         //filleditnavigation("154099BE-C2A6-E35B-1DB2-67ABF0A4C4FB","ee5b8618-b239-49ca-86a9-6975134c8713", "" ,"942bf34b-932a-cbb1-c745-4b23b69934b6_nav" );
-        tabGenID = $("[data-principaltabgen='" + tabGenID + "'").attr("data-tabgenlayout");
+        if ($("[data-principaltabgen='" + tabGenID + "'").attr("data-tabgenlayout")) {
+            tabGenID = $("[data-principaltabgen='" + tabGenID + "'").attr("data-tabgenlayout");
+        }
+        
         if (tabGenID) {
             filleditnavigation(filtro, layoutID, "", tabGenID)
         }
@@ -53,7 +56,13 @@ function f_aba(nameLayout,layoutID,titleMenu,loadData, enterpriseID){
     $("#controls-tabs").append(tab);
     $("#controls-recipient").append("<div class='tab-pane fade in  controls-recipient active' id='" + tabGenID + "'>");
 
-    fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
+    tabGenID = fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
+
+    if (loadData == "true") {
+        var dados = "&Filtro=*"
+        openData(dados, layoutID, tabGenID);
+    }
+    
 }
 
 function guid() {
@@ -426,12 +435,11 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
                 }
             }
 
-        });
-
-        
+        });    
         
 
     }});
+    return tabGenID;
 }
 
 
@@ -580,7 +588,7 @@ function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID) {
                 FormID = $(formTelaIDNavigation[0]).attr("data-formid");
                 tabGenID = $(formTelaIDNavigation[0]).attr("data-tabgenlayout");
 
-                fillScreen(result);
+                fillScreen(result, "", LayoutID);
 
                 var formID = $(formTelaIDNavigation[0]).attr("data-tabgenlayout");
                 var $tabNav = $(formTelaIDNavigation[0]).parents("form .panel.panel-nav");

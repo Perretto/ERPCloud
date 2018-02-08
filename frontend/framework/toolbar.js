@@ -169,6 +169,9 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
 
     var template = $("#" + form + "_table").attr("data-template");
 
+    if (!template) {
+        template = $("#" + form.replace(layoutID, containerID) + "_table").attr("data-template")
+    }
     if(template == "MASTERDETAIL"){
         clear = false;
     }
@@ -223,9 +226,15 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                         ClearForm(form, true);
                                           
                         var id = "";
+                        if (elementID.length == 0) {
+                            elementID = $("#" + formID + "_panel").find("[name*='_PK']");
+                        }
 
                         if (elementID.length > 0) {
                             id = $(elementID[0]).val()
+                            if (!id) {
+                                id="*";
+                            }
                             fillgrid(containerID, id, layoutID)
                         }
                         ClearForm(form, false);                        
