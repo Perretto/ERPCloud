@@ -304,6 +304,8 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
                     }
 
                     //if ($(".steps.steps-xs.row").find("span.step-title")[0].innerHTML == "Vendas") {
+                    layoutid = layoutid.toLowerCase();
+
                     if (layoutid.includes("ee5b8618-b239-49ca-86a9-6975134c8713")) {
                         bt_gerarVenda();
                     }
