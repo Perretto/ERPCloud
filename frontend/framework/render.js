@@ -275,6 +275,18 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
                     var containerObject;
                     if (layoutid) {
                         formObject = $("#" + layoutid).find(".current");
+
+                        if (formObject) {
+                            if (formObject.length == 0) {
+                                var arraylayoutid = layoutid.split("_");
+                                if (arraylayoutid) {
+                                    if (arraylayoutid.length > 1) {
+                                        formObject = $("#" + arraylayoutid[1]).find(".current");
+                                    }
+                                }
+                            }
+                        }
+
                         if (formObject.length > 0) {
                             var formid = $(formObject[0]).attr("tabgenid");
                             var containerid = $(formObject[0]).attr("containerid");
