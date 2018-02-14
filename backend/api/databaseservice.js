@@ -184,7 +184,14 @@ router.route('/findid2/:id/:layoutid').get(function(req, res) {
                                 }else{
                                     row[key] = array[i][key];
                                 }
-    
+                                
+                                if (key.indexOf("id_") > -1 && key.indexOf("_FK") == -1) {
+                                    if (row[key] != null) {
+                                        row[key] = row[key].toLowerCase();
+                                    }
+                                    
+                                }
+
                                 j++
                             }
                             if (row) {
