@@ -207,6 +207,13 @@ function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
                             titulo: "", nome: "Delete", tooltip: "excluir", onClick: "deleteRowGrid(this,'" + containerID + "','" + valueID + "')", classe: "btn btn-xs btn-danger", icone: '<i class="fa fa-trash-o"></i>', returnString: true
                         });
 
+                        defaultcolumn += CreateButton({
+                            titulo: "", nome: "Edit", tooltip: "editar", onClick: "editGridLine(this,\"" + containerID + "\", \"" + valueID + "\")", classe: "btn btn-xs btn-warning", icone: "<i class=\"fa fa-pencil\"></i>", returnString: true
+                        });
+                        defaultcolumn += "  ";
+                        defaultcolumn += CreateButton({
+                            titulo: "", nome: "Delete", tooltip: "excluir", onClick: "deleteRowGrid(this,'" + containerID + "','" + valueID + "')", classe: "btn btn-xs btn-danger", icone: '<i class="fa fa-trash-o"></i>', returnString: true
+                        });
 
 
                     }
@@ -658,7 +665,8 @@ function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
             var idcheckbox = this.id;
             var cor = $("#" + idcheckbox).attr("data-color");
             contador = contador + 1;
-            carregaIcheckCheckBoxColor(idcheckbox, cor);
+            $("#" + idcheckbox).iCheck({checkboxClass: 'icheckbox_flat-' + cor, radioClass: 'iradio_flat-blue', increaseArea: '20%' });
+            //carregaIcheckCheckBoxColor(idcheckbox, cor);
             var eventClick = $("#" + idcheckbox).attr("onclick");
             //var namespaces = eventClick.split("(");
             var funcName = eventClick; //namespaces[0].replace("(", "");

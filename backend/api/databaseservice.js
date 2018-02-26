@@ -1113,6 +1113,65 @@ router.route('/buttongrid/:tabgen').get(function(req, res) {
     obj["visibleGrid"]=false
     result.push(obj);
 
+//===========================================================================================
+obj = {};
+code = ""
+   
+    obj["FormID"]="1df8627a-f0a4-4c50-8a1c-eb6d7d5d04e5_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["classe"]="hidden"
+    obj["containerID"]="1df8627a-f0a4-4c50-8a1c-eb6d7d5d04e5_f8af21d6-e280-060a-1d92-0e7948ad107f .panel-body #3818d7aa-e57f-40da-bb26-e93a9aaa28bf_controlgroup"
+    obj["containerIDScreen"]="1df8627a-f0a4-4c50-8a1c-eb6d7d5d04e5_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["controlID"]="3818d7aa-e57f-40da-bb26-e93a9aaa28bf"
+    obj["controlType"]="CHECKBOXGRID"
+    obj["derivedFrom"]=null
+    obj["field"]=null
+    obj["fill1PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["fill2PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["icon"]=""
+    obj["id"]="f8af21d6-e280-060a-1d92-0e7948ad107f_CoGridGerarTitulosArquivoCnab_checkboxGrid"
+    obj["layoutID"]="00000000-0000-0000-0000-000000000000"
+    obj["layoutName"]="lyImportarXML"
+    obj["layoutScreen"]="c6bd6c44-6546-4700-954d-e22c61a20979"
+    obj["localAutoComplete"]=false
+    obj["mask"]=""
+    obj["nameLayout"]=""
+    obj["nativeDataType"]=null
+    obj["newValue"]=""
+    obj["nome"]=""
+    obj["onClickName"]="editarProdutoXml"
+    obj["ownerFieldTreeView"]=false
+    obj["propertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["readOnly"]=false
+    obj["required"]=false
+    obj["scriptEvents"]= code;
+    obj["sequenceRecording"]=0
+    obj["serializable"]=false
+    obj["symbol"]=""
+    obj["tabGenID"]="f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["table"]=null
+    obj["tamanho"]="col-md-9"
+    obj["tamanhofield"]=""
+    obj["tamanholabel"]=""
+    obj["template"]="MASTERDETAIL"
+    obj["text"]=""
+    obj["textList"]=""
+    obj["titleMenu"]=""
+    obj["titulo"]="Editar"
+    obj["tooltip"]="Editar"
+    obj["typeOpeningLayout"]=""
+    obj["valueList"]=""
+    obj["visibleGrid"]=false
+    result.push(obj);
+
+    //===============================================================================
+
+
+
+
+
+
+
+
     res.send(result);
 });
 

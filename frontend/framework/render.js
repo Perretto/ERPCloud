@@ -88,6 +88,7 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
     layoutID = layoutID.toUpperCase();
     $.ajax({async:false, url: returnCookie("urlPlataform") + "/api/layout/" + layoutID, success: function(result){	
         var tabGenID2 = guid();
+        gridButtons = fillButtonGrid("1df8627a-f0a4-4c50-8a1c-eb6d7d5d04e5_" + tabGenID2 + "_table", tabGenID2);
         result[0].html = replaceAll(result[0].html, result[0].tabgenid, tabGenID2)
         
         var forcingTemplate = "";
@@ -107,8 +108,8 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
         tabGenID = tabGenID2;
         var wizard = $("[data-guidwizard='" + tabGenID + "']");
         
-        gridButtons = fillButtonGrid("194536c8-48b0-43de-b464-cb9b5da4683e_" + tabGenID + "_table", tabGenID);
-
+        //gridButtons = fillButtonGrid("194536c8-48b0-43de-b464-cb9b5da4683e_" + tabGenID + "_table", tabGenID);
+        
         for (var i = 0; i < wizard.length; i++) {
             if ($("#" + wizard[i].id).attr("data-guidwizard")) {
                 if ($("#" + wizard[i].id).html().indexOf("<form") < 0) {
@@ -1215,9 +1216,12 @@ function fillButtonGrid(id, tabgen){
     success: function(result){
         for (let index = 0; index < result.length; index++) {
             result[index]["scriptEvents"] =  replaceAll(result[index]["scriptEvents"],"f8af21d6-e280-060a-1d92-0e7948ad107f" , tabgen)
+            id =  replaceAll(result[index]["FormID"],"f8af21d6-e280-060a-1d92-0e7948ad107f" , tabgen)
+            retorno[id + "_table"] = []
+            retorno[id + "_table"].push(result[index]);
         }
         
-        retorno[id] = result;
+        
     }})
 
     return retorno;
