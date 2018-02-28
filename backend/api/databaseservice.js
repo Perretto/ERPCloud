@@ -9,8 +9,8 @@ const ObjectID = require('mongodb').ObjectID
 const router = express.Router()
 server.use('/api', router)
 // config for your database
-var config = {user: 'sa', password: 'IntSql2015@', server: '52.89.63.119',  database: 'eCloud-homologa'};
-//var config = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'eCloud-homologa'};
+//var config = {user: 'sa', password: 'IntSql2015@', server: '52.89.63.119',  database: 'eCloud-homologa'};
+var config = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'eCloud-homologa'};
 
 var EnterpriseID = "";
 var UserID = "";
@@ -244,6 +244,7 @@ router.route('/editGridLine/:id/:filtro').get(function(req, res) {
     var select = ""; //'select Id, nm_razaosocial, nr_codigo, dt_cadastro, nm_nomefantasia, sn_pessoafisica, nm_cpf, nm_cnpj FROM entidade'
 
     id = id.toUpperCase();
+    console.log(id)
     MongoClient.connect(url, function(err, db) {
       if (err) throw err;
       db.collection("containers").find({"containerID": id}, { _id: false }).toArray(function(err, result) {
@@ -260,7 +261,7 @@ router.route('/editGridLine/:id/:filtro').get(function(req, res) {
 
     sql.close()
     
-
+    console.log(select)
     // connect to your database
     sql.connect(config, function (err) {    
         if (err) console.log(err);
@@ -1165,12 +1166,314 @@ code = ""
 
     //===============================================================================
 
+    obj = {};
+    code = ""
+       
+        obj["FormID"]="df94b0c8-7fbd-4253-ad4f-fe1adf307889_f8af21d6-e280-060a-1d92-0e7948ad107f"
+        obj["classe"]="hidden"
+        obj["containerID"]="df94b0c8-7fbd-4253-ad4f-fe1adf307889_f8af21d6-e280-060a-1d92-0e7948ad107f .panel-body #3818d7aa-e57f-40da-bb26-e93a9aaa28bf_controlgroup"
+        obj["containerIDScreen"]="df94b0c8-7fbd-4253-ad4f-fe1adf307889_f8af21d6-e280-060a-1d92-0e7948ad107f"
+        obj["controlID"]="3818d7aa-e57f-40da-bb26-e93a9aaa28bf"
+        obj["controlType"]="CHECKBOXGRID"
+        obj["derivedFrom"]=null
+        obj["field"]=null
+        obj["fill1PropertyID"]="00000000-0000-0000-0000-000000000000"
+        obj["fill2PropertyID"]="00000000-0000-0000-0000-000000000000"
+        obj["icon"]=""
+        obj["id"]="f8af21d6-e280-060a-1d92-0e7948ad107f_CoGridGerarTitulosArquivoCnab_checkboxGrid"
+        obj["layoutID"]="00000000-0000-0000-0000-000000000000"
+        obj["layoutName"]="lyImportarXML"
+        obj["layoutScreen"]="c6bd6c44-6546-4700-954d-e22c61a20979"
+        obj["localAutoComplete"]=false
+        obj["mask"]=""
+        obj["nameLayout"]=""
+        obj["nativeDataType"]=null
+        obj["newValue"]=""
+        obj["nome"]=""
+        obj["onClickName"]="editarProdutoXml"
+        obj["ownerFieldTreeView"]=false
+        obj["propertyID"]="00000000-0000-0000-0000-000000000000"
+        obj["readOnly"]=false
+        obj["required"]=false
+        obj["scriptEvents"]= code;
+        obj["sequenceRecording"]=0
+        obj["serializable"]=false
+        obj["symbol"]=""
+        obj["tabGenID"]="f8af21d6-e280-060a-1d92-0e7948ad107f"
+        obj["table"]=null
+        obj["tamanho"]="col-md-9"
+        obj["tamanhofield"]=""
+        obj["tamanholabel"]=""
+        obj["template"]="MASTERDETAIL"
+        obj["text"]=""
+        obj["textList"]=""
+        obj["titleMenu"]=""
+        obj["titulo"]="Editar"
+        obj["tooltip"]="Editar"
+        obj["typeOpeningLayout"]=""
+        obj["valueList"]=""
+        obj["visibleGrid"]=false
+        result.push(obj);
+    
+        //===============================================================================
+    
 
+obj = {};
+code = ""
+   
+    obj["FormID"]="e350e395-0e70-4bd1-84dd-af8db72152f7_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["classe"]="hidden"
+    obj["containerID"]="e350e395-0e70-4bd1-84dd-af8db72152f7_f8af21d6-e280-060a-1d92-0e7948ad107f .panel-body #3818d7aa-e57f-40da-bb26-e93a9aaa28bf_controlgroup"
+    obj["containerIDScreen"]="e350e395-0e70-4bd1-84dd-af8db72152f7_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["controlID"]="3818d7aa-e57f-40da-bb26-e93a9aaa28bf"
+    obj["controlType"]=""
+    obj["derivedFrom"]=null
+    obj["field"]=null
+    obj["fill1PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["fill2PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["icon"]=""
+    obj["id"]="f8af21d6-e280-060a-1d92-0e7948ad107f_CoGridGerarTitulosArquivoCnab_checkboxGrid"
+    obj["layoutID"]="00000000-0000-0000-0000-000000000000"
+    obj["layoutName"]="lyImportarXML"
+    obj["layoutScreen"]="c6bd6c44-6546-4700-954d-e22c61a20979"
+    obj["localAutoComplete"]=false
+    obj["mask"]=""
+    obj["nameLayout"]=""
+    obj["nativeDataType"]=null
+    obj["newValue"]=""
+    obj["nome"]=""
+    obj["onClickName"]="editarProdutoXml"
+    obj["ownerFieldTreeView"]=false
+    obj["propertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["readOnly"]=false
+    obj["required"]=false
+    obj["scriptEvents"]= code;
+    obj["sequenceRecording"]=0
+    obj["serializable"]=false
+    obj["symbol"]=""
+    obj["tabGenID"]="f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["table"]=null
+    obj["tamanho"]="col-md-9"
+    obj["tamanhofield"]=""
+    obj["tamanholabel"]=""
+    obj["template"]="MASTERDETAIL"
+    obj["text"]=""
+    obj["textList"]=""
+    obj["titleMenu"]=""
+    obj["titulo"]="Editar"
+    obj["tooltip"]="Editar"
+    obj["typeOpeningLayout"]=""
+    obj["valueList"]=""
+    obj["visibleGrid"]=false
+    result.push(obj);
 
+    //===============================================================================
+    
 
+    obj = {};
+    code = ""
+   
+    obj["FormID"]="6c0c5f73-2339-435b-ab8e-edef71daea37_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["classe"]="hidden"
+    obj["containerID"]="6c0c5f73-2339-435b-ab8e-edef71daea37_f8af21d6-e280-060a-1d92-0e7948ad107f .panel-body #3818d7aa-e57f-40da-bb26-e93a9aaa28bf_controlgroup"
+    obj["containerIDScreen"]="6c0c5f73-2339-435b-ab8e-edef71daea37_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["controlID"]="3818d7aa-e57f-40da-bb26-e93a9aaa28bf"
+    obj["controlType"]=""
+    obj["derivedFrom"]=null
+    obj["field"]=null
+    obj["fill1PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["fill2PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["icon"]=""
+    obj["id"]="f8af21d6-e280-060a-1d92-0e7948ad107f_CoGridGerarTitulosArquivoCnab_checkboxGrid"
+    obj["layoutID"]="00000000-0000-0000-0000-000000000000"
+    obj["layoutName"]="lyImportarXML"
+    obj["layoutScreen"]="c6bd6c44-6546-4700-954d-e22c61a20979"
+    obj["localAutoComplete"]=false
+    obj["mask"]=""
+    obj["nameLayout"]=""
+    obj["nativeDataType"]=null
+    obj["newValue"]=""
+    obj["nome"]=""
+    obj["onClickName"]="editarProdutoXml"
+    obj["ownerFieldTreeView"]=false
+    obj["propertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["readOnly"]=false
+    obj["required"]=false
+    obj["scriptEvents"]= code;
+    obj["sequenceRecording"]=0
+    obj["serializable"]=false
+    obj["symbol"]=""
+    obj["tabGenID"]="f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["table"]=null
+    obj["tamanho"]="col-md-9"
+    obj["tamanhofield"]=""
+    obj["tamanholabel"]=""
+    obj["template"]="MASTERDETAIL"
+    obj["text"]=""
+    obj["textList"]=""
+    obj["titleMenu"]=""
+    obj["titulo"]="Editar"
+    obj["tooltip"]="Editar"
+    obj["typeOpeningLayout"]=""
+    obj["valueList"]=""
+    obj["visibleGrid"]=false
+    result.push(obj);
 
+    //===============================================================================
+    
 
+    obj = {};
+    code = ""
+   
+    obj["FormID"]="90c96f99-9879-4752-83ca-febf573c0a1d_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["classe"]="hidden"
+    obj["containerID"]="90c96f99-9879-4752-83ca-febf573c0a1d_f8af21d6-e280-060a-1d92-0e7948ad107f .panel-body #3818d7aa-e57f-40da-bb26-e93a9aaa28bf_controlgroup"
+    obj["containerIDScreen"]="90c96f99-9879-4752-83ca-febf573c0a1d_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["controlID"]="3818d7aa-e57f-40da-bb26-e93a9aaa28bf"
+    obj["controlType"]=""
+    obj["derivedFrom"]=null
+    obj["field"]=null
+    obj["fill1PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["fill2PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["icon"]=""
+    obj["id"]="f8af21d6-e280-060a-1d92-0e7948ad107f_CoGridGerarTitulosArquivoCnab_checkboxGrid"
+    obj["layoutID"]="00000000-0000-0000-0000-000000000000"
+    obj["layoutName"]="lyImportarXML"
+    obj["layoutScreen"]="c6bd6c44-6546-4700-954d-e22c61a20979"
+    obj["localAutoComplete"]=false
+    obj["mask"]=""
+    obj["nameLayout"]=""
+    obj["nativeDataType"]=null
+    obj["newValue"]=""
+    obj["nome"]=""
+    obj["onClickName"]="editarProdutoXml"
+    obj["ownerFieldTreeView"]=false
+    obj["propertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["readOnly"]=false
+    obj["required"]=false
+    obj["scriptEvents"]= code;
+    obj["sequenceRecording"]=0
+    obj["serializable"]=false
+    obj["symbol"]=""
+    obj["tabGenID"]="f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["table"]=null
+    obj["tamanho"]="col-md-9"
+    obj["tamanhofield"]=""
+    obj["tamanholabel"]=""
+    obj["template"]="MASTERDETAIL"
+    obj["text"]=""
+    obj["textList"]=""
+    obj["titleMenu"]=""
+    obj["titulo"]="Editar"
+    obj["tooltip"]="Editar"
+    obj["typeOpeningLayout"]=""
+    obj["valueList"]=""
+    obj["visibleGrid"]=false
+    result.push(obj);
 
+    //===============================================================================
+    
+
+    obj = {};
+    code = ""
+   
+    obj["FormID"]="69851ed9-00ab-4add-9efd-ae9ce00e5df3_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["classe"]="hidden"
+    obj["containerID"]="69851ed9-00ab-4add-9efd-ae9ce00e5df3_f8af21d6-e280-060a-1d92-0e7948ad107f .panel-body #3818d7aa-e57f-40da-bb26-e93a9aaa28bf_controlgroup"
+    obj["containerIDScreen"]="69851ed9-00ab-4add-9efd-ae9ce00e5df3_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["controlID"]="3818d7aa-e57f-40da-bb26-e93a9aaa28bf"
+    obj["controlType"]=""
+    obj["derivedFrom"]=null
+    obj["field"]=null
+    obj["fill1PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["fill2PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["icon"]=""
+    obj["id"]="f8af21d6-e280-060a-1d92-0e7948ad107f_checkboxGrid"
+    obj["layoutID"]="00000000-0000-0000-0000-000000000000"
+    obj["layoutName"]="lyImportarXML"
+    obj["layoutScreen"]="c6bd6c44-6546-4700-954d-e22c61a20979"
+    obj["localAutoComplete"]=false
+    obj["mask"]=""
+    obj["nameLayout"]=""
+    obj["nativeDataType"]=null
+    obj["newValue"]=""
+    obj["nome"]=""
+    obj["onClickName"]="editarProdutoXml"
+    obj["ownerFieldTreeView"]=false
+    obj["propertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["readOnly"]=false
+    obj["required"]=false
+    obj["scriptEvents"]= code;
+    obj["sequenceRecording"]=0
+    obj["serializable"]=false
+    obj["symbol"]=""
+    obj["tabGenID"]="f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["table"]=null
+    obj["tamanho"]="col-md-9"
+    obj["tamanhofield"]=""
+    obj["tamanholabel"]=""
+    obj["template"]="MASTERDETAIL"
+    obj["text"]=""
+    obj["textList"]=""
+    obj["titleMenu"]=""
+    obj["titulo"]="Editar"
+    obj["tooltip"]="Editar"
+    obj["typeOpeningLayout"]=""
+    obj["valueList"]=""
+    obj["visibleGrid"]=false
+    result.push(obj);
+
+    //===============================================================================
+    
+
+    obj = {};
+    code = ""
+   
+    obj["FormID"]="e1b4201f-5e01-47da-bc6b-c18828f2f990_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["classe"]="hidden"
+    obj["containerID"]="e1b4201f-5e01-47da-bc6b-c18828f2f990_f8af21d6-e280-060a-1d92-0e7948ad107f .panel-body #3818d7aa-e57f-40da-bb26-e93a9aaa28bf_controlgroup"
+    obj["containerIDScreen"]="e1b4201f-5e01-47da-bc6b-c18828f2f990_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["controlID"]="3818d7aa-e57f-40da-bb26-e93a9aaa28bf"
+    obj["controlType"]=""
+    obj["derivedFrom"]=null
+    obj["field"]=null
+    obj["fill1PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["fill2PropertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["icon"]=""
+    obj["id"]="f8af21d6-e280-060a-1d92-0e7948ad107f_CoGridGerarTitulosArquivoCnab_checkboxGrid"
+    obj["layoutID"]="00000000-0000-0000-0000-000000000000"
+    obj["layoutName"]="lyImportarXML"
+    obj["layoutScreen"]="c6bd6c44-6546-4700-954d-e22c61a20979"
+    obj["localAutoComplete"]=false
+    obj["mask"]=""
+    obj["nameLayout"]=""
+    obj["nativeDataType"]=null
+    obj["newValue"]=""
+    obj["nome"]=""
+    obj["onClickName"]="editarProdutoXml"
+    obj["ownerFieldTreeView"]=false
+    obj["propertyID"]="00000000-0000-0000-0000-000000000000"
+    obj["readOnly"]=false
+    obj["required"]=false
+    obj["scriptEvents"]= code;
+    obj["sequenceRecording"]=0
+    obj["serializable"]=false
+    obj["symbol"]=""
+    obj["tabGenID"]="f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["table"]=null
+    obj["tamanho"]="col-md-9"
+    obj["tamanhofield"]=""
+    obj["tamanholabel"]=""
+    obj["template"]="MASTERDETAIL"
+    obj["text"]=""
+    obj["textList"]=""
+    obj["titleMenu"]=""
+    obj["titulo"]="Editar"
+    obj["tooltip"]="Editar"
+    obj["typeOpeningLayout"]=""
+    obj["valueList"]=""
+    obj["visibleGrid"]=false
+    result.push(obj);
 
     res.send(result);
 });
