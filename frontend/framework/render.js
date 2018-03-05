@@ -107,7 +107,7 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID)
         $("[data-tabgenlayout='" + tabGenID2 + "']").attr("data-principaltabgen",tabGenID);
         tabGenID = tabGenID2;
         var wizard = $("[data-guidwizard='" + tabGenID + "']");
-        
+        $("textarea").val("");
         //gridButtons = fillButtonGrid("194536c8-48b0-43de-b464-cb9b5da4683e_" + tabGenID + "_table", tabGenID);
         
         for (var i = 0; i < wizard.length; i++) {
