@@ -2749,9 +2749,14 @@
 
         _createInsertButton: function() {
             return this._createGridButton(this.insertButtonClass, this.insertButtonTooltip, function(grid) {
-                grid.insertItem().done(function() {
-                    grid.clearInsert();
-                });
+                var itensid = $("[id*='CoItensVenda_txtitensid']").attr("data-valuegrid");
+                if(itensid){
+                    grid.insertItem().done(function() {
+                        grid.clearInsert();
+                    });
+                }else{
+                    notification({ messageTitle: "Ops", messageText: "Selecione um produto antes de adicionar o item.", fix: false, type: "error", icon: "thumbs-down" });
+                }               
             });
         },
 
