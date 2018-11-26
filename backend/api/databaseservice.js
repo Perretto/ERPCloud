@@ -350,6 +350,9 @@ function compareObj(a,b) {
                                 
                                 res.setHeader('Content-type', 'application/pdf');
                                 pdf.create(html.topo +  html.detail + html.footer + html.base, options).toStream(function(err, stream){
+                                    if(err){
+                                        console.log(err)
+                                    }
                                     stream.pipe(fs.createWriteStream('../frontend/reports/' + nome + '.pdf'));
                                     res.redirect('../frontend/reports/' + nome + '.pdf');
 
