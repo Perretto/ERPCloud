@@ -353,9 +353,12 @@ function compareObj(a,b) {
                                     if(err){
                                         console.log(err)
                                     }
-                                    stream.pipe(fs.createWriteStream('../frontend/reports/' + nome + '.pdf'));
+                                    if(stream.pipe){
+                                        stream.pipe(fs.createWriteStream('../frontend/reports/' + nome + '.pdf'));
+                                    }
+                                    
                                     res.redirect(full.replace(":3002","") + '/reports/' + nome + '.pdf');
-
+                                    
                                 //pdf.create(html.topo +  html.detail + html.footer + html.base, options).toBuffer(function(err, buffer){
                                 //    pdf.create(html.topo +  html.detail + html.footer + html.base, options).toFile('../frontend/reports/' + nome + '.pdf' ,function(err, buffer){
                                 //stream.pipe(res);
