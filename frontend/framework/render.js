@@ -1558,8 +1558,8 @@ function fillScreenOLD(data, template, layoutID){
     for (var i = 0; i < p.length; i++) {        
         for (var key in p[i]) {
             var keyfield = key.split('.')
-            var table = keyfield[0];
-            var field = keyfield[1];
+            var table = keyfield[0].toLowerCase();
+            var field = keyfield[1].toLowerCase();
 
             tablegrid = $("[data-table='" + table + "'][data-fielddata='" + field + "']").closest('table');
             var idfield = $("[data-table='" + table + "'][data-fielddata='" + field + "']").attr("data-field");        
@@ -1742,8 +1742,8 @@ function fillContainer(data){
     for (var i = 0; i < p.length; i++) {        
         for (var key in p[i]) {
             var keyfield = key.split('.')
-            var table = keyfield[0];
-            var field = keyfield[1];
+            var table = keyfield[0].toLowerCase();
+            var field = keyfield[1].toLowerCase();
             var value = p[i][key];
 
             if (value != undefined && value != "undefined") {
