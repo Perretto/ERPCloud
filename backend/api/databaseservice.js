@@ -339,8 +339,9 @@ function compareObj(a,b) {
 
                                 res.setHeader('Content-type', 'application/pdf');
 
-                                pdf.create(html.topo +  html.detail + html.footer + html.base, options).toBuffer(function(err, buffer){
-                                    //stream.pipe(res);
+                                //pdf.create(html.topo +  html.detail + html.footer + html.base, options).toBuffer(function(err, buffer){
+                                    pdf.create(html.topo +  html.detail + html.footer + html.base, options).toFile('../frontend/reports/' + nome + '.pdf' ,function(err, buffer){
+                                //stream.pipe(res);
                                     if(err){
                                         console.log(err)
                                     }
