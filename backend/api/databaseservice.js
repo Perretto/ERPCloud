@@ -327,7 +327,7 @@ function compareObj(a,b) {
                                 }
 
                                 //var options = { paginationOffset: 1,orientation: orientation, header: {"height": "" + headersize + "mm", "contents": html.header} ,footer: {"height":"10mm", "contents": '<span style="float:right;font-weight:bold;font-family:Arial;font-size:x-small;">{{page}}</span>' } };
-                                var options = {paginationOffset: 1,orientation: orientation, header: {"height": "" + headersize + "mm", "contents": html.header} ,footer: {"height":"10mm", "contents":html.footer} };
+                                var options = {paginationOffset: 1,orientation: orientation, header: {"height": "" + headersize + "mm", "contents": html.header} ,footer: {"height":"10mm", "contents":html.footer}, directory: '../frontend/reports/' };
                                 //var options = {};
                                 
                                 //pdf.create(html.topo +  html.detail + html.footer + html.base, options).toStream(function(err, stream){
