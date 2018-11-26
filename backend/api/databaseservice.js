@@ -372,7 +372,7 @@ function compareObj(a,b) {
                                         console.log(err)
                                     }
                                     else{
-                                        if(stream){
+                                        if(buffer){
                                             res.write(buffer);
                                         }
                                     }
