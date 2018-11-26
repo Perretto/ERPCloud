@@ -54,8 +54,8 @@ router.route('/*').get(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "homologa";  //"homologa"; //"broker";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        dados = "intelecta10";  //"homologa"; //"broker";
+        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
         local = true;
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
@@ -103,8 +103,8 @@ router.route('/*').get(function(req, res, next) {
 function conectionsLink(full, callback){
     if(String(full).indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "homologa"; //"broker";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        dados = "intelecta10"; //"broker";
+        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
     }else{
         var parts = String(full).split('.');
         var dados = "";
@@ -341,8 +341,13 @@ function compareObj(a,b) {
 
                                 pdf.create(html.topo +  html.detail + html.footer + html.base, options).toBuffer(function(err, buffer){
                                     //stream.pipe(res);
-                                    if(buffer){
-                                        res.write(buffer);
+                                    if(err){
+                                        console.log(err)
+                                    }
+                                    else{
+                                        if(buffer){
+                                            res.write(buffer);
+                                        }
                                     }
                                     
                                     res.end()
