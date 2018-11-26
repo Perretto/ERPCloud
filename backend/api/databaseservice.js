@@ -54,8 +54,8 @@ router.route('/*').get(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "intelecta10";  //"homologa"; //"broker";
-        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
+        dados = "homologa";  //"homologa"; //"broker";
+        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
         local = true;
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
@@ -103,8 +103,8 @@ router.route('/*').get(function(req, res, next) {
 function conectionsLink(full, callback){
     if(String(full).indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "intelecta10"; //"broker";
-        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
+        dados = "homologa"; //"broker";
+        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
     }else{
         var parts = String(full).split('.');
         var dados = "";
@@ -327,7 +327,19 @@ function compareObj(a,b) {
                                 }
 
                                 //var options = { paginationOffset: 1,orientation: orientation, header: {"height": "" + headersize + "mm", "contents": html.header} ,footer: {"height":"10mm", "contents": '<span style="float:right;font-weight:bold;font-family:Arial;font-size:x-small;">{{page}}</span>' } };
-                                var options = {paginationOffset: 1,orientation: orientation, header: {"height": "" + headersize + "mm", "contents": html.header} ,footer: {"height":"10mm", "contents":html.footer}, directory: '../frontend/reports/', phantomPath: '/node_modules/phantomjs-prebuilt/lib/phantom/bin' };
+                                var options = {
+                                    paginationOffset: 1,
+                                    orientation: orientation, 
+                                    header: {
+                                        "height": "" + headersize + "mm", 
+                                        "contents": html.header
+                                    } ,
+                                    footer: {
+                                        "height":"10mm", 
+                                        "contents":html.footer
+                                    }, 
+                                    directory: '../frontend/reports/' 
+                                };
                                 //var options = {};
                                 
                                 //pdf.create(html.topo +  html.detail + html.footer + html.base, options).toStream(function(err, stream){
@@ -336,11 +348,11 @@ function compareObj(a,b) {
                                 //        stream.pipe(res)
                                 //});
 
-
+                                
                                 res.setHeader('Content-type', 'application/pdf');
 
-                                //pdf.create(html.topo +  html.detail + html.footer + html.base, options).toBuffer(function(err, buffer){
-                                    pdf.create(html.topo +  html.detail + html.footer + html.base, options).toFile('../frontend/reports/' + nome + '.pdf' ,function(err, buffer){
+                                pdf.create(html.topo +  html.detail + html.footer + html.base, options).toBuffer(function(err, buffer){
+                                //    pdf.create(html.topo +  html.detail + html.footer + html.base, options).toFile('../frontend/reports/' + nome + '.pdf' ,function(err, buffer){
                                 //stream.pipe(res);
                                     if(err){
                                         console.log(err)
