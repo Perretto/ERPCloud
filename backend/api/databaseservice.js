@@ -337,8 +337,7 @@ function compareObj(a,b) {
                                     footer: {
                                         "height":"10mm", 
                                         "contents":html.footer
-                                    }, 
-                                    directory: '../frontend/reports' 
+                                    }
                                 };
                                 //var options = {};
                                 
