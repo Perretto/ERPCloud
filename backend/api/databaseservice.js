@@ -353,9 +353,12 @@ function compareObj(a,b) {
                                     if(err){
                                         console.log(err)
                                     }
-                                    if(stream.pipe){
-                                        stream.pipe(fs.createWriteStream('../frontend/reports/' + nome + '.pdf'));
+                                    if(stream){
+                                        if(stream.pipe){
+                                            stream.pipe(fs.createWriteStream('../frontend/reports/' + nome + '.pdf'));
+                                        }
                                     }
+                                    
                                     
                                     res.redirect(full.replace(":3002","") + '/reports/' + nome + '.pdf');
                                     
