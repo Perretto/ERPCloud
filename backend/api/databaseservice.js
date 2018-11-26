@@ -349,6 +349,7 @@ function compareObj(a,b) {
 
                                 
                                 res.setHeader('Content-type', 'application/pdf');
+                                /*
                                 pdf.create(html.topo +  html.detail + html.footer + html.base, options).toStream(function(err, stream){
                                     if(err){
                                         console.log(err)
@@ -361,20 +362,21 @@ function compareObj(a,b) {
                                     
                                     
                                     res.redirect(full.replace(":3002","") + '/reports/' + nome + '.pdf');
-                                    
-                                //pdf.create(html.topo +  html.detail + html.footer + html.base, options).toBuffer(function(err, buffer){
+                                 */   
+
+                                pdf.create(html.topo +  html.detail + html.footer + html.base, options).toBuffer(function(err, buffer){
                                 //    pdf.create(html.topo +  html.detail + html.footer + html.base, options).toFile('../frontend/reports/' + nome + '.pdf' ,function(err, buffer){
                                 //stream.pipe(res);
-                                    /*
+                                    
                                     if(err){
                                         console.log(err)
                                     }
                                     else{
                                         if(stream){
-                                            res.send(stream);
+                                            res.write(buffer);
                                         }
                                     }
-                                    */
+                                    
 
                                     res.end()
                                 });
