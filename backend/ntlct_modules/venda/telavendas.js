@@ -227,7 +227,7 @@ router.route('/LancarEstoqueVenda/:idvenda').get(function(req, res) {
     select += " ('2B7BCB91-ADD2-4FB8-8384-0CB9AF5A0CD4') AS 'id_dsg_status_movimentacao_estoque',  ";
     select += " ('') AS 'vl_custo_medio', ('" + idvenda + "') AS 'id_origem_movimento',  ";
     select += " ('86ADE029-99BF-45D6-B864-8E453E7D227B') AS 'id_dsg_origem_estoque', (custo_aquisicao.vl_custoaquisicao) AS 'vl_valor_movimentacao', ";
-    select += " ('') AS 'id_armazem_destino', ('') AS 'vl_quantidade_previsao_entrada', ('') AS 'vl_quantidade_empenhada', ";
+    select += " ('') AS 'id_armazem_destino', ('') AS 'vl_quantidade_previsao_entrada', (venda_produtos.vl_quantidade) AS 'vl_quantidade_empenhada', ";
     select += " ('') AS 'id_movimentacao_origem', ('') AS 'id_ordem_producao' ";
     select += " FROM venda_produtos ";
     select += " INNER JOIN venda ON venda.id=venda_produtos.id_venda ";
@@ -275,7 +275,7 @@ router.route('/LancarEstoqueVenda/:idvenda').get(function(req, res) {
                 insertquery += (!recordset.recordset[i].vl_valor_movimentacao ? "0" : "" + recordset.recordset[i].vl_valor_movimentacao + "") + ", ";
                 insertquery += (!recordset.recordset[i].id_armazem_destino ? "NULL" : "'" + recordset.recordset[i].id_armazem_destino + "'") + ", ";
                 insertquery += (!recordset.recordset[i].vl_quantidade_previsao_entrada ? "0" : "" + recordset.recordset[i].vl_quantidade_previsao_entrada + "") + ", ";
-                insertquery += (!recordset.recordset[i].vl_quantidade_empenhada ? "0" : "" + recordset.recordset[i].vl_quantidade_empenhada + "") + ", ";
+                insertquery += (!recordset.recordset[i].vl_quantidade_empenhada ? "0" : "-" + recordset.recordset[i].vl_quantidade_empenhada + "") + ", ";
                 insertquery += (!recordset.recordset[i].id_movimentacao_origem ? "NULL" : "'" + recordset.recordset[i].id_movimentacao_origem + "'") + ", ";
                 insertquery += (!recordset.recordset[i].id_ordem_producao ? "NULL" : "'" + recordset.recordset[i].id_ordem_producao + "'") + " ";
 
