@@ -253,7 +253,8 @@ router.route('/LancarEstoqueVenda/:idvenda').get(function(req, res) {
                 insertquery += " id_armazem_destino, vl_quantidade_previsao_entrada, vl_quantidade_empenhada, ";
                 insertquery += " id_movimentacao_origem, id_ordem_producao) ";
 
-                insertquery += " VALUES(";                                        
+                insertquery += " VALUES(";   
+
                 insertquery += (!recordset.recordset[i].nm_observacao ? "NULL" : "'" + recordset.recordset[i].nm_observacao + "'") + ", ";
                 insertquery += (!recordset.recordset[i].dt_movimentacao ? "NULL" : "'" + recordset.recordset[i].dt_movimentacao + "'") + ", ";
                 insertquery += (!recordset.recordset[i].id_dsg_unidade_medida ? "NULL" : "'" + recordset.recordset[i].id_dsg_unidade_medida + "'") + ", ";
@@ -263,7 +264,7 @@ router.route('/LancarEstoqueVenda/:idvenda').get(function(req, res) {
                 insertquery += (!recordset.recordset[i].nm_numero_documento ? "NULL" : "'" + recordset.recordset[i].nm_numero_documento + "'") + ", ";
                 insertquery += (!recordset.recordset[i].id ? "NULL" : "'" + recordset.recordset[i].id + "'") + ", ";
                 insertquery += (!recordset.recordset[i].id_empresa ? "NULL" : "'" + recordset.recordset[i].id_empresa + "'") + ", ";
-                insertquery += (!recordset.recordset[i].vl_quantidade ? "0" : "" + recordset.recordset[i].vl_quantidade + "") + ", ";
+                insertquery += (!recordset.recordset[i].vl_quantidade ? "0" : "-" + recordset.recordset[i].vl_quantidade + "") + ", ";
                 insertquery += (!recordset.recordset[i].sn_movimentacao_saida ? "0" : "" + recordset.recordset[i].sn_movimentacao_saida + "") + ", ";
                 insertquery += (!recordset.recordset[i].id_produtos ? "NULL" : "'" + recordset.recordset[i].id_produtos + "'") + ", ";
                 insertquery += (!recordset.recordset[i].id_dsg_tipo_movimentacao_estoque ? "NULL" : "'" + recordset.recordset[i].id_dsg_tipo_movimentacao_estoque + "'") + ", ";
@@ -278,9 +279,7 @@ router.route('/LancarEstoqueVenda/:idvenda').get(function(req, res) {
                 insertquery += (!recordset.recordset[i].id_movimentacao_origem ? "NULL" : "'" + recordset.recordset[i].id_movimentacao_origem + "'") + ", ";
                 insertquery += (!recordset.recordset[i].id_ordem_producao ? "NULL" : "'" + recordset.recordset[i].id_ordem_producao + "'") + " ";
 
-                insertquery += ");";
-
-                
+                insertquery += ");";                
             }
 
             var retorno = {
