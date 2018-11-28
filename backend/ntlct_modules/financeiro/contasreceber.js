@@ -31,8 +31,8 @@ router.route('/*').get(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "inteleca10";  //"homologa"; //"foodtown";
-        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
+        dados = "homologa";  //"homologa"; //"foodtown";
+        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -88,8 +88,8 @@ router.route('/*').post(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "intelecta10";  //"homologa"; //"foodtown";
-        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
+        dados = "homologa";  //"homologa"; //"foodtown";
+        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -845,10 +845,11 @@ function funAtualizarConta(parametros,callbackf) {
                     queryItens += "'" + parametros.parcelas[parcela].idParcela + "',";
                     queryItens += "'" + EnterpriseID + "',";
                     queryItens += "'" + parametros.idTitulo + "',";
-                    queryItens += (parametros.parcelas[parcela].idBanco == "" ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
-                    queryItens += (parametros.parcelas[parcela].idFormaPagamento == "" ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
-                    queryItens += (parametros.parcelas[parcela].idConfCNAB == "" ? "null" : "'" + parametros.parcelas[parcela].idConfCNAB + "'") + ",";
-                    queryItens += (parametros.parcelas[parcela].idContaFinanceira == "" ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
+                    queryItens += (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
+                    
+                    queryItens += (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
+                    queryItens += (!parametros.parcelas[parcela].idConfCNAB ? "null" : "'" + parametros.parcelas[parcela].idConfCNAB + "'") + ",";
+                    queryItens += (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
                     queryItens += "'" + parametros.parcelas[parcela].parcela + "',";
                     queryItens += "'" + parametros.parcelas[parcela].documento + "',";
                     queryItens +=  parametros.parcelas[parcela].fluxoCaixa + ",";
@@ -869,7 +870,7 @@ function funAtualizarConta(parametros,callbackf) {
                 query += "where id = '" + parametros.idTitulo + "'";
                 query += " and id_empresa = '" + EnterpriseID + "'";
             }
-            
+           
             sql.close();
             sql.connect(config, function (err) {    
                 if (err){
@@ -894,6 +895,11 @@ function funAtualizarConta(parametros,callbackf) {
                                     callbackf(resposta);
                                 }
                                 else{
+
+                                    console.log("----------------------------------------------------------");
+                                    console.log(queryItens);
+                                    console.log("----------------------------------------------------------");
+                        
                                     if(queryItens != ""){
                                         try{
                                             var request = new sql.Request(transacao);
