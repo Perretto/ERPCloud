@@ -31,8 +31,8 @@ router.route('/*').get(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "homologa";  //"homologa"; //"foodtown";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        dados = "intelecta10";  //"homologa"; //"foodtown";
+        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -88,8 +88,8 @@ router.route('/*').post(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "homologa";  //"homologa"; //"foodtown";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        dados = "intelecta10";  //"homologa"; //"foodtown";
+        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -775,7 +775,7 @@ function funAtualizarConta(parametros,callbackf) {
             resposta.mensagem.push("O documento não foi informado.");
         }
 
-        if(parametros.idParcelamento == "" || parametros.idparcelamento == "undefined"){
+        if(!parametros.idParcelamento){
             resposta.status = 0;
             resposta.mensagem.push("A forma de parcelamento não foi informada.");
         }
@@ -822,10 +822,10 @@ function funAtualizarConta(parametros,callbackf) {
                 query += "'" + parametros.idTitulo + "',";
                 query += "'" + EnterpriseID + "',";
                 query += "'" + parametros.idEntidade + "',";
-                query += ((parametros.idPedido == "" || parametros.idPedido == "undefined") ? "null" : "'" + parametros.idPedido + "'") + ",";
-                query += ((parametros.idNotaFiscal == "" || parametros.idNotaFiscal == "undefined") ? "null" : "'" + parametros.idNotaFiscal + "'") + ",";
+                query += (!parametros.idPedido ? "null" : "'" + parametros.idPedido + "'") + ",";
+                query += (!parametros.idNotaFiscal ? "null" : "'" + parametros.idNotaFiscal + "'") + ",";
                 query += "'" + parametros.idParcelamento + "',";
-                query += ((parametros.idContaFinanceira == "" || parametros.idContaFinanceira == "undefined") ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
+                query += (!parametros.idContaFinanceira ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
                 query += "'" + parametros.nrTitulo + "',";
                 query += "'" + parametros.emissao + "',";
                 query += "'" + parametros.competencia  + "',";
