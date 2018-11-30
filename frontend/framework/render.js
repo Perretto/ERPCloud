@@ -181,7 +181,7 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID,
 
             if ($(wizard[i]).attr("containeronload")) {
                 $(wizard[i]).attr("data-guidwizard", tabGenID);
-                //eval($(wizard[i]).attr("containeronload"));
+                eval($(wizard[i]).attr("containeronload"));
             }
         }
 
