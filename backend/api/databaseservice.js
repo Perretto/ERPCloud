@@ -54,7 +54,7 @@ router.route('/*').get(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "homologa";  //"homologa"; //"broker";
+        dados = "broker";  //"homologa"; //"broker";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
         local = true;
     }else{
@@ -103,7 +103,7 @@ router.route('/*').get(function(req, res, next) {
 function conectionsLink(full, callback){
     if(String(full).indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "homologa"; //"broker";
+        dados = "broker"; //"broker";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
     }else{
         var parts = String(full).split('.');
@@ -2079,9 +2079,7 @@ router.route('/save').post(function(req, res) {
                                 var numberincrement;
                                 var updateincrement = ""
                 
-                                console.log(resultado)
-
-                                
+                                console.log(resultado);                                
 
                                 if(resultado){
                                     if (resultado.length > 0) {
