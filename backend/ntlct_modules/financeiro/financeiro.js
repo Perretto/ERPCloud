@@ -299,19 +299,6 @@ function diaUtil(dataInicial,diaAnterior){
     return(diaUtil);
 }
 
-/*------------------------------------------------------------------------------
---------------------------------------------------------------------------------
-*/
-function truncateDecimal(value,precision){
-    var step = Math.pow(10, precision);
-    var tmp = Math.trunc(step * value);
-    return(tmp / step);
-}
-
-
-
-
-
 exports.moedaPorExternso = function(valor){
     var milhares = null;
     var centenas = null;
@@ -487,4 +474,81 @@ exports.moedaPorExternso = function(valor){
     console.log(resposta);
 
     return(resposta);
+}
+
+/*------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+*/
+exports.buscaOrigemNome = function(nome){
+    var origens = null;
+    var origem = null;
+    var posOrigem = 0;
+
+    nome = nome.trim().toLowerCase();
+
+    origens = origensDocumento();
+
+    posOrigem = origens.findIndex(function(value,index,array){return value.nome == nome});
+
+    if(posOrigem >= 0)
+        origem = origens[posOrigem];
+    else
+        origem = {id: null,nome: "não definida"}
+
+    return(origem);
+}
+
+
+/*------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+*/
+exports.buscaOrigemId = function(id){
+    var origens = null;
+    var origem = null;
+    var posOrigem = 0;
+
+    id = id.trim().toUpperCase();
+
+    origens = origensDocumento();
+
+    posOrigem = origens.findIndex(function(value,index,array){return value.id == id});
+
+    if(posOrigem >= 0)
+        origem = origens[posOrigem];
+    else
+        origem = {id: null,nome: "não definida"}
+
+    return(origem);
+}
+
+/*======================================================================================================================*/
+
+/*------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+*/
+function truncateDecimal(value,precision){
+    var step = Math.pow(10, precision);
+    var tmp = Math.trunc(step * value);
+    return(tmp / step);
+}
+
+
+/*------------------------------------------------------------------------------
+Possívies origens para contas a receber e a pagar.
+--------------------------------------------------------------------------------
+*/
+function origensDocumento(){
+    var origens = [];
+
+    origens.push({
+        id: "D98649D0-475D-40AD-816C-B5DFB8993E5E",
+        nome: "compras"
+    });
+
+    origens.push({
+        id: "78562ADC-8B7B-45FC-A35A-4B091E62B6D6",
+        nome: "vendas"
+    })
+
+    return(origens);
 }

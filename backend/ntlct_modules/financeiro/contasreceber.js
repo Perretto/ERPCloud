@@ -741,7 +741,7 @@ router.route('/atualizarconta').post(function(req, res) {
         resposta.status = -1;
         resposta.mensagem = [];
         resposta.mensagem.push("" + erro);
-        titulo = null;
+        resposta.titulo = null;
         res.json(resposta);
     }
 })
@@ -908,7 +908,7 @@ function funAtualizarConta(parametros,callbackf) {
                                                     resposta.status = -4;
                                                     resposta.mensagem = [];
                                                     resposta.mensagem.push("f: " + err);
-                                                    titulo = null;
+                                                    resposta.titulo = null;
                                                     transacao.rollback();
                                                     callbackf(resposta);
                                                 }

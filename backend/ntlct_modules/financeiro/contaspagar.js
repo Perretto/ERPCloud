@@ -577,6 +577,148 @@ router.route('/dadostitulo').post(function(req, res) {
     }
 })
 
+
+
+
+
+/*------------------------------------------------------------------------------
+Criar as parcelas a partir do pedido de compras.
+--------------------------------------------------------------------------------
+*/
+router.route('/gerarparcelascompra').post(function(req, res) {
+    var query = "";
+    var nrParcela = 0;
+    var total = 0;
+    var origem = null;
+    var parcela = null;
+    var resposta = null;
+    var parametros = null;
+    var titulo = null;
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
+    res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+
+    parametros = req.body.parametros;
+
+    origem = funcoesFinanceiro.buscaOrigemNome("compras");    
+
+    try{
+        query += "select id,id_entidade,nr_pedido,dt_emissao,id_parcelamento,id_formapagamento,id_notafiscal,vl_totalprodutos,vl_totalservicos from compra";
+        query += " where id_empresa = '" + EnterpriseID + "'";
+        query += " and id = '" + parametros.idCompra + "'; ";
+
+        sql.close();
+        sql.connect(config, function (err) {
+            if (err){
+                resposta = {
+                    status: -2,
+                    mensagem: ["" + err],
+                    titulo: null
+                }
+                res.json(resposta);
+            }
+            else{
+                var request = new sql.Request();
+                request.query(query, function (err, recordset) {
+                    if (err){
+                        resposta = {
+                            status: -3,
+                            mensagem: ["" + err],
+                            titulo: null
+                        }
+                        res.json(resposta);
+                    }
+                    else{
+                        var compra = recordset.recordsets[0][0];
+                        var i = 0;
+
+                        funcoesFinanceiro.gerarparcelas(config,EnterpriseID,compra.id_parcelamento,compra.vl_totalprodutos + compra.vl_totalservicos,new Date(compra.dt_emissao),(function(respostaParcelas){
+                            try{
+                                if(respostaParcelas.status > 0){
+                                    titulo = {
+                                        idEmpresa: EnterpriseID,
+                                        idUsuario: parametros.idUsuario,
+                                        idTitulo: "",
+                                        idEntidade: compra.id_entidade,
+                                        idPedido: parametros.idCompra,
+                                        idNotaFiscal: compra.id_notafiscal,
+                                        nrTitulo: compra.nr_pedido,
+                                        emissao: new Date(compra.dt_emissao).toISOString(),
+                                        competencia: "",
+                                        valor: compra.vl_totalprodutos + compra.vl_totalservicos,
+                                        idContaFinanceira: "",
+                                        idParcelamento: compra.id_parcelamento,
+                                        observacao: "",
+                                        dre: 0,
+                                        idOrigem: origem.id,
+                                        parcelas: []
+                                    };
+                        
+                                    for(i = 0; i < respostaParcelas.parcelas.length; i++){
+                                        nrParcela++;
+                                        parcela = {
+                                            idParcela: "",
+                                            documento: compra.nr_pedido,
+                                            parcela: respostaParcelas.parcelas[i].parcela,
+                                            vencimento: new Date(respostaParcelas.parcelas[i].vencimento).toISOString(),
+                                            valor: respostaParcelas.parcelas[i].valor,
+                                            idBanco: "",
+                                            idFormaPagamento: compra.id_formapagamento,
+                                            idContaFinanceira: "",
+                                            fluxoCaixa: "1"
+                                        };
+                                        total += parseFloat(respostaParcelas.parcelas[i].valor);
+                                        titulo.parcelas.push(parcela);
+                                    }                        
+                                    titulo.valor = total;
+
+                                    if(total > 0){
+                                        funAtualizarConta(titulo,(function(repostacallback){
+                                            res.json(repostacallback);
+                                        }));
+                                    }
+                                    else{
+                                        resposta = {
+                                            status: 0,
+                                            mensagem: ["Não foram geradas parcelas para esta compra"],
+                                            titulo: null
+                                        }
+                                        res.json(reposta);
+                                    }
+                                }
+                                else{                                    
+                                    sql.close();
+                                    res.json(respostaParcelas);
+                                }
+                            }
+                            catch(erro){
+                                resposta.status = -4;
+                                resposta.mensagem = [];
+                                resposta.mensagem.push("criarparcelas: " + erro);
+                                resposta.parcelas = [];
+                                sql.close();
+                                res.json(resposta);
+                            }
+                        }));
+                    }
+                })
+            }
+        })
+    }
+    catch(erro){
+        resposta = {
+            status: -1,
+            mensagem: [],
+            titulo: null
+        }
+        resposta.mensagem.push("" + erro);
+        res.json(resposta);
+    }
+})
+
+
 /*------------------------------------------------------------------------------
 Inclui ou atualiza uma conta com suas parcelas.
 --------------------------------------------------------------------------------
@@ -602,137 +744,228 @@ router.route('/atualizarconta').post(function(req, res) {
     try{
         parametros = req.body.parametros;
 
-        if(parametros.idTitulo == ""){
-            parametros.idTitulo = general.guid();
-            query = "insert into contas_pagar (id,id_empresa,id_entidade,id_compra,id_notafiscal,id_parcelamento,id_plano_contas_financeiro,nm_documento,dt_emissao,nm_competencia,vl_valor,nm_observacao) values("
-            query += "'" + parametros.idTitulo + "',";
-            query += "'" + EnterpriseID + "',";
-            query += "'" + parametros.idEntidade + "',";
-            query += "null,";
-            query += "null,";
-            query += "'" + parametros.idParcelamento + "',";
-            query += ((parametros.idContaFinanceira == "" || parametros.idContaFinanceira == "undefined") ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
-            query += "'" + parametros.nrTitulo + "',";
-            query += "'" + parametros.emissao + "',";
-            query += "'" + parametros.competencia  + "',";
-            query += parametros.valor.toString().trim() + ",";
-            query += "'" + parametros.observacao + "'";
-            query += ")";
+        parametros.idOrigem = null;
 
-            queryItens += "insert into contas_pagar_parcelas (id,id_empresa,id_contas_pagar,id_Banco,id_forma_pagamento,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor)";
-            queryItens += " values ";
-            for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
-                if(parcela > 0)
-                    queryItens += ",";
-                
-                parametros.parcelas[parcela].idParcela = general.guid();
-                queryItens += "(";
-                queryItens += "'" + parametros.parcelas[parcela].idParcela + "',";
-                queryItens += "'" + EnterpriseID + "',";
-                queryItens += "'" + parametros.idTitulo + "',";
-                queryItens += (parametros.parcelas[parcela].idBanco == "" ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
-                queryItens += (parametros.parcelas[parcela].idFormaPagamento == "" ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
-                queryItens += (parametros.parcelas[parcela].idContaFinanceira == "" ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
-                queryItens += "'" + parametros.parcelas[parcela].parcela + "',";
-                queryItens += "'" + parametros.parcelas[parcela].documento + "',";
-                queryItens +=  parametros.parcelas[parcela].fluxoCaixa + ",";
-                queryItens += "'" + parametros.parcelas[parcela].vencimento + "',";
-                queryItens += parametros.parcelas[parcela].valor.toString().trim()
-                queryItens += ")";
-            }
-        }
-        else{
-            queryItens = "";
-            query += "update contas_pagar set " 
-            query += "id_plano_contas_financeiro = " + (parametros.idContaFinanceira == "" ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
-            query += "nm_competencia = '" + parametros.competencia + "',"
-            query += "nm_observacao = '" + parametros.observacao + "'";
-            query += "where id = '" + parametros.idTitulo + "'";
-            query += " and id_empresa = '" + EnterpriseID + "'";
-        }
-        
-        sql.close();
-        sql.connect(config, function (err) {    
-            if (err){
-                resposta.status = -2;
-                resposta.mensagem = [];
-                resposta.mensagem.push("" + err);
-                titulo = null;
-                res.json(resposta);
-            }
-            else{
-                try{
-                    var transacao = new sql.Transaction();
-                    transacao.begin(err =>{
-                        var request = new sql.Request(transacao);
-                        request.query(query, function (err, recordset) {
-                            if (err){
-                                resposta.status = -3;
-                                resposta.mensagem = [];
-                                resposta.mensagem.push("" + err);
-                                titulo = null;
-                                transacao.rollback();
-                                res.json(resposta);
-                            }
-                            else{
-                                if(queryItens != ""){
-                                    try{
-                                        var request = new sql.Request(transacao);
-                                        request.query(queryItens, function (err, recordset) {
-                                            if (err){
-                                                resposta.status = -4;
-                                                resposta.mensagem = [];
-                                                resposta.mensagem.push("" + err);
-                                                titulo = null;
-                                                transacao.rollback();
-                                                res.json(resposta);
-                                            }
-                                            else{
-                                                resposta.status = 1;
-                                                resposta.mensagem = ["ok"];
-                                                resposta.titulo =  parametros;
-                                                transacao.commit();
-                                                res.json(resposta);
-                                            }
-                                        })                                    
-                                    }
-                                    catch(err){
-                                        resposta.status = -5;
-                                        resposta.mensagem = [];
-                                        resposta.mensagem.push("" + erro);
-                                        titulo = null;
-                                        res.json(resposta);                                    
-                                    }
-                                }
-                                else{
-                                    resposta.status = 1;
-                                    resposta.mensagem = ["ok"];
-                                    resposta.titulo =  parametros;
-                                    transacao.commit();
-                                    res.json(resposta);
-                                }
-                            }
-                        })
-                    })
-                }
-                catch(err){
-                    resposta.status = -6;
-                    resposta.mensagem = [];
-                    resposta.mensagem.push("" + erro);
-                    titulo = null;
-                    res.json(resposta);                    
-                }
-            }
-        });
+        funAtualizarConta(parametros,(function(repostacallback){
+            res.json(repostacallback);
+        }));
     }
     catch(erro){
         resposta.status = -1;
         resposta.mensagem = [];
         resposta.mensagem.push("" + erro);
-        titulo = null;
+        resposta.titulo = null;
         res.json(resposta);
     }
 })
+
+
+/*------------------------------------------------------------------------------
+Inclui ou atualiza uma conta com suas parcelas.
+--------------------------------------------------------------------------------
+*/
+function funAtualizarConta(parametros,callbackf) {
+    var query = "";
+    var queryItens = "";
+    var parcela = 0;
+    var resposta = null;
+
+    resposta = {
+        status: 1,
+        mensagem: [],
+        titulo: null
+    }
+
+    try{
+        if(!parametros.idEntidade){
+            resposta.status = 0;
+            resposta.mensagem.push("O fornecedor não foi informado.");
+        }
+
+        if(!parametros.nrTitulo){
+            resposta.status = 0;
+            resposta.mensagem.push("O documento não foi informado.");
+        }
+
+        if(!parametros.idParcelamento){
+            resposta.status = 0;
+            resposta.mensagem.push("A forma de parcelamento não foi informada.");
+        }
+
+        if(!parametros.emissao || parametros.emissao.indexOf("undefined") >= 0){
+            resposta.status = 0;
+            resposta.mensagem.push("A data de emissão não foi informada.");
+        }
+
+        if(!parametros.valor || parametros.valor == "undefined" || isNaN(parametros.valor)){
+            resposta.status = 0;
+            resposta.mensagem.push("Valor do documento é inválido ou não foi informado.");
+        }
+
+        if(!(parametros.hasOwnProperty("parcelas")) || parametros.parcelas.length == 0){
+            resposta.status = 0;
+            resposta.mensagem.push("As parcelas não foram informadas.");
+        }
+        else{
+            for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
+                if(parametros.parcelas[parcela].documento == "" || parametros.parcelas[parcela].documento == "undefined"){
+                    resposta.status = 0;
+                    resposta.mensagem.push("A parcela " + (parcela + 1).toString().trim() + " não possui o documento.");
+                }
+                if(parametros.parcelas[parcela].parcela == "" || parametros.parcelas[parcela].parcela == "undefined"){
+                    resposta.status = 0;
+                    resposta.mensagem.push("A parcela " + (parcela + 1).toString().trim() + " não possui o número informado.");
+                }
+                if(parametros.parcelas[parcela].vencimento == "" || parametros.parcelas[parcela].vencimento == "undefined"){
+                    resposta.status = 0;
+                    resposta.mensagem.push("A parcela " + (parcela + 1).toString().trim() + " não possui a data de vencimento.");
+                }
+                if(parametros.parcelas[parcela].valor == "" || parametros.parcelas[parcela].valor == "undefined" || isNaN(parametros.parcelas[parcela].valor)){
+                    resposta.status = 0;
+                    resposta.mensagem.push("A parcela " + (parcela + 1).toString().trim() + " não possui valor.");
+                }
+            }
+        }
+
+        if(resposta.status == 1){
+            if(parametros.idTitulo == ""){
+                parametros.idTitulo = general.guid();
+                query = "insert into contas_pagar (id,id_empresa,id_entidade,id_compra,id_notafiscal,id_parcelamento,id_plano_contas_financeiro,id_origem,nm_documento,dt_emissao,nm_competencia,vl_valor,nm_observacao) values("
+                query += "'" + parametros.idTitulo + "',";
+                query += "'" + EnterpriseID + "',";
+                query += "'" + parametros.idEntidade + "',";
+                query += (!parametros.idPedido ? "null" : "'" + parametros.idPedido + "'") + ",";
+                query += (!parametros.idNotaFiscal ? "null" : "'" + parametros.idNotaFiscal + "'") + ",";
+                query += "'" + parametros.idParcelamento + "',";
+                query += (!parametros.idContaFinanceira ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
+                query += (!parametros.idOrigem ? "null" : "'" + parametros.idOrigem + "'") + ",";
+                query += "'" + parametros.nrTitulo + "',";
+                query += "'" + parametros.emissao + "',";
+                query += "'" + parametros.competencia  + "',";
+                query += parametros.valor.toString().trim() + ",";
+                query += "'" + parametros.observacao + "'";
+                query += ")";
+
+                queryItens += "insert into contas_pagar_parcelas (id,id_empresa,id_contas_pagar,id_Banco,id_forma_pagamento,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor)";
+                queryItens += " values ";
+                for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
+                    if(parcela > 0)
+                        queryItens += ",";
+                    
+                    parametros.parcelas[parcela].idParcela = general.guid();
+                    queryItens += "(";
+                    queryItens += "'" + parametros.parcelas[parcela].idParcela + "',";
+                    queryItens += "'" + EnterpriseID + "',";
+                    queryItens += "'" + parametros.idTitulo + "',";
+                    queryItens += (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
+                    queryItens += (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
+                    queryItens += (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
+                    queryItens += "'" + parametros.parcelas[parcela].parcela + "',";
+                    queryItens += "'" + parametros.parcelas[parcela].documento + "',";
+                    queryItens +=  parametros.parcelas[parcela].fluxoCaixa + ",";
+                    queryItens += "'" + parametros.parcelas[parcela].vencimento + "',";
+                    queryItens += parametros.parcelas[parcela].valor.toString().trim()
+                    queryItens += ")";
+                }
+            }
+            else{
+                queryItens = "";
+                query += "update contas_pagar set " 
+                query += "id_plano_contas_financeiro = " + (!parametros.idContaFinanceira ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
+                query += "nm_competencia = '" + parametros.competencia + "',"
+                query += "nm_observacao = '" + parametros.observacao + "'";
+                query += "where id = '" + parametros.idTitulo + "'";
+                query += " and id_empresa = '" + EnterpriseID + "'";
+            }
+            
+            sql.close();
+            sql.connect(config, function (err) {    
+                if (err){
+                    resposta.status = -2;
+                    resposta.mensagem = [];
+                    resposta.mensagem.push("" + err);
+                    resposta.titulo = null;
+                    callbackf(resposta);
+                }
+                else{
+                    try{
+                        var transacao = new sql.Transaction();
+                        transacao.begin(err =>{
+                            var request = new sql.Request(transacao);
+                            request.query(query, function (err, recordset) {
+                                if (err){
+                                    resposta.status = -3;
+                                    resposta.mensagem = [];
+                                    resposta.mensagem.push("" + err);
+                                    resposta.titulo = null;
+                                    transacao.rollback();
+                                    callbackf(resposta);
+                                }
+                                else{
+                                    if(queryItens != ""){
+                                        try{
+                                            var request = new sql.Request(transacao);
+                                            request.query(queryItens, function (err, recordset) {
+                                                if (err){
+                                                    resposta.status = -4;
+                                                    resposta.mensagem = [];
+                                                    resposta.mensagem.push("" + err);
+                                                    resposta.titulo = null;
+                                                    transacao.rollback();
+                                                    callbackf(resposta);
+                                                }
+                                                else{
+                                                    resposta.status = 1;
+                                                    resposta.mensagem = ["ok"];
+                                                    resposta.titulo =  parametros;
+                                                    transacao.commit();
+                                                    callbackf(resposta);
+                                                }
+                                            })                                    
+                                        }
+                                        catch(err){
+                                            resposta.status = -5;
+                                            resposta.mensagem = [];
+                                            resposta.mensagem.push("" + erro);
+                                            resposta.titulo = null;
+                                            callbackf(resposta);                                
+                                        }
+                                    }
+                                    else{
+                                        resposta.status = 1;
+                                        resposta.mensagem = ["ok"];
+                                        resposta.titulo =  parametros;
+                                        transacao.commit();
+                                        callbackf(resposta);
+                                    }
+                                }
+                            })
+                        })
+                    }
+                    catch(err){
+                        resposta.status = -6;
+                        resposta.mensagem = [];
+                        resposta.mensagem.push("" + erro);
+                        resposta.titulo = null;
+                        callbackf(resposta);                
+                    }
+                }
+            });
+        }
+        else{
+            resposta.titulo == null;
+            callbackf(resposta);
+        }
+    }
+    catch(erro){
+        resposta.status = -1;
+        resposta.mensagem = [];
+        resposta.mensagem.push("" + erro);
+        resposta.titulo = null;
+        callbackf(resposta);
+    }
+}
+
 
 
 /*------------------------------------------------------------------------------
@@ -1486,19 +1719,86 @@ Verifica se uma conta pode ser excluída.
 */
 router.route('/verificarexclusaoconta').post(function(req, res) {
     var query = "";
+    var parcela = 0;
+    var baixa = false;
+    var origem = null;
     var resposta = null;
-    var parametros = null;
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
     res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+   
+    try{
+        query += "select id_origem from contas_pagar where id = '" + req.body.parametros.idTitulo + "'";
+        query += " and id_empresa = '" + EnterpriseID + "'; ";
 
-    resposta = {
-        status: 1,
-        mensagem: ["ok"]
+        query += "select cpp.id,baixa.vl_valor from contas_pagar_parcelas cpp"
+        query += " left join contas_pagar_baixas baixa on baixa.id_contas_pagar_parcela = cpp.id and baixa.id_empresa = '" + EnterpriseID + "'";
+        query += " where cpp.id_contas_pagar = '" + req.body.parametros.idTitulo + "' and cpp.id_empresa = '" + EnterpriseID + "'";
+
+        sql.close();
+        sql.connect(config, function (err) {
+            if (err){
+                resposta = {
+                    status: -2,
+                    mensagem: ["" + err],
+                }
+                res.json(resposta);
+            }
+            else{
+                var request = new sql.Request();
+                request.query(query, function (err, recordset) {
+                    if (err){
+                        resposta = {
+                            status: -3,
+                            mensagem: ["" + err]
+                        }
+                        res.json(resposta);
+                    }
+                    else{
+                        if(recordset.recordsets[0][0].id_origem){
+                            origem = funcoesFinanceiro.buscaOrigemId(recordset.recordsets[0][0].id_origem);
+                            resposta = {
+                                status: 0,
+                                mensagem: ["Este documento foi gerado por " + origem.nome + ". Sua exclusão deve ser feita pela exclusão do documento original."]
+                            }
+                        }
+                        else{
+                            baixa = false;
+                            parcela = 0;
+                            while(parcela < recordset.recordsets[1].length && !baixa){
+                                if(recordset.recordsets[1][parcela].vl_valor){
+                                    baixa = true;
+                                }
+                                parcela++;
+                            }
+                            if(baixa){
+                                resposta = {
+                                    status: 0,
+                                    mensagem: ["Este documento possui parcelas que foram pagas. Para excluí-lo, os pagamentos devem ser cancelados."]
+                                }
+                            }
+                            else{
+                                resposta = {
+                                    status: 1,
+                                    mensagem: ["ok"]
+                                }
+                            }
+                        }
+                        res.json(resposta);
+                    }
+                })
+            }
+        })
     }
-    res.json(resposta);
+    catch(err){
+        resposta = {
+            status: -1,
+            mensagem: ["" + err],
+        }
+        res.json(resposta);
+    }
 })
 
 
@@ -1525,7 +1825,7 @@ router.route('/excluirconta').post(function(req, res) {
     try{
         parametros = req.body.parametros;
 
-        query += "select cp.id,cp.nm_documento,ent.nm_razaosocial from contas_pagar cp,entidade ent";
+        query += "select cp.id,cp.nm_documento,cp.id_origem,ent.nm_razaosocial from contas_pagar cp,entidade ent";
         query += " where cp.id_empresa = '" + EnterpriseID + "'";
         query += " and cp.id = '" + parametros.idTitulo + "'";      
         query += " and ent.id = cp.id_entidade; ";
