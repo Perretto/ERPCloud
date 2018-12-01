@@ -388,7 +388,8 @@ function SerializeFields(param){
         
     }
 
-    //arrayObjs = sortBy(arrayObjs, "table")
+
+    arrayObjs = sortBy(arrayObjs, "table")
 
     var json = ""    
     json += '['
@@ -462,37 +463,37 @@ function sortBy(element, p) {
 
   
 function onNew(form, id, instanceID, containerID, layoutID, async, onAfterSaving) {
-    
-if ($("#" + form).length == 0) {
-    form = form.replace(containerID,layoutID)
-}
+        
+    if ($("#" + form).length == 0) {
+        form = form.replace(containerID,layoutID)
+    }
 
-//Verifica se deseja gravar antes de limpar a tela.
-var firstTab = false;
-var tabGen = "";
-var array = form.split("_");
-if (array) {
-    if (array.length > 1) {
-        tabGen = array[1];
-        tabGen = tabGen.replace("_","")
-        if (tabGen) {
-            var arrayform = $("#" + tabGen).find("form")
-            if (arrayform) {
-                if (arrayform.length > 1) {
-                    if (form == arrayform[0].id) {
-                        firstTab = true
+    //Verifica se deseja gravar antes de limpar a tela.
+    var firstTab = false;
+    var tabGen = "";
+    var array = form.split("_");
+    if (array) {
+        if (array.length > 1) {
+            tabGen = array[1];
+            tabGen = tabGen.replace("_","")
+            if (tabGen) {
+                var arrayform = $("#" + tabGen).find("form")
+                if (arrayform) {
+                    if (arrayform.length > 1) {
+                        if (form == arrayform[0].id) {
+                            firstTab = true
+                        }
                     }
                 }
             }
         }
     }
-}
 
-if (firstTab) {
-    ClearForm(tabGen, true);
-}else{
-    ClearForm(form, false);
-}
-    
-        
+    if (firstTab) {
+        ClearForm(tabGen, true);
+    }else{
+        ClearForm(form, false);
+    }
+    $("[id=" + form + "] [name*='_PK']").val("");
+            
 }

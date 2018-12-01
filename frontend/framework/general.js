@@ -333,23 +333,26 @@ function ClearForm(formId, clearTable) {
                             break;
                         case "text":
                             if (elements[i].getAttribute("data-nativeDataType") == "Data") {
-                                elements[i].value = $(elements[i]).attr("data-oldvalue");
-    
-                                //var today = new Date();
-                                //var dd = today.getDate();
-                                //var mm = today.getMonth() + 1; //January is 0!
-                                //var yyyy = today.getFullYear();
-    
-                                //if (dd < 10) {
-                                //    dd = '0' + dd
-                                //}
-    
-                                //if (mm < 10) {
-                                //    mm = '0' + mm
-                                //}
-    
-                                //today = dd + '/' + mm + '/' + yyyy;
-                                //elements[i].value = today;
+                                //elements[i].value = $(elements[i]).attr("data-oldvalue");
+                                
+                                if(elements[i].getAttribute("data-default") == "now"){
+                                    var today = new Date();
+                                    var dd = today.getDate();
+                                    var mm = today.getMonth() + 1; //January is 0!
+                                    var yyyy = today.getFullYear();
+        
+                                    if (dd < 10) {
+                                        dd = '0' + dd
+                                    }
+        
+                                    if (mm < 10) {
+                                        mm = '0' + mm
+                                    }
+        
+                                    today = dd + '/' + mm + '/' + yyyy;
+                                    elements[i].value = today;
+                                }
+                                
                             }
                             else if (elements[i].getAttribute("data-nativeDataType") == "Moeda" || elements[i].getAttribute("data-nativeDataType") == "Quantidade") {
                                 elements[i].value = 0;

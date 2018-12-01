@@ -1888,6 +1888,8 @@ function getDropdownHTML(LayoutID, tabGenID){
         async: true,
         success: function (data) {
             for (var key in data) {
+                var valorid = $("#" + tabGenID + "_" + key).val();
+
                 if(document.getElementById(tabGenID + "_" + key)){
                     var value = data[key];
                     //$("#" + tabGenID + "_" + key).html(value);
@@ -1942,6 +1944,8 @@ function getDropdownHTML(LayoutID, tabGenID){
                     //var propertyid = $("#" + id).attr("data-propertyid");
                     //EventHideModal(id, controlid, propertyid);
                 }
+
+                $("#" + tabGenID + "_" + key).val(valorid);
             }
         },
         error: function (xhr) {
