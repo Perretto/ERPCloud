@@ -150,6 +150,14 @@ function fillTab(nameLayout,layoutID,titleMenu,loadData, enterpriseID, tabGenID,
         //Tira o load da aba
         $("#controls-tabs li a[href='#" + tabGenID + "'] img").replaceWith(" <span class='tabControls'>&nbsp&nbsp<i class='fa fa-refresh' onClick='atualizaAba(\"" + layoutID + "\",\"" + layoutID + "\",\"" + tabGenID + "\",\"" + forcingTemplate + "\",\"" + layoutType + "\",\"" + urlRenderLayout + "\",\"" + urlRenderLayoutData + "\",\"" + titleMenu + "\");'></i>&nbsp&nbsp<i class='icon wb-close-mini' onClick='fechaAba(\"" + tabGenID + "\");'></i></span>")
         
+        var objhtml = $(result[0].html).find('[data-guidwizard][containeronload]');
+        for (let i = 0; i < objhtml.length; i++) {
+            const element = objhtml[i];
+            var funct = $(element).attr("containeronload");
+            result[0].html = result[0].html.replace(funct + " </script>", " </script>");
+        }
+
+
         $("#" + tabGenID).append(result[0].html);
         panel_change_start(tabGenID + " > form > .panel  > .panel-body > div > .panel-nav ");
         $("[data-tabgenlayout='" + tabGenID2 + "']").attr("data-principaltabgen",tabGenID);
