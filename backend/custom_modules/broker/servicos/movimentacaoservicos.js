@@ -755,6 +755,7 @@ router.route('/gerarComissao/:id').get(function(req, res) {
 
     select += " WHERE movimentacao_servicos.id='" + id + "' ";
     
+    console.log(select);
 
     sql.close(); 
     sql.connect(config, function (err) { 
@@ -821,7 +822,6 @@ router.route('/gerarComissao/:id').get(function(req, res) {
                             valorcomiss = (parseFloat(vl_venda) * parseFloat(vl_comissaopercIND).toFixed(2)) / 100;
                             valorcomiss = valorcomiss.toFixed(2);                                
                             vl_comissaoInd = valorcomiss.toString();
-
                             if(vl_comissaopercOP){
                                 valorcomiss = ((parseFloat(vl_venda) - parseFloat(vl_comissaoInd)) * parseFloat(vl_comissaopercOP).toFixed(2)) / 100;
                                 valorcomiss = valorcomiss.toFixed(2); 

@@ -1044,7 +1044,7 @@ function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID, fillgri
                 FormID = $(formTelaIDNavigation[0]).attr("data-formid");
                 tabGenID = $(formTelaIDNavigation[0]).attr("data-tabgenlayout");
 
-                fillScreen(result, "", LayoutID, fillgrid);
+                fillScreen(result, "", LayoutID, fillgrid, tabGenID);
 
                 var formID = $(formTelaIDNavigation[0]).attr("data-tabgenlayout");
                 var $tabNav = $(formTelaIDNavigation[0]).parents("form .panel.panel-nav");
@@ -1108,7 +1108,7 @@ function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID, fillgri
 }
 
 
-function fillScreen(data, template, layoutID, fillgrid){
+function fillScreen(data, template, layoutID, fillgrid, tabGenID){
     var arraytable = [];
     var arraydatagrid = [[]];
     var arraydataJSON = [[]];
@@ -1138,10 +1138,17 @@ function fillScreen(data, template, layoutID, fillgrid){
             var keyfield = key.split('.')
             var table = keyfield[0];
             var field = keyfield[1];
+            var idfield;
 
-            tablegrid = $("[data-table='" + table + "'][data-fielddata='" + field + "']").closest('table');
-            var idfield = $("[data-table='" + table + "'][data-fielddata='" + field + "']").attr("data-field");        
-
+            if (tabGenID) {
+                tablegrid = $("[data-id*='" + tabGenID + "'][data-table='" + table + "'][data-fielddata='" + field + "']").closest('table');
+                idfield = $("[data-id*='" + tabGenID + "'][data-table='" + table + "'][data-fielddata='" + field + "']").attr("data-field");        
+            }else{
+                tablegrid = $("[data-table='" + table + "'][data-fielddata='" + field + "']").closest('table');
+                idfield = $("[data-table='" + table + "'][data-fielddata='" + field + "']").attr("data-field");        
+           
+            }
+            
             if (field.toLowerCase() === "id") {
                 idGrid = p[i][key];                
             }                    
@@ -1162,8 +1169,14 @@ function fillScreen(data, template, layoutID, fillgrid){
             if (layoutID == "" || layoutID == "undefined" || layoutID == undefined) {
                 layoutID = $("#" + containerID).attr("layoutid"); 
             }
-             
-            var th = $("[data-table='" + table + "'][data-fielddata='" + field + "']");
+
+            var th;
+
+            if (tabGenID) {
+                th = $("[data-id*='" + tabGenID + "'][data-table='" + table + "'][data-fielddata='" + field + "']");
+            }else{
+                th = $("[data-table='" + table + "'][data-fielddata='" + field + "']");           
+            }
 
             if(fillgrid == false){
                 th = [];
@@ -1290,8 +1303,13 @@ function fillScreen(data, template, layoutID, fillgrid){
                 //    value = returnCookie("EnterpriseID");
                 //}
                 
-                $("[data-table='" + table + "'][data-field='" + field + "'][data-fielddata!='" + field + "']").val(value)
-                $("[data-table='" + table + "'][data-field='" + field + "'][data-fielddata!='" + field + "']").attr("data-oldvalue", value)            
+                if (tabGenID) {
+                    $("[id*='" + tabGenID + "'][data-table='" + table + "'][data-field='" + field + "'][data-fielddata!='" + field + "']").val(value)
+                    $("[id*='" + tabGenID + "'][data-table='" + table + "'][data-field='" + field + "'][data-fielddata!='" + field + "']").attr("data-oldvalue", value)                
+                }else{
+                    $("[data-table='" + table + "'][data-field='" + field + "'][data-fielddata!='" + field + "']").val(value)
+                    $("[data-table='" + table + "'][data-field='" + field + "'][data-fielddata!='" + field + "']").attr("data-oldvalue", value)                
+                }
                 
             }             
         }
@@ -1736,7 +1754,7 @@ function fillScreenOLD(data, template, layoutID){
     }    
 }
 
-function fillContainer(data){
+function fillContainer(data, tabGenID){
     var arraytable = [];
     var arraydatagrid = [[]];
     var arraydataJSON = [[]];
@@ -1756,16 +1774,16 @@ function fillContainer(data){
             var value = p[i][key];
 
             if (value != undefined && value != "undefined") {
-                if($("[data-table='" + table + "'][data-field='" + field + "']").length > 0){
-                    if($("[data-table='" + table + "'][data-field='" + field + "']")[0].type === "select-one"){
+                if($("[id*='" + tabGenID + "'][data-table='" + table + "'][data-field='" + field + "']").length > 0){
+                    if($("[id*='" + tabGenID + "'][data-table='" + table + "'][data-field='" + field + "']")[0].type === "select-one"){
                         value = value.toLowerCase();
                     }
                     
-                    var autocomplete = $("input[data-table='" + table + "'][data-field='" + field + "']").attr("localautocomplete");
+                    var autocomplete = $("input[id*='" + tabGenID + "'][data-table='" + table + "'][data-field='" + field + "']").attr("localautocomplete");
 
                     if(autocomplete){
                         var valueAutocomplete = p[i][key + "_FK"];
-                        var idAutocomplete = $("input[data-table='" + table + "'][data-field='" + field + "']").attr("id");
+                        var idAutocomplete = $("input[id*='" + tabGenID + "'][data-table='" + table + "'][data-field='" + field + "']").attr("id");
                         if (!valueAutocomplete) {
                             valueAutocomplete = "";
                         }
@@ -1773,7 +1791,7 @@ function fillContainer(data){
                         $("#" + idAutocomplete + "_autocomplete").val(valueAutocomplete);
                     }
 
-                    var attribute = $("input[data-table='" + table + "'][data-field='" + field + "']").attr("data-nativedatatype");
+                    var attribute = $("input[id*='" + tabGenID + "'][data-table='" + table + "'][data-field='" + field + "']").attr("data-nativedatatype");
                     
                     switch (attribute) {
                         case "Data":
@@ -1785,9 +1803,9 @@ function fillContainer(data){
                             break;
                         case "SimNao":
                             if (value == true) {
-                                $("[data-table='" + table + "'][data-field='" + field + "']").iCheck('check');
+                                $("[id*='" + tabGenID + "'][data-table='" + table + "'][data-field='" + field + "']").iCheck('check');
                             }else{
-                                $("[data-table='" + table + "'][data-field='" + field + "']").iCheck('uncheck');
+                                $("[id*='" + tabGenID + "'][data-table='" + table + "'][data-field='" + field + "']").iCheck('uncheck');
                             }
                             break;
                         case "Moeda":
@@ -1808,8 +1826,8 @@ function fillContainer(data){
 
             }
             
-            $("[data-table='" + table + "'][data-field='" + field + "'][data-fielddata!='" + field + "']").val(value)
-            $("[data-table='" + table + "'][data-field='" + field + "'][data-fielddata!='" + field + "']").attr("data-oldvalue", value)            
+            $("[id*='" + tabGenID + "'][data-table='" + table + "'][data-field='" + field + "'][data-fielddata!='" + field + "']").val(value)
+            $("[id*='" + tabGenID + "'][data-table='" + table + "'][data-field='" + field + "'][data-fielddata!='" + field + "']").attr("data-oldvalue", value)            
         }  
     }     
 }
@@ -1823,9 +1841,22 @@ function editGridLine(button, containerID, ID) {
             containerID = arrayContainerID[0];
         }
     }
+
+    var tabGenID = "";
+    var elementTH = $(button + " th[data-id]");
+    if(elementTH.length > 0){
+        tabGenID = $(elementTH[0]).attr("data-id");
+        var arrayTab = tabGenID.split('_');
+        if(arrayTab.length > 0){
+            tabGenID = arrayTab[0];
+            tabGenID = tabGenID.replace("_","");
+        }
+
+    }
+    
     loaderImage(form, true);
     $.ajax({url: returnCookie("urlPlataform") + "/api/editGridLine/" + containerID + "/" + ID, success: function(result){
-        fillContainer(result);
+        fillContainer(result, tabGenID);
         loaderImage(form, false);
     }})
 }

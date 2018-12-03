@@ -247,7 +247,9 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                             if (!id) {
                                 id="*";
                             }
-                            fillgrid(containerID, id, layoutID)
+                            instanceID = instanceID.replace(containerID, "");
+                            instanceID = instanceID.replace("_", "");
+                            fillgrid(containerID, id, layoutID, instanceID)
                         }
                         ClearForm(form, false);                        
                     }else if(result[i].increment){

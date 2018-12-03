@@ -774,14 +774,14 @@ function mudaTotalGrid(containerID, parameters) {
 
 };
 
-function fillgrid(containerID, id, layoutID){
+function fillgrid(containerID, id, layoutID, tabGenID){
     
     $.ajax({
         url: returnCookie("urlPlataform") + "/api/containergrid/" + containerID + "/" + id, 
         async: false,
         success: function(result){
         if (result) {
-            fillScreen(result, "MASTERDETAIL", layoutID);
+            fillScreen(result, "MASTERDETAIL", layoutID, undefined, tabGenID);
         }
         
     }});
