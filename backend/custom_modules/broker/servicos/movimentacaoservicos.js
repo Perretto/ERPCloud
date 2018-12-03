@@ -127,7 +127,7 @@ var dataDe = req.param('dataDe');
 var dataAte = req.param('dataAte');
 var fat = req.param('fat');
 var bol = req.param('bol');
-
+var arrayData = [];
 
     var where = ""; 
     var select = "SELECT newID() AS 'id', "; 
@@ -150,10 +150,14 @@ var bol = req.param('bol');
         if(dataDe != "*"){ 
             dataDe = dataDe.replace("-","/"); 
             dataDe = dataDe.replace("-","/"); 
+
+            arrayData = dataDe.split('/');
+            dataDe = arrayData[1] + "/" + arrayData[0] + "/" + arrayData[2];
+
             if(!where){ 
-                where += " WHERE FORMAT(movimentacao_servicos.dt_emissao, 'd', 'pt-BR' ) >= '" + dataDe + "' "; 
+                where += " WHERE movimentacao_servicos.dt_emissao >= '" + dataDe + "' "; 
             }else{ 
-                where += " AND FORMAT(movimentacao_servicos.dt_emissao, 'd', 'pt-BR' ) >= '" + dataDe + "' "; 
+                where += " AND movimentacao_servicos.dt_emissao >= '" + dataDe + "' "; 
             } 
         } 
     } 
@@ -161,10 +165,14 @@ var bol = req.param('bol');
         if(dataAte != "*"){ 
             dataAte = dataAte.replace("-","/"); 
             dataAte = dataAte.replace("-","/"); 
+            
+            arrayData = dataAte.split('/');
+            dataAte = arrayData[1] + "/" + arrayData[0] + "/" + arrayData[2];
+
             if(!where){ 
-                where += " WHERE FORMAT(movimentacao_servicos.dt_emissao, 'd', 'pt-BR' ) <= '" + dataAte + "' "; 
+                where += " WHERE movimentacao_servicos.dt_emissao <= '" + dataAte + "' "; 
             }else{ 
-                where += " AND FORMAT(movimentacao_servicos.dt_emissao, 'd', 'pt-BR' ) <= '" + dataAte + "' "; 
+                where += " AND movimentacao_servicos.dt_emissao <= '" + dataAte + "' "; 
             } 
         } 
     } 
@@ -204,7 +212,8 @@ var bol = req.param('bol');
 
     select = select + where; 
     select = select + "  GROUP BY entidade.nm_cnpj, entidade.nm_razaosocial,  movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,  movimentacao_servicos.nm_numero_boleto";
-    
+    console.log("=============================================================");
+    console.log(select)
     sql.close(); 
     sql.connect(config, function (err) { 
         if (err) console.log(err); 
@@ -370,12 +379,17 @@ router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtf
     }
 
     if(dtfat != "-"){ 
+
         dtfat = dtfat.replace("-","/"); 
-        dtfat = dtfat.replace("-","/");
+        dtfat = dtfat.replace("-","/"); 
+        
+        arrayData = dtfat.split('/');
+        dtfat = arrayData[1] + "/" + arrayData[0] + "/" + arrayData[2];
+
         if(!where){ 
-            where += " WHERE FORMAT(movimentacao_servicos.dt_faturamento, 'd', 'pt-BR' ) = '" + dtfat + "' "; 
+            where += " WHERE CONVERT(date, FORMAT(movimentacao_servicos.dt_faturamento, 'd', 'pt-BR' )) = '" + dtfat + "' "; 
         }else{ 
-            where += " AND FORMAT(movimentacao_servicos.dt_faturamento, 'd', 'pt-BR' ) = '" + dtfat + "' "; 
+            where += " AND CONVERT(date, FORMAT(movimentacao_servicos.dt_faturamento, 'd', 'pt-BR' )) = '" + dtfat + "' "; 
         } 
     }else{
         if(!where){ 
@@ -416,26 +430,35 @@ router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtf
         if(dataDe != "*"){ 
             dataDe = dataDe.replace("-","/"); 
             dataDe = dataDe.replace("-","/"); 
+            
+            arrayData = dataDe.split('/');
+            dataDe = arrayData[1] + "/" + arrayData[0] + "/" + arrayData[2];
+
             if(!where){ 
-                where += " WHERE FORMAT(movimentacao_servicos.dt_emissao, 'd', 'pt-BR' ) >= '" + dataDe + "' "; 
+                where += " WHERE movimentacao_servicos.dt_emissao >= '" + dataDe + "' "; 
             }else{ 
-                where += " AND FORMAT(movimentacao_servicos.dt_emissao, 'd', 'pt-BR' ) >= '" + dataDe + "' "; 
+                where += " AND movimentacao_servicos.dt_emissao >= '" + dataDe + "' "; 
             } 
         } 
     } 
     if(dataAte){ 
-        if(dataAte != "*"){ 
+        if(dataAte != "*"){  
             dataAte = dataAte.replace("-","/"); 
             dataAte = dataAte.replace("-","/"); 
+            
+            arrayData = dataAte.split('/');
+            dataAte = arrayData[1] + "/" + arrayData[0] + "/" + arrayData[2];
+
             if(!where){ 
-                where += " WHERE FORMAT(movimentacao_servicos.dt_emissao, 'd', 'pt-BR' ) <= '" + dataAte + "' "; 
+                where += " WHERE movimentacao_servicos.dt_emissao <= '" + dataAte + "' "; 
             }else{ 
-                where += " AND FORMAT(movimentacao_servicos.dt_emissao, 'd', 'pt-BR' ) <= '" + dataAte + "' "; 
+                where += " AND movimentacao_servicos.dt_emissao <= '" + dataAte + "' "; 
             } 
         } 
     } 
 
     select = select + where; 
+    console.log(select)
     sql.close(); 
     sql.connect(config, function (err) { 
         if (err) console.log(err); 
