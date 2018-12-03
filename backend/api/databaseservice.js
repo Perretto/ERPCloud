@@ -2318,7 +2318,7 @@ function createInsert(submit, index, guid, layoutID){
 
             switch (prefixo) {
                 case "id":
-                    if (submit[index][key] == "") {
+                    if (submit[index][key] == "" || submit[index][key] == undefined || submit[index][key] == "undefined") {
                         submit[index][key] = "NULL"
                     }else{
                         submit[index][key] = "'" + submit[index][key] + "'"
