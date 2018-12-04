@@ -361,10 +361,11 @@ router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtf
     select += " movimentacao_servicos.nm_documento AS 'doc', "; 
     select += " FORMAT(movimentacao_servicos.dt_emissao, 'd', 'pt-BR' ) AS 'data', "; 
     select += " entidade.nm_razaosocial AS 'razaosocial', "; 
-    select += " (prod.nm_descricao + ' - ' + sub.nm_descricao) AS 'prodSub', "; 
+    select += " IIF(sub.nm_descricao IS NULL,(prod.nm_descricao + ' - ' + sub2.nm_descricao),(prod.nm_descricao + ' - ' + sub.nm_descricao)) AS 'prodSub', "; 
     select += " FORMAT(movimentacao_servicos.vl_valor, 'c', 'pt-BR' )  AS 'valor'  "; 
     select += " FROM movimentacao_servicos "; 
-    select += " INNER JOIN produtos sub ON sub.id=movimentacao_servicos.id_subservicos "; 
+    select += " LEFT JOIN produtos sub ON sub.id=movimentacao_servicos.id_subservicos "; 
+    select += " LEFT JOIN subservico sub2 ON sub2.id=movimentacao_servicos.id_subservicos "; 
     select += " INNER JOIN produtos prod ON prod.id=movimentacao_servicos.id_produtos "; 
     select += " INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade "; 
     if(cliente != "-"){ 
