@@ -258,7 +258,7 @@ router.route('/carregaListaComissao/:idEntidade/:dataDe/:dataAte/:equipe/:servic
 
     if(idEntidade){ 
         if(idEntidade != "*"){ 
-            where += " WHERE (op.id='" + idEntidade + "' OR ind.id='" + idEntidade + "' "; 
+            where += " WHERE (op.id='" + idEntidade + "' OR ind.id='" + idEntidade + "') "; 
         } 
     } 
     
