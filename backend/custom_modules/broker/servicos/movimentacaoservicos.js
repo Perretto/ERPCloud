@@ -87,15 +87,22 @@ sql.close();
 
 //* servicos/movimentacaoservicos/carregaSubServico 
 
-router.route('/carregaSubServico/:idProdutos/:idEntidade').get(function(req, res) {
+router.route('/carregaSubServico/:idProdutos/:idEntidade/:idMovimentacao').get(function(req, res) {
     var idProdutos = req.param('idProdutos');
     var idEntidade = req.param('idEntidade');
+    var idMovimentacao = req.param('idMovimentacao');
+
     sql.close();
     sql.connect(config, function (err) {
         if (err) console.log(err); 
         var select = "SELECT produtos.id AS 'id', produtos.nm_descricao AS 'desc', (SELECT TOP 1 cliente_servicos.id_dsg_moeda FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' AND id_produtos=produtos.id) AS 'moeda', (SELECT TOP 1 cliente_servicos.vl_valor FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' AND id_produtos=produtos.id) AS 'precovenda'   FROM produtos_subservicos INNER JOIN produtos ON produtos.id=produtos_subservicos.id_subservicos WHERE produtos_subservicos.id_produtos='" + idProdutos + "';";
         select += " SELECT produtos.id AS 'id',  produtos.nm_descricao AS 'desc', (SELECT TOP 1 cliente_servicos.id_dsg_moeda FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' AND id_produtos=produtos.id) AS 'moeda', (SELECT TOP 1 cliente_servicos.vl_valor FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' AND id_produtos=produtos.id) AS 'precovenda'   FROM produtos WHERE produtos.id='" + idProdutos + "' ";
         select += " SELECT subservico.id AS 'id', subservico.nm_descricao AS 'desc', (SELECT TOP 1 cliente_servicos.id_dsg_moeda FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' AND id_produtos=subservico.id) AS 'moeda', (SELECT TOP 1 cliente_servicos.vl_valor FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' AND id_produtos=subservico.id) AS 'precovenda'   FROM produtos_subservicos INNER JOIN subservico ON subservico.id=produtos_subservicos.id_subservicos WHERE produtos_subservicos.id_produtos='" + idProdutos + "';";
+
+        if(idMovimentacao != "*"){
+            select += " SELECT id_subservicos FROM movimentacao_servicos WHERE id='" + idMovimentacao + "';";
+        }
+        
 
         console.log(select)
         var request = new sql.Request();
