@@ -145,8 +145,8 @@ var arrayData = [];
     select += " movimentacao_servicos.nm_numero_nfes AS 'numero_nfes', "; 
     select += " movimentacao_servicos.nm_numero_boleto AS 'numero_boleto' "; 
     select += " FROM movimentacao_servicos "; 
-    select += " INNER JOIN produtos sub ON sub.id=movimentacao_servicos.id_subservicos "; 
-    select += " INNER JOIN produtos prod ON prod.id=movimentacao_servicos.id_produtos "; 
+    //select += " INNER JOIN produtos sub ON sub.id=movimentacao_servicos.id_subservicos "; 
+    //select += " INNER JOIN produtos prod ON prod.id=movimentacao_servicos.id_produtos "; 
     select += " INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade "; 
     if(idEntidade){ 
         if(idEntidade != "*"){ 
