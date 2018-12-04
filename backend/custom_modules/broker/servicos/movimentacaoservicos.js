@@ -821,6 +821,7 @@ router.route('/gerarComissao/:id').get(function(req, res) {
                    
                     if(vl_comissaopercOP){
                         valorcomiss = (parseFloat(vl_venda) * parseFloat(vl_comissaopercOP).toFixed(2)) / 100;
+                        valorcomiss = valorcomiss.toFixed(2);
                         vl_comissaoOp = valorcomiss.toString();
                     }
                     id_indicador = "";
