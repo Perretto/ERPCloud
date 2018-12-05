@@ -28,7 +28,7 @@ router.route('/*').get(function(req, res, next){
     if(full.indexOf("localhost") > -1) {
         serverWindows = "http://localhost:2444";
         dados = "hidrobombas";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        configEnvironment = {user: 'sa', password: '123', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -84,7 +84,7 @@ router.route('/*').post(function(req, res, next) {
     if(full.indexOf("localhost") > -1) {
         serverWindows = "http://localhost:2444";
         dados = "hidrobombas";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        configEnvironment = {user: 'sa', password: '123', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -253,7 +253,7 @@ router.route('/confirmasequencia').post(function(req, res) {
                 }
                 res.json(resposta);
             }
-            else{
+            else {
             /* Produtos */
             var request = new sql.Request();
             request.input("idempresa",EnterpriseID);
@@ -324,3 +324,74 @@ router.route('/confirmasequencia').post(function(req, res) {
     }
 
 })
+
+router.route('/grupoitens').get(function(req, res) {
+    
+    var select = "SELECT grupoitens.id as 'id', grupoitens.nm_grupoitem as 'descricao', grupoitens.nm_codgruitem as 'codigo', grupoitens.id_campopai as 'idpai' FROM grupoitens order by nr_sequencial";
+    var resultado;
+
+    sql.close(); 
+    sql.connect(config, function (err) { 
+    if (err) console.log(err); 
+    var request = new sql.Request(); 
+    request.query(select, function (err, recordset){ 
+    if (err) console.log(err);
+    var html = "<div class='easy-tree' id='treehidro'>";
+    html+= "<ul>";
+    
+    for (let index = 0; index < recordset.recordset.length; index++) {
+        const element = recordset.recordset[index];
+        //+ "</li>";
+        
+        if(element.idpai == null){
+            html+="<li data-elementoli='"+ element.id +"' data-elementcod = '" + element.codigo + "' data-descricao = '" + element.descricao + "' data-id = '" + element.idpai + "' data-nivel='1'>" + element.descricao;
+            for (let I = 0; I < recordset.recordset.length; I++) {
+                const element1 = recordset.recordset[I];
+                if(element.id == element1.idpai){
+                    html+= "<ul>";
+                    html+="<li data-elementoli='"+ element1.id +"' data-elementcod = '" + element1.codigo +"' data-descricao = '" + element1.descricao + "' data-id = '" + element1.idpai + "' data-nivel='2'>" + element1.descricao;
+                    
+                    for (let J = 0; J < recordset.recordset.length; J++) {
+                        const element2 = recordset.recordset[J];
+                        if(element1.id == element2.idpai){
+                            html+= "<ul>";
+                            html+="<li data-elementoli='"+ element2.id +"' data-elementcod = '" + element2.codigo +"' data-descricao = '" + element2.descricao + "' data-id = '" + element2.idpai + "' data-nivel='3'>" + element2.descricao;
+                            
+                            for (let L = 0; L < recordset.recordset.length; L++) {
+                                const element3 = recordset.recordset[L];
+                                if(element2.id == element3.idpai){
+                                    html+= "<ul>";
+                                    html+="<li data-elementoli='"+ element3.id +"' data-elementcod = '" + element3.codigo + "' data-descricao = '" + element3.descricao + "' data-id = '" + element3.idpai + "' data-nivel='4'>" + element3.descricao;
+                                    
+                                    html+= "</li>";
+                                    html+= "</ul>";
+                                    
+            
+                                }
+                            }
+
+                            html+= "</li>";
+                            html+= "</ul>";
+
+    
+                        }
+                    }
+                    html+= "</ul>";
+
+    
+                }
+            }
+        }
+
+       
+        html += "</li>"
+    }
+
+    html+="<ul>";
+    html+="</div>";
+    console.log(html);
+    res.send(html); 
+        
+            }); 
+        }); 
+    });

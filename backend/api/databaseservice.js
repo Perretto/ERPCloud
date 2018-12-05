@@ -54,8 +54,8 @@ router.route('/*').get(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "broker";  //"homologa"; //"broker";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        dados = "intelecta10";  //"homologa"; //"broker";
+        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
         local = true;
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
@@ -103,8 +103,8 @@ router.route('/*').get(function(req, res, next) {
 function conectionsLink(full, callback){
     if(String(full).indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "broker"; //"broker";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        dados = "intelecta10"; //"broker";
+        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
     }else{
         var parts = String(full).split('.');
         var dados = "";
@@ -2803,7 +2803,7 @@ router.route('/buttongrid/:tabgen').get(function(req, res) {
     var tabgen = req.param('tabgen');
     var code = " function editarProdutoXml(botao) {var idTela='f8af21d6-e280-060a-1d92-0e7948ad107f_'; console.log(botao); var NomeProduto = $('#7ee809e2-fe73-4b0e-b741-198df26a414f_'+$(botao).attr('data-referenceid')).attr('data-newvalue'); $('#' + idTela + 'CoImportarXML_txtNome').val(NomeProduto); $('#' + idTela + 'CoImportarXML_txtProdutoVinculado_autocomplete').attr('data-iddata',$(botao).attr('data-referenceid')); } "
    
-    obj["FormID"]="c6bd6c44-6546-4700-954d-e22c61a20979_f8af21d6-e280-060a-1d92-0e7948ad107f"
+    obj["FormID"]="194536c8-48b0-43de-b464-cb9b5da4683e_f8af21d6-e280-060a-1d92-0e7948ad107f"
     obj["classe"]="hidden"
     obj["containerID"]="194536c8-48b0-43de-b464-cb9b5da4683e_f8af21d6-e280-060a-1d92-0e7948ad107f .panel-body #3818d7aa-e57f-40da-bb26-e93a9aaa28bf_controlgroup"
     obj["containerIDScreen"]="194536c8-48b0-43de-b464-cb9b5da4683e_f8af21d6-e280-060a-1d92-0e7948ad107f"
@@ -2817,7 +2817,7 @@ router.route('/buttongrid/:tabgen').get(function(req, res) {
     obj["id"]="f8af21d6-e280-060a-1d92-0e7948ad107f_CoImportarXML_chkok"
     obj["layoutID"]="00000000-0000-0000-0000-000000000000"
     obj["layoutName"]="lyImportarXML"
-    obj["layoutScreen"]="c6bd6c44-6546-4700-954d-e22c61a20979"
+    obj["layoutScreen"]="194536c8-48b0-43de-b464-cb9b5da4683e"
     obj["localAutoComplete"]=false
     obj["mask"]=""
     obj["nameLayout"]=""
