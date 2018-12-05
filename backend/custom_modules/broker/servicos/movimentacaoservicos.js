@@ -355,6 +355,12 @@ router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtf
     var bol = req.param('bol');
     
     cnpj = cnpj.replace("(*_*)","/");
+    
+    cliente = cliente.replace("(*_*)","/");
+    cliente = cliente.replace("(*_*)","/");
+    cliente = cliente.replace("(*_*)","/");
+    cliente = cliente.replace("(*_*)","/");
+    cliente = cliente.replace("(*_*)","/");
 
     var where = ""; 
     var select = "SELECT newID() AS 'id', "; 
@@ -1099,7 +1105,6 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
 
     query += " ORDER BY venda.datacadastro DESC ";
 
-    console.log(query);
 
     pool.query(query, (err, rest) => {
         console.log(err, rest)
