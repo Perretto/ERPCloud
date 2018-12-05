@@ -597,8 +597,6 @@ router.route('/carregaControleComissaoPagar/:dataDe/:dataAte/:equipe').get(funct
     select += " INNER JOIN comiss ON comiss.id_venda=movimentacao_servicos.id ";
     select += " INNER JOIN entidade op ON op.id=comiss.id_vendedor   ";
     
-    
-
     if(equipe){ 
         if(equipe != "*"){ 
             if(!where){ 
@@ -617,8 +615,7 @@ router.route('/carregaControleComissaoPagar/:dataDe/:dataAte/:equipe').get(funct
     
     select = select + where; 
     select += " GROUP BY op.nm_razaosocial, op.id ";
-    console.log(select);
-
+    
     sql.close(); 
     sql.connect(config, function (err) { 
         if (err) console.log(err); 
@@ -660,8 +657,7 @@ router.route('/carregaControleComissaoPagar/:dataDe/:dataAte/:equipe').get(funct
                     res.send(false)
                 });
             });
-
-            
+           
         }); 
      }); 
 
