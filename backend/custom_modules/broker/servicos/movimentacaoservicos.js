@@ -541,6 +541,7 @@ router.route('/carregaControleComissaoPagar/:dataDe/:dataAte/:equipe').get(funct
     var equipe = req.param('equipe');
 
     var where = ""; 
+    where += " WHERE comiss.nm_status='Em Pagamento' ";
     var select = "";
 
     var campoequipe = "";
@@ -551,29 +552,16 @@ router.route('/carregaControleComissaoPagar/:dataDe/:dataAte/:equipe').get(funct
         campoequipe = " IS NULL"
     }
 
-    select += " SELECT IIF((SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id ";
-    select += "     AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "' AND comissao_apuracao.id_equipe " + campoequipe + ") IS NULL, NEWID(), ";
-    select += "     (SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id ";
-    select += "     AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "' AND comissao_apuracao.id_equipe " + campoequipe ;
-    select += "     )) as 'id',  ";
-    select += " op.id as 'idoperador',  ";
-    select += " op.nm_razaosocial as 'operador',  FORMAT(SUM(comiss.vl_venda), 'c', 'pt-BR' ) as 'valorvenda', FORMAT(SUM(comiss.vl_comissao), 'c', 'pt-BR' ) as 'valor',  ";
-    select += " FORMAT (SUM(comiss.vl_comissao) - IIF((SELECT SUM(vl_desconto) FROM comissao_desconto WHERE id_contas_pagar=(SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id  AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "' AND comissao_apuracao.id_equipe  " + campoequipe + ")) IS NULL,0,(SELECT SUM(vl_desconto) FROM comissao_desconto WHERE id_contas_pagar=(SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id  AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "' AND comissao_apuracao.id_equipe  " + campoequipe + "))), 'c', 'pt-BR' ) AS 'valorliquido' , ";
-    select += " (SELECT FORMAT (SUM(vl_desconto), 'c', 'pt-BR' ) FROM comissao_desconto WHERE id_contas_pagar=(SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id  AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "' AND comissao_apuracao.id_equipe  " + campoequipe + ")) as desconto  ";
-    select += " FROM movimentacao_servicos  ";
-    select += " INNER JOIN comiss ON comiss.id_venda=movimentacao_servicos.id ";
-    select += " INNER JOIN entidade op ON op.id=comiss.id_vendedor   ";
-    
-    where += " WHERE comiss.nm_status='Em Pagamento' ";
-
     if(dataDe){ 
         if(dataDe != "*"){ 
             dataDe = dataDe.replace("-","/"); 
             dataDe = dataDe.replace("-","/"); 
+
+            var arrayDataDe = dataDe.split("/");
             if(!where){ 
-                where += " WHERE FORMAT(comiss.dt_emissao, 'd', 'pt-BR' ) >= '" + dataDe + "' "; 
+                where += " WHERE comiss.dt_emissao >= '" + arrayDataDe[2] + "/" + arrayDataDe[1] + "/" + arrayDataDe[0] + "' "; 
             }else{ 
-                where += " AND FORMAT(comiss.dt_emissao, 'd', 'pt-BR' ) >= '" + dataDe + "' "; 
+                where += " AND comiss.dt_emissao >= '" + arrayDataDe[2] + "/" + arrayDataDe[1] + "/" + arrayDataDe[0] + "' "; 
             } 
         } 
     } 
@@ -582,14 +570,35 @@ router.route('/carregaControleComissaoPagar/:dataDe/:dataAte/:equipe').get(funct
         if(dataAte != "*"){ 
             dataAte = dataAte.replace("-","/"); 
             dataAte = dataAte.replace("-","/"); 
+            var arrayDataAte = dataAte.split("/");
             if(!where){ 
-                where += " WHERE FORMAT(comiss.dt_emissao, 'd', 'pt-BR' ) <= '" + dataAte + "' "; 
+                where += " WHERE comiss.dt_emissao <= '"  + arrayDataAte[2] + "/" + arrayDataAte[1] + "/" + arrayDataAte[0] + "' "; 
             }else{ 
-                where += " AND FORMAT(comiss.dt_emissao, 'd', 'pt-BR' ) <= '" + dataAte + "' "; 
+                where += " AND comiss.dt_emissao <= '" + arrayDataAte[2] + "/" + arrayDataAte[1] + "/" + arrayDataAte[0] + "' "; 
             } 
         } 
     } 
     
+    select += " SELECT IIF((SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id ";
+    select += "     AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "' AND comissao_apuracao.id_equipe " + campoequipe + ") IS NULL, NEWID(), ";
+    select += "     (SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id ";
+    select += "     AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "' AND comissao_apuracao.id_equipe " + campoequipe ;
+    select += "     )) as 'id',  ";
+
+    select += "IIF((SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id  ";
+    select += "    AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "'  ";
+    select += "    AND comissao_apuracao.id_equipe  IS NULL) IS NULL, '0', '1') as 'insup',  ";
+
+    select += " op.id as 'idoperador',  ";
+    select += " op.nm_razaosocial as 'operador',  FORMAT(SUM(comiss.vl_venda), 'c', 'pt-BR' ) as 'valorvenda', FORMAT(SUM(comiss.vl_comissao), 'c', 'pt-BR' ) as 'valor',  ";
+    select += " FORMAT (SUM(comiss.vl_comissao) - IIF((SELECT SUM(vl_desconto) FROM comissao_desconto WHERE id_contas_pagar=(SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id  AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "' AND comissao_apuracao.id_equipe  " + campoequipe + ")) IS NULL,0,(SELECT SUM(vl_desconto) FROM comissao_desconto WHERE id_contas_pagar=(SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id  AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "' AND comissao_apuracao.id_equipe  " + campoequipe + "))), 'c', 'pt-BR' ) AS 'valorliquido' , ";
+    select += " (SELECT FORMAT (SUM(vl_desconto), 'c', 'pt-BR' ) FROM comissao_desconto WHERE id_contas_pagar=(SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id  AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "' AND comissao_apuracao.id_equipe  " + campoequipe + ")) as desconto  ";
+    select += " FROM movimentacao_servicos  ";
+    select += " INNER JOIN comiss ON comiss.id_venda=movimentacao_servicos.id ";
+    select += " INNER JOIN entidade op ON op.id=comiss.id_vendedor   ";
+    
+    
+
     if(equipe){ 
         if(equipe != "*"){ 
             if(!where){ 
@@ -632,6 +641,12 @@ router.route('/carregaControleComissaoPagar/:dataDe/:dataAte/:equipe').get(funct
              
                 for(var i = 0; i < retorno.recordset.length; i++){
                     sqlstring += " INSERT INTO comissao_apuracao (id, id_entidade, nm_datade, nm_dataate, id_equipe) VALUES('" + retorno.recordset[i].id + "','" + retorno.recordset[i].idoperador + "', '" + dataDe + "', '" + dataAte + "' , " + equipe + "); ";
+                    if(retorno.recordset[i].insup == "0"){
+                        sqlstring += " INSERT INTO comissao_desconto (id, nm_descricao, id_contas_pagar, vl_desconto) ";
+                        sqlstring += " VALUES (NEWID(), 'Impostos referente a nota fiscal de serviços', '" + retorno.recordset[i].id + "',  ";
+                        sqlstring += " IIF((SELECT TOP 1 vl_tributoservicos FROM empresa WHERE id='9F39BDCF-6B98-45DE-A819-24B7F3EE2560') IS NULL,0, ";
+                        sqlstring += " CAST('" + retorno.recordset[i].valor.replace(".","").replace(",",".").replace("R$ ","") + "' AS decimal) * (CAST((SELECT TOP 1 vl_tributoservicos FROM empresa WHERE id='9F39BDCF-6B98-45DE-A819-24B7F3EE2560') AS decimal) / 100))); ";
+                    }
                 }
             }
             
