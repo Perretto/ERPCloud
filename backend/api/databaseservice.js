@@ -285,6 +285,7 @@ function compareObj(a,b) {
                 /*
                 Parâmetros do relatórios */                
                 paramRelatorioProps = Object.getOwnPropertyNames(paramRelatorio);
+                console.log(paramRelatorioProps)
                 for(var i = 0; i < paramRelatorioProps.length; i++){
                     if(paramRelatorio[paramRelatorioProps[i]].type == "numeric")
                         request.input(paramRelatorioProps[i],(paramRelatorio[paramRelatorioProps[i]].value == "" ? null : Number(paramRelatorio[paramRelatorioProps[i]].value)));
@@ -292,6 +293,7 @@ function compareObj(a,b) {
                         request.input(paramRelatorioProps[i],(paramRelatorio[paramRelatorioProps[i]].value == "" ? null : paramRelatorio[paramRelatorioProps[i]].value));
                 }
     
+                console.log(select)
                 // query to the database and get the records
                 request.query(select, function (err, recordset) {
                     if (err){
