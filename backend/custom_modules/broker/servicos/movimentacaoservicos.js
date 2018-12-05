@@ -955,6 +955,34 @@ router.route('/editarControleComissaoPagarDesconto/:id').get(function(req, res) 
     }); 
 });
 
+
+router.route('/deletarControleComissaoPagarDesconto/:id').get(function(req, res) {
+    var id = req.param('id'); 
+    var where = ""; 
+    var select = "DELETE "; 
+    select += " FROM comissao_desconto "; 
+    select += " WHERE id='" + id + "'";
+
+    var message = { success: false, message: "" };
+    
+    sql.close();
+    sql.connect(config).then(function() {
+        var request = new sql.Request();
+        request.query(select).then(function(recordset) {
+            message.success = true;
+            message.message = "Deletado com sucesso";
+            res.send(message)
+        }).catch(function(err) { 
+            console.log(err)  
+            message.success = false;
+            message.message = "Falha ao deletar";                 
+            res.send(message)
+        });
+    }) 
+});
+
+
+
 router.route('/carregaControleComissaoPagarEquipe/:id/:equipe').get(function(req, res) {
     var id = req.param('id'); 
     var equipe = req.param('equipe'); 
