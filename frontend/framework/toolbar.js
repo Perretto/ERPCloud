@@ -5,7 +5,7 @@ function onDelete(formID, id, metadataContainerID, layoutID, instanceTela) {
   
 
     if($("#" + formID).length == 0){
-        formID = instanceTela
+        formID = layoutID + "_" + instanceTela;
     }
 
     loaderImage(formID, true);
@@ -37,6 +37,7 @@ function onDelete(formID, id, metadataContainerID, layoutID, instanceTela) {
 
 
                             ClearForm(formID, true);
+                            ClearForm(instanceTela, true);
 
                             //editGridLine("", metadataContainerID, id)
                             if(layoutID.toLowerCase == "ee5b8618-b239-49ca-86a9-6975134c8713"){

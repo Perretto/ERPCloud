@@ -54,8 +54,8 @@ router.route('/*').get(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "intelecta10";  //"homologa"; //"broker";
-        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
+        dados = "homologa"; //"broker";
+        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
         local = true;
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
@@ -103,8 +103,8 @@ router.route('/*').get(function(req, res, next) {
 function conectionsLink(full, callback){
     if(String(full).indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "intelecta10"; //"broker";
-        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
+        dados = "homologa"; //"broker";
+        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
     }else{
         var parts = String(full).split('.');
         var dados = "";
@@ -2801,6 +2801,7 @@ router.route('/buttongrid/:tabgen').get(function(req, res) {
     var obj = {};
     var result = [];
     var tabgen = req.param('tabgen');
+
     var code = " function editarProdutoXml(botao) {var idTela='f8af21d6-e280-060a-1d92-0e7948ad107f_'; console.log(botao); var NomeProduto = $('#7ee809e2-fe73-4b0e-b741-198df26a414f_'+$(botao).attr('data-referenceid')).attr('data-newvalue'); $('#' + idTela + 'CoImportarXML_txtNome').val(NomeProduto); $('#' + idTela + 'CoImportarXML_txtProdutoVinculado_autocomplete').attr('data-iddata',$(botao).attr('data-referenceid')); } "
    
     obj["FormID"]="194536c8-48b0-43de-b464-cb9b5da4683e_f8af21d6-e280-060a-1d92-0e7948ad107f"
@@ -2848,11 +2849,11 @@ router.route('/buttongrid/:tabgen').get(function(req, res) {
     obj["valueList"]=""
     obj["visibleGrid"]=false
     result.push(obj);
-
-//===========================================================================================
-obj = {};
-code = ""
-   
+    
+    //===========================================================================================
+    obj = {};
+    code = ""
+    
     obj["FormID"]="1df8627a-f0a4-4c50-8a1c-eb6d7d5d04e5_f8af21d6-e280-060a-1d92-0e7948ad107f"
     obj["classe"]="hidden"
     obj["containerID"]="1df8627a-f0a4-4c50-8a1c-eb6d7d5d04e5_f8af21d6-e280-060a-1d92-0e7948ad107f .panel-body #3818d7aa-e57f-40da-bb26-e93a9aaa28bf_controlgroup"
