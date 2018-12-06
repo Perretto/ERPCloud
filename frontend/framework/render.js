@@ -1153,7 +1153,7 @@ function fillScreen(data, template, layoutID, fillgrid, tabGenID){
                 idGrid = p[i][key];                
             }                    
 
-            if (containerID === "") {
+            //if (containerID === "") {
                 if ($(tablegrid[0]).parents(".sharpGrid")) {
                     var div = $(tablegrid[0]).parents(".sharpGrid");
                     if (div.length > 0) {
@@ -1164,7 +1164,7 @@ function fillScreen(data, template, layoutID, fillgrid, tabGenID){
                         }
                     }
                 }
-            }
+            //}
             
             if (layoutID == "" || layoutID == "undefined" || layoutID == undefined) {
                 layoutID = $("#" + containerID).attr("layoutid"); 

@@ -5,7 +5,7 @@ function onDelete(formID, id, metadataContainerID, layoutID, instanceTela) {
   
 
     if($("#" + formID).length == 0){
-        formID = instanceTela
+        formID = layoutID + "_" + instanceTela;
     }
 
     loaderImage(formID, true);
