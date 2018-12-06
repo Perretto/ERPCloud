@@ -67,13 +67,13 @@
 
             // addable
             if (options.addable) {
-                $(easyTree).find('.easy-tree-toolbar').append('<div class="create"><a href="javascript: void(0);" class="btn btn-default btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span></a></div> ');
-                $(easyTree).find('.easy-tree-toolbar .create > a').attr('title', options.i18n.addTip).click(function () {
+                $(easyTree).find('.easy-tree-toolbar').append('<div class="create"><button class="btn btn-default btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span></button></div> ');
+                $(easyTree).find('.easy-tree-toolbar .create > button').attr('title', options.i18n.addTip).click(function () {
                     var createBlock = $(easyTree).find('.easy-tree-toolbar .create');
                     $(createBlock).append(createInput);
                     $(createInput).find('input').focus();
                     $(createInput).find('.confirm').text(options.i18n.confirmButtonLabel);
-                    $(createInput).find('.confirm').on("click",function () {
+                    $(createInput).find('.confirm').click(function () {
                         if ($(createInput).find('input').val() === '')
                             return;
                         var selected = getSelectedItems();
@@ -112,16 +112,16 @@
                                     var selected = getSelectedItems();
                                     if (options.editable) {
                                         if (selected.length <= 0 || selected.length > 1)
-                                            $(easyTree).find('.easy-tree-toolbar .edit > a').addClass('disabled');
+                                            $(easyTree).find('.easy-tree-toolbar .edit > button').addClass('disabled');
                                         else
-                                            $(easyTree).find('.easy-tree-toolbar .edit > a').removeClass('disabled');
+                                            $(easyTree).find('.easy-tree-toolbar .edit > button').removeClass('disabled');
                                     }
 
                                     if (options.deletable) {
                                         if (selected.length <= 0 || selected.length > 1)
-                                            $(easyTree).find('.easy-tree-toolbar .remove > a').addClass('disabled');
+                                            $(easyTree).find('.easy-tree-toolbar .remove > button').addClass('disabled');
                                         else
-                                            $(easyTree).find('.easy-tree-toolbar .remove > a').removeClass('disabled');
+                                            $(easyTree).find('.easy-tree-toolbar .remove > button').removeClass('disabled');
                                     }
 
                                 }
@@ -141,8 +141,8 @@
 
             // editable
             if (options.editable) {
-                $(easyTree).find('.easy-tree-toolbar').append('<div class="edit"><a href="javascript: void(0);" class="btn btn-default btn-sm btn-primary disabled"><span class="glyphicon glyphicon-edit"></span></a></div> ');
-                $(easyTree).find('.easy-tree-toolbar .edit > a').attr('title', options.i18n.editTip).click(function () {
+                $(easyTree).find('.easy-tree-toolbar').append('<div class="edit"><button class="btn btn-default btn-sm btn-primary disabled"><span class="glyphicon glyphicon-edit"></span></button></div> ');
+                $(easyTree).find('.easy-tree-toolbar .edit > button').attr('title', options.i18n.editTip).click(function () {
                     $(easyTree).find('input.easy-tree-editor').remove();
                     $(easyTree).find('li > span > a:hidden').show();
                     var selected = getSelectedItems();
@@ -176,8 +176,8 @@
 
             // deletable
             if (options.deletable) {
-                $(easyTree).find('.easy-tree-toolbar').append('<div class="remove"><a href="javascript: void(0);" class="btn btn-default btn-sm btn-danger disabled"><span class="glyphicon glyphicon-remove"></span></a></div> ');
-                $(easyTree).find('.easy-tree-toolbar .remove > a').attr('title', options.i18n.deleteTip).click(function () {
+                $(easyTree).find('.easy-tree-toolbar').append('<div class="remove"><button class="btn btn-default btn-sm btn-danger disabled"><span class="glyphicon glyphicon-remove"></span></button></div> ');
+                $(easyTree).find('.easy-tree-toolbar .remove > button').attr('title', options.i18n.deleteTip).click(function () {
                     var selected = getSelectedItems();
                     if (selected.length <= 0) {
                         $(easyTree).prepend(warningAlert);
@@ -238,16 +238,16 @@
                         var selected = getSelectedItems();
                         if (options.editable) {
                             if (selected.length <= 0 || selected.length > 1)
-                                $(easyTree).find('.easy-tree-toolbar .edit > a').addClass('disabled');
+                                $(easyTree).find('.easy-tree-toolbar .edit > button').addClass('disabled');
                             else
-                                $(easyTree).find('.easy-tree-toolbar .edit > a').removeClass('disabled');
+                                $(easyTree).find('.easy-tree-toolbar .edit > button').removeClass('disabled');
                         }
 
                         if (options.deletable) {
                             if (selected.length <= 0 || selected.length > 1)
-                                $(easyTree).find('.easy-tree-toolbar .remove > a').addClass('disabled');
+                                $(easyTree).find('.easy-tree-toolbar .remove > button').addClass('disabled');
                             else
-                                $(easyTree).find('.easy-tree-toolbar .remove > a').removeClass('disabled');
+                                $(easyTree).find('.easy-tree-toolbar .remove > button').removeClass('disabled');
                         }
 
                     }
