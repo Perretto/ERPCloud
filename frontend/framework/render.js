@@ -1276,14 +1276,22 @@ function fillScreen(data, template, layoutID, fillgrid, tabGenID){
                                 var arrayvalue = value.split("T");
                                 if (arrayvalue.length > 0) {
                                     value = arrayvalue[0];
-                                    value = formatDate(value);
+                                    if(value == "1900-01-01"){
+                                        value = "";
+                                    }else{
+                                        value = formatDate(value);
+                                    }
                                 }
                                 break;
                             case "DataHora":
                                 var arrayvalue = value.split("T");
                                 if (arrayvalue.length > 0) {
                                     value = arrayvalue[0];
-                                    value = formatDate(value);
+                                    if(value == "1900-01-01"){
+                                        value = "";
+                                    }else{
+                                        value = formatDate(value);
+                                    }
                                 }
                                 break;
                             case "SimNao":
