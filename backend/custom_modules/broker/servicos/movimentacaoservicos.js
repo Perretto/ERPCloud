@@ -1034,6 +1034,8 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
 
     var dataDe = req.param('dataDe');
     var dataAte = req.param('dataAte');
+
+
     var cliente = req.param('cliente');
     var servico = req.param('servico');
     var where = "";
@@ -1048,39 +1050,81 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
         port: 5432,
     })
 
-    query += " SELECT venda.idvenda AS idvenda, ";
+    query += " SELECT venda.idvenda AS id,venda.codigo AS codigo, ";
     query += " TO_CHAR(venda.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, nbs.nome AS nomeservico, ";
-    query += " to_char(venda.valortotal, 'L9G999G990D99') AS  valortotal, ";
-    query += " pessoa.cpfcnpj"
+    query += " pessoa.nome AS nomepessoa, ('RVS') AS nomeservico, vendaoperacao.valor AS valortotal ";
     query += " FROM venda ";
-    query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda ";
-    query += " INNER JOIN vendaoperacao ON venda.idvenda = vendaoperacao.idvenda ";
-    query += " INNER JOIN nbs ON nbs.idnbs=vendaoperacao.idnbs ";
-    
+    query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoaadquirente  ";
+    query += " INNER JOIN vendaoperacao ON vendaoperacao.idvenda = venda.idvenda ";
     if(dataDe){ 
         if(dataDe != "*"){ 
-            dataDe = dataDe.replace("-","/"); 
-            dataDe = dataDe.replace("-","/"); 
-            if(!where){ 
-                where += " WHERE venda.datacadastro >= '" + dataDe + "' "; 
-            }else{ 
-                where += " AND venda.datacadastro >= '" + dataDe + "' "; 
+            query += " WHERE venda.datacadastro >= '" + dataDe + " 00:00:00' "; 
+            if(dataAte){ 
+                if(dataAte != "*"){ 
+                    query += " AND venda.datacadastro <= '" + dataAte + " 23:59:59' ";         
+                } 
+            } 
+        } 
+    } 
+    query += " UNION ALL ";
+    query += " SELECT aquisicao.idaquisicao AS id,aquisicao.codigo AS codigo, ";
+    query += " TO_CHAR(aquisicao.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
+    query += " pessoa.nome AS nomepessoa, ('RAS') AS nomeservico, aquisicaooperacao.valor AS valortotal ";
+    query += " FROM aquisicao ";
+    query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
+    query += " INNER JOIN aquisicaooperacao ON aquisicaooperacao.idaquisicao = aquisicao.idaquisicao ";
+    if(dataDe){ 
+        if(dataDe != "*"){ 
+            query += " WHERE aquisicao.datacadastro >= '" + dataDe + " 00:00:00' "; 
+            if(dataAte){ 
+                if(dataAte != "*"){ 
+                    query += " AND aquisicao.datacadastro <= '" + dataAte + " 23:59:59' ";         
+                } 
+            } 
+        } 
+    }    
+    
+    query += " UNION ALL ";
+    query += " SELECT faturamento.idfaturamento AS id,faturamento.codigo AS codigo, ";
+    query += " TO_CHAR(faturamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
+    query += " pessoa.nome AS nomepessoa, ('RF') AS nomeservico, faturamentooperacao.valorfaturado AS valortotal ";
+    query += " FROM faturamento ";
+    query += " INNER JOIN venda ON venda.idvenda = faturamento.idvenda ";
+    query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoaadquirente ";
+    query += " INNER JOIN faturamentooperacao ON faturamentooperacao.idfaturamento = faturamento.idfaturamento ";
+    if(dataDe){ 
+        if(dataDe != "*"){ 
+            query += " WHERE faturamento.datacadastro >= '" + dataDe + " 00:00:00' "; 
+            if(dataAte){ 
+                if(dataAte != "*"){ 
+                    query += " AND faturamento.datacadastro <= '" + dataAte + " 23:59:59' ";         
+                } 
             } 
         } 
     } 
 
-    if(dataAte){ 
-        if(dataAte != "*"){ 
-            dataAte = dataAte.replace("-","/"); 
-            dataAte = dataAte.replace("-","/"); 
-            if(!where){ 
-                where += " WHERE venda.datacadastro <= '" + dataAte + "' "; 
-            }else{ 
-                where += " AND venda.datacadastro <= '" + dataAte + "' "; 
+    query += " UNION ALL ";
+    query += " SELECT pagamento.idpagamento AS id,pagamento.codigo AS codigo, ";
+    query += " TO_CHAR(pagamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
+    query += " pessoa.nome AS nomepessoa, ('RP') AS nomeservico, pagamentooperacao.valorpago AS valortotal ";
+    query += " FROM pagamento ";
+    query += " INNER JOIN aquisicao ON aquisicao.idaquisicao = pagamento.idaquisicao ";
+    query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
+    query += " INNER JOIN pagamentooperacao ON pagamentooperacao.idpagamento = pagamento.idpagamento ";
+    if(dataDe){ 
+        if(dataDe != "*"){ 
+            query += " WHERE pagamento.datacadastro >= '" + dataDe + " 00:00:00' "; 
+            if(dataAte){ 
+                if(dataAte != "*"){ 
+                    query += " AND pagamento.datacadastro <= '" + dataAte + " 23:59:59' ";         
+                } 
             } 
         } 
     } 
+    
+    
+
+    
     
     /*
     if(cliente){ 
@@ -1100,15 +1144,16 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
     } 
     */
 
-   query = query + where; 
+   //query = query + where; 
     //query += " WHERE venda.datacadastro >= '01/02/2018' AND venda.datacadastro <= '01/03/2018'";
 
-    query += " ORDER BY venda.datacadastro DESC ";
+    query += " ORDER BY datacadastro ASC ";
 
 
     pool.query(query, (err, rest) => {
         console.log(err, rest)
         pool.end()
+        console.log(query)
         res.send(rest);
     })
      
