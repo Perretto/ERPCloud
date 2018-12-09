@@ -64,6 +64,55 @@ router.route('/*').get(function(req, res, next) {
     });    
 });    
 
+router.route('/*').post(function(req, res, next) {
+    var full = req.host;
+    var parts = full.split('.');
+    var dados = "";
+    if (parts.length > 3) {
+        dados = parts[0];
+    }
+    host = dados;
+    dados = dados.replace("http://","");   
+    if(full.indexOf("localhost") > -1){
+        serverWindows = "http://localhost:2444";
+        dados = "broker";
+        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+    }else{
+        serverWindows = "http://" + dados + ".empresariocloud.com.br";
+        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
+    }                    
+    var database = "";
+    var server = "";
+    var password = "";
+    var user = "";    var select = "SELECT id AS idempresa,nm_CompanyName nome,nm_DatabaseName_Aplication AS 'database',  ";
+    select += " nm_ServerIP_Aplication AS 'server', ";
+    select += " password_Aplication AS 'password', ";
+    select += " nm_User_Aplication AS 'user', ";
+    select += " nm_mongodb AS mongodb ";
+    select += " FROM Enterprise WHERE domainName='" + dados + "' ";  
+    sql.close();
+    sql.connect(configEnvironment, function (err) {  
+        if (err) console.log(err);
+        var request = new sql.Request();
+        request.query(select, function (err, recordset) {    
+            if (err) console.log(err)
+            if(recordset.recordsets[0].length > 0){
+                const element = recordset.recordsets[0][0];
+                database = element.database;
+                server = element.server;
+                password = element.password;
+                user = element.user;
+                EnterpriseID = element.idempresa;
+                EnterpriseName = element.nome;
+                base = element.mongodb;
+                url = "mongodb://localhost:27017/" + base;
+                config = {user: user, password: password, server: server,  database: database};
+                next();
+            }
+        });
+    });    
+});    
+
 //% servicos/movimentacaoservicos/carregaSubServico 
 
 
@@ -1284,15 +1333,22 @@ router.route('/gravarClienteServico/:idprodutos/:valor/:idmoeda/:unicamoeda/:idE
 });
 
 
-router.route('/gerarContasPagar/:idMovimentacao/:EnterpriseID/:idUsuario').get(function(req, res) { 
-    var idMovimentacao = req.param('idMovimentacao'); 
-    var EnterpriseID = req.param('EnterpriseID'); 
-    var idUsuario = req.param('idUsuario'); 
+router.route('/gerarContasPagar').post(function(req, res) {     
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
+    res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+
+    var idMovimentacao = null; //req.param('idMovimentacao'); 
+    var EnterpriseID = null; //req.param('EnterpriseID'); 
+    var idUsuario = null; //req.param('idUsuario'); 
+    var parametros = null;
 
     var query = "";
     var resposta = {};
     var nrParcela = 0;
-    var arrayMovimentacao = idMovimentacao.split(",");
+    var arrayMovimentacao = null; //idMovimentacao.split(",");
     var j = 0;
     var arrayResposta = [];
     var total = 0;
@@ -1301,6 +1357,11 @@ router.route('/gerarContasPagar/:idMovimentacao/:EnterpriseID/:idUsuario').get(f
     var Atitulo = [];
 
     try{
+        parametros = req.body.parametros;
+        arrayMovimentacao = parametros.idTitulo;
+        EnterpriseID = parametros.idEmpresa;
+        idUsuario = parametros.idUsuario;
+
         sql.close();
         sql.connect(config, function (err) {
             var where = "";
@@ -1412,9 +1473,50 @@ router.route('/gerarContasPagar/:idMovimentacao/:EnterpriseID/:idUsuario').get(f
                                         
                                         funAtualizarConta(Atitulo,(function(repostacallback){
                                             j += 1;
-                                            arrayResposta.push(repostacallback);                                            
-                                            res.json(arrayResposta);
+                                            arrayResposta.push(repostacallback);  
                                             
+                                            query = "SELECT  comiss.id AS 'id', ";
+                                            query += " comiss.nm_status AS 'status' ";
+                                            query += " FROM movimentacao_servicos   "; 
+                                            query += " INNER JOIN comiss ON comiss.id_venda=movimentacao_servicos.id   ";
+                                            query += " INNER JOIN entidade op ON op.id=comiss.id_vendedor   ";
+                                            query += " INNER JOIN comissao_apuracao ca ON ca.id_entidade=op.id  ";
+                                            query += " WHERE " + where + " AND comiss.nm_status='Em Pagamento' ";
+                                            sql.close()
+                                            sql.connect(config).then(function() {
+                                            var request = new sql.Request();
+                                            request.query(query, function (err, recordset) {
+                                                if (err){
+                                                    resposta = {
+                                                        status: -3,
+                                                        mensagem: ["" + err],
+                                                        titulo: null
+                                                    }
+                                                    res.json(resposta);
+                                                }
+                                                else{
+                                                    var comissaoFinal = [];
+                                                    comissaoFinal = recordset.recordsets[0];
+                                                    var queryComiss = "";
+                                                    for(s = 0; s < comissaoFinal.length; s++){
+                                                        queryComiss += "UPDATE comiss SET nm_status='Concluído' WHERE id='" + comissaoFinal[s].id + "'; ";
+                                                    }
+
+                                                    sql.close()
+                                                    sql.connect(config).then(function() {
+                                                        var request = new sql.Request();
+                                                        request.query(queryComiss).then(function(recordset) {
+                                                            res.json(arrayResposta); 
+                                                        }).catch(function(err) { 
+                                                            console.log(err)                   
+                                                            res.send(false)
+                                                        });
+                                                    });
+
+                                                    
+                                                    }
+                                                })
+                                            })
                                         }));
                                                                             
                                         
