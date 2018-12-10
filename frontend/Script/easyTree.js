@@ -13,20 +13,20 @@
             editable: false,
             addable: false,
             i18n: {
-                deleteNull: '请选择要删除的项。',
-                deleteConfirmation: '您确认要执行删除操作吗？',
-                confirmButtonLabel: '确认',
-                editNull: '请选择要编辑的项。',
-                editMultiple: '一次只能编辑一项',
-                addMultiple: '请选择一项添加',
-                collapseTip: '收起分支',
-                expandTip: '展开分支',
-                selectTip: '选择',
-                unselectTip: '取消选择',
-                editTip: '编辑',
-                addTip: '添加',
-                deleteTip: '删除',
-                cancelButtonLabel: '取消'
+                deleteNull: '',
+                deleteConfirmation: '',
+                confirmButtonLabel: '',
+                editNull: '',
+                editMultiple: '',
+                addMultiple: '',
+                collapseTip: '',
+                expandTip: '',
+                selectTip: '',
+                unselectTip: '',
+                editTip: '',
+                addTip: '',
+                deleteTip: '',
+                cancelButtonLabel: ''
             }
         };
 
