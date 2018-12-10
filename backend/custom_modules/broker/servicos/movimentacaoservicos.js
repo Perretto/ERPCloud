@@ -297,7 +297,7 @@ router.route('/carregaListaComissao/:idEntidade/:dataDe/:dataAte/:equipe/:servic
     var select = "";
     select += " SELECT  comiss.id as 'id', FORMAT (comiss.dt_emissao, 'd', 'pt-BR' ) as 'dt_emissao', entidade.nm_razaosocial as 'cliente',  ";
     select += " op.nm_razaosocial as 'operador', produtos.nm_descricao as 'produto', comiss.vl_venda as 'valorvenda', comiss.nm_status as 'status', comiss.vl_comissao as 'valor', ";
-    select += " (SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=comiss.id_vendedor AND vendedor_servicos.id_produtos = movimentacao_servicos.id_produtos) as'percentualcomiss', ";
+    select += " (SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=comiss.id_vendedor AND vendedor_servicos.id_produtos = movimentacao_servicos.id_subservicos) as'percentualcomiss', ";
     select += " FORMAT ((comiss.vl_comissao - ((SELECT vl_tributoservicos FROM empresa WHERE empresa.id='9F39BDCF-6B98-45DE-A819-24B7F3EE2560')) * movimentacao_servicos.vl_valor / 100 ), 'c', 'pt-BR' ) AS 'valorliquido' ";
     select += " FROM movimentacao_servicos ";
     select += " INNER JOIN comiss ON comiss.id_venda=movimentacao_servicos.id ";
@@ -821,8 +821,8 @@ router.route('/gerarComissao/:id').get(function(req, res) {
     select += " movimentacao_servicos.id_indicador AS 'idindicador',  ";
     select += " (SELECT TOP 1 nm_status FROM comiss WHERE id_venda=movimentacao_servicos.id AND id_operador=movimentacao_servicos.id_operador) AS 'statusop', ";
     select += " (SELECT TOP 1 nm_status FROM comiss WHERE id_venda=movimentacao_servicos.id AND id_operador=movimentacao_servicos.id_indicador) AS 'statusind', ";
-    select += " (SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=movimentacao_servicos.id_operador AND vendedor_servicos.id_produtos=movimentacao_servicos.id_produtos) AS 'comissaopercop', ";
-    select += " (SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=movimentacao_servicos.id_indicador AND vendedor_servicos.id_produtos=movimentacao_servicos.id_produtos) AS 'comissaopercind'  ";
+    select += " (SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=movimentacao_servicos.id_operador AND vendedor_servicos.id_produtos=movimentacao_servicos.id_subservicos) AS 'comissaopercop', ";
+    select += " (SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=movimentacao_servicos.id_indicador AND vendedor_servicos.id_produtos=movimentacao_servicos.id_subservicos) AS 'comissaopercind'  ";
     select += " , movimentacao_servicos.vl_valor AS 'valormov' ";
  
     select += " FROM movimentacao_servicos ";
