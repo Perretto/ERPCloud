@@ -2,8 +2,8 @@
 .easy-tree {
     min-height: 20px;
     margin-bottom: 20px;
-    background-color: #e56155;
-    color: #fff;
+    /* background-color: #FFFFFF; */
+    color: #333;
     border: none;
     border-top: none;
     padding-bottom: 15px;
@@ -28,7 +28,7 @@
 }
 
 .easy-tree li::before {
-    border-left: 1px solid #fff;
+    border-left: 1px solid #333;
     bottom: 50px;
     height: 100%;
     top: 0;
@@ -36,14 +36,14 @@
 }
 
 .easy-tree li::after {
-    border-top: 1px solid #fff;
+    border-top: 1px solid #333;
     height: 20px;
-    top: 30px;
+    top: 25px;
     width: 35px
 }
 
 .easy-tree li > span {
-    border: 1px solid #fff;
+    border: 1px solid #333;
     border-radius: 3px;
     display: inline-block;
     padding: 5px;
@@ -63,18 +63,18 @@
     height: 30px
 }
 
-.easy-tree li.parent_li > span:hover, .easy-tree li.parent_li > span:hover + ul li span {
-    background: #ff6c60;
-    color: #fff;
+.easy-tree li.parent_li > span:hover, .easy-tree li.parent_li > span:hover + ul li span { 
+    background: #62a8ea;
 }
+
 
 .easy-tree li.parent_li > span:hover + ul li.li_selected span {
     background: #e5e2e1;
-    color: #e56155;
+    color: #62a8ea;
 }
 
 .easy-tree li > span > a {
-    color: #fff;
+    color: #333;
     text-decoration: none;
 }
 
@@ -84,12 +84,12 @@
 
 .easy-tree li.li_selected > span, .easy-tree li.li_selected > span > a {
     background: #e5e2e1;
-    color: #e56155;
+    color: #62a8ea;
 }
 
 .easy-tree li.li_selected > span:hover, .easy-tree li.li_selected > span:hover > a {
     background: #fafafa;
-    color: #ff6c60;
+    color: #62a8ea;
 }
 
 .easy-tree .easy-tree-toolbar {
