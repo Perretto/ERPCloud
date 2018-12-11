@@ -635,9 +635,9 @@ router.route('/carregaControleComissaoPagar/:dataDe/:dataAte/:equipe').get(funct
         } 
     } 
     
-    select += " SELECT IIF((SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id ";
+    select += " SELECT IIF((SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id AND comissao_apuracao.nm_status IS NULL ";
     select += "     AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "' AND comissao_apuracao.id_equipe " + campoequipe + ") IS NULL, NEWID(), ";
-    select += "     (SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id ";
+    select += "     (SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id  AND comissao_apuracao.nm_status IS NULL ";
     select += "     AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "' AND comissao_apuracao.id_equipe " + campoequipe ;
     select += "     )) as 'id',  ";
 
@@ -830,6 +830,7 @@ router.route('/gerarComissao/:id').get(function(req, res) {
 
     select += " WHERE movimentacao_servicos.id='" + id + "' ";
     
+    console.log("+++++++++++++COMISSAO++++++++++++++++++");
     console.log(select);
 
     sql.close(); 
@@ -884,7 +885,10 @@ router.route('/gerarComissao/:id').get(function(req, res) {
                 var dt_emissao = mm + '/' + dd + '/' + yyyy;   
                 var valorcomiss = 0;
 
-                if((idcomissop != null && idcomissind == null) || (idcomissop == idcomissind && idcomissop != null && idcomissind != null)){
+                console.log("idcomissop=" + idcomissop);
+                console.log("idcomissind=" + idcomissind);
+
+                if((id_operador != null && id_indicador == null) || (id_operador == id_indicador && id_operador != null && id_indicador != null)){
                    
                     if(vl_comissaopercOP){
                         valorcomiss = (parseFloat(vl_venda) * parseFloat(vl_comissaopercOP).toFixed(2)) / 100;
@@ -1501,6 +1505,18 @@ router.route('/gerarContasPagar').post(function(req, res) {
                                                     for(s = 0; s < comissaoFinal.length; s++){
                                                         queryComiss += "UPDATE comiss SET nm_status='Concluído' WHERE id='" + comissaoFinal[s].id + "'; ";
                                                     }
+
+                                                    where = "";
+                                                    for (let k = 0; k < arrayMovimentacao.length; k++) {
+                                                        if(k == 0){
+                                                            where += " comissao_apuracao.id='" + arrayMovimentacao[k] + "' ";
+                                                        }else{
+                                                            where += " OR comissao_apuracao.id='" + arrayMovimentacao[k] + "' ";
+                                                        }                                                        
+                                                    }
+
+                                                    queryComiss += " UPDATE comissao_apuracao SET nm_status='Concluído' WHERE " + where + " AND nm_status IS NULL; ";
+                                                    console.log(queryComiss);
 
                                                     sql.close()
                                                     sql.connect(config).then(function() {
