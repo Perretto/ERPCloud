@@ -396,7 +396,7 @@ router.route('/carregaListaComissao/:idEntidade/:dataDe/:dataAte/:equipe/:servic
 
 });
 
-router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtfat/:nfse/:bol').get(function(req, res) {
+router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtfat/:nfse/:bol/:notaunica').get(function(req, res) {
     var cliente = req.param('cliente');
     var dataDe = req.param('dataDe');
     var dataAte = req.param('dataAte');
@@ -404,6 +404,7 @@ router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtf
     var dtfat = req.param('dtfat');
     var nfse = req.param('nfse');
     var bol = req.param('bol');
+    var notaunica = req.param('notaunica');
     
     cnpj = cnpj.replace("(*_*)","/");
     
@@ -425,6 +426,9 @@ router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtf
     select += " LEFT JOIN subservico sub2 ON sub2.id=movimentacao_servicos.id_subservicos "; 
     select += " INNER JOIN produtos prod ON prod.id=movimentacao_servicos.id_produtos "; 
     select += " INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade "; 
+    select += " LEFT JOIN cliente_servicos ON cliente_servicos.id_produtos=movimentacao_servicos.id_subservicos  ";
+    select += " AND  cliente_servicos.id_entidade= movimentacao_servicos.id_entidade ";
+
     if(cliente != "-"){ 
         where = " WHERE entidade.nm_razaosocial='" + cliente + "' "; 
     }
@@ -522,7 +526,15 @@ router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtf
         } 
     } 
 
+    if(notaunica == "1"){
+        where += " AND cliente_servicos.sn_notaunica = 1 ";
+    }else{
+        where += " AND cliente_servicos.sn_notaunica IS NULL ";
+    }
+
     select = select + where; 
+    
+    console.log("==============================================================")
     console.log(select)
     sql.close(); 
     sql.connect(config, function (err) { 
@@ -2045,7 +2057,7 @@ function truncateDecimal(value,precision){
 
 
 
-router.route('/geraContasReceber').post(function(req, res) {     
+router.route('/gerarContasReceber').post(function(req, res) {     
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
@@ -2069,7 +2081,9 @@ router.route('/geraContasReceber').post(function(req, res) {
     var titulo = null;
     var Atitulo = [];
     var movimentacaoFinal = [];
-
+    var arrayEntidade = [];
+    var arrayNotaUnica = [];
+    
     try{
         parametros = req.body.parametros;
         arrayMovimentacao = parametros.cnpjs;
@@ -2080,31 +2094,84 @@ router.route('/geraContasReceber').post(function(req, res) {
         sql.close();
         sql.connect(config, function (err) {
             var where = "";
+            where += "(";
             for (let k = 0; k < arrayMovimentacao.length; k++) {
                 if(k == 0){
-                    where += " entidade.nm_cnpj='" + arrayMovimentacao[k] + "' ";
+                    where += "( entidade.nm_cnpj='" + arrayMovimentacao[k] + "' ";
+
+                    if(parametros.filtros.notaunica[k] == "1"){
+                        where += " AND cliente_servicos.sn_notaunica = 1 ) ";
+                    }else{
+                        where += " AND cliente_servicos.sn_notaunica IS NULL ) ";
+                    }
+                    
                 }else{
-                    where += " OR entidade.nm_cnpj='" + arrayMovimentacao[k] + "' ";
+                    where += " OR (entidade.nm_cnpj='" + arrayMovimentacao[k] + "' ";
+                    if(parametros.filtros.notaunica[k] == "1"){
+                        where += " AND cliente_servicos.sn_notaunica = 1 ) ";
+                    }else{
+                        where += " AND cliente_servicos.sn_notaunica IS NULL ) ";
+                    }
                 }                
             }
 
-            query += " SELECT newID() AS 'id', ";
-            query += " movimentacao_servicos.id_entidade AS 'id_entidade',   ";
-            query += " entidade.nm_razaosocial AS 'razaosocial',   ";
-            query += " SUM(movimentacao_servicos.vl_valor)  AS 'valortotal', ";
-            query += " (SELECT TOP 1 id FROM parcelamento WHERE nr_numeroparcelas=1) AS 'id_parcelamento', ";
-                
-            query += " GETDATE() AS 'dt_emissao', ";
-            query += " IIF((SELECT TOP 1 nm_documento FROM contas_receber ORDER BY nm_documento DESC) IS NULL,0, ";
-            query += " (SELECT TOP 1 nm_documento FROM contas_receber ORDER BY nm_documento DESC)) AS 'nr_pedido' ";
+            where += ")";
 
-            query += " FROM movimentacao_servicos   ";
-            query += " INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade   ";
-            query += " WHERE movimentacao_servicos.id_contas_receber  IS  NULL AND ";   
+            var faturamento = parametros.filtros.faturamento;
+            var boleto = parametros.filtros.boleto;
+            var datade = parametros.filtros.datade;
+            var dataate = parametros.filtros.dataate;
+
+            if(faturamento == true){
+                faturamento = " NOT ";
+            }else{
+                faturamento = "";
+            }
+
+            if(boleto == true){
+                boleto = " NOT ";
+            }else{
+                boleto = "";
+            }
+
+            if(datade){
+                where += " AND movimentacao_servicos.dt_emissao >= '" + datade + "'   ";
+            }
+
+            if(dataate){
+                where += " AND movimentacao_servicos.dt_emissao <= '" + dataate + "' ";
+            }
+                        
+            where += " AND movimentacao_servicos.id_contas_receber  IS  NULL     "; 
+            where += " AND movimentacao_servicos.nm_numero_nfes IS " + faturamento + " NULL    ";
+            where += " AND movimentacao_servicos.nm_numero_boleto IS " + boleto + " NULL    ";
+                       
+
+            query += " SELECT newID() AS 'id',  ";
+            query += " movimentacao_servicos.id_entidade AS 'id_entidade',    ";
+            query += " entidade.nm_razaosocial AS 'razaosocial',    ";
+            query += " SUM(movimentacao_servicos.vl_valor)  AS 'valortotal',  ";
+            query += " (SELECT TOP 1 id FROM parcelamento WHERE nr_numeroparcelas=1) AS 'id_parcelamento',  ";
+                            
+            query += " GETDATE() AS 'dt_emissao',  ";
+            query += " IIF((SELECT TOP 1 nm_documento FROM contas_receber ORDER BY nm_documento DESC) IS NULL,0,  ";
+            query += " (SELECT TOP 1 nm_documento FROM contas_receber ORDER BY nm_documento DESC)) AS 'nr_pedido', ";
+            query += " cliente_servicos.sn_notaunica AS 'notaunica'  ";
+
+            query += " FROM movimentacao_servicos    ";
+            query += " INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade  ";
+            query += " LEFT JOIN cliente_servicos ON cliente_servicos.id_produtos=movimentacao_servicos.id_subservicos  ";
+            query += " AND  cliente_servicos.id_entidade= movimentacao_servicos.id_entidade  ";
             query += " WHERE " + where + " ";
-            query += " GROUP BY entidade.nm_cnpj, entidade.nm_razaosocial,   ";
-            query += " movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,   ";
-            query += " movimentacao_servicos.nm_numero_boleto, movimentacao_servicos.id_entidade ";
+            
+            query += " GROUP BY entidade.nm_cnpj, entidade.nm_razaosocial,    ";
+            query += " movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,   "; 
+            query += " movimentacao_servicos.nm_numero_boleto, movimentacao_servicos.id_entidade, cliente_servicos.sn_notaunica ";
+
+            console.log("**********************************************************")
+            console.log(query)
+
+            
 
             if (err){
                 resposta = {
@@ -2112,7 +2179,8 @@ router.route('/geraContasReceber').post(function(req, res) {
                     mensagem: ["" + err],
                     titulo: null
                 }
-                res.json(resposta);
+                arrayResposta.push(resposta);
+                res.json(arrayResposta);
             }
             else{
                 var request = new sql.Request();
@@ -2123,131 +2191,145 @@ router.route('/geraContasReceber').post(function(req, res) {
                             mensagem: ["" + err],
                             titulo: null
                         }
-                        res.json(resposta);
+                        arrayResposta.push(resposta);
+                        res.json(arrayResposta);
                     }
                     else{
                         var movimentacao = recordset.recordsets[0][0];
 
-                        gerarparcelas(config,EnterpriseID,movimentacao.id_parcelamento,movimentacao.valortotal,new Date(movimentacao.dt_emissao),(function(respostaParcelas){
-                            
-                            try{
-                                if(respostaParcelas.status > 0){
-                                    for (let h = 0; h < recordset.recordsets[0].length; h++) {
-                                        movimentacao = recordset.recordsets[0][h];
-                                        movimentacaoFinal.push(movimentacao.id);
-                                        total = 0;
-                                        parcela = null;
-                                        titulo = {
-                                            idEmpresa: EnterpriseID,
-                                            idUsuario: idUsuario,
-                                            idTitulo: movimentacao.id,
-                                            idEntidade: movimentacao.id_entidade,
-                                            idPedido: movimentacao.id,
-                                            //idNotaFiscal: compra.id_notafiscal,
-                                            nrTitulo: parseInt(movimentacao.nr_pedido) + (h + 1),
-                                            emissao: new Date(movimentacao.dt_emissao).toISOString(),
-                                            competencia: "",
-                                            valor: movimentacao.valortotal,
-                                            idContaFinanceira: "",
-                                            idParcelamento: movimentacao.id_parcelamento,
-                                            observacao: "",
-                                            dre: 0,
-                                            idOrigem: "",
-                                            parcelas: []
-                                        };
-                            
-                                        for(i = 0; i < respostaParcelas.parcelas.length; i++){
-                                            nrParcela++;
-                                            parcela = {
-                                                idParcela: "",
-                                                documento: parseInt(movimentacao.nr_pedido) + (h + 1),
-                                                parcela: respostaParcelas.parcelas[i].parcela,
-                                                vencimento: new Date(respostaParcelas.parcelas[i].vencimento).toISOString(),
+                        if(movimentacao){
+                            gerarparcelas(config,EnterpriseID,movimentacao.id_parcelamento,movimentacao.valortotal,new Date(movimentacao.dt_emissao),(function(respostaParcelas){
+                                
+                                try{
+                                    if(respostaParcelas.status > 0){
+                                        for (let h = 0; h < recordset.recordsets[0].length; h++) {
+                                            movimentacao = recordset.recordsets[0][h];
+                                            movimentacaoFinal.push(movimentacao.id);
+                                            arrayEntidade.push(movimentacao.id_entidade);
+                                            arrayNotaUnica.push(movimentacao.notaunica);
+
+                                            total = 0;
+                                            parcela = null;
+                                            titulo = {
+                                                idEmpresa: EnterpriseID,
+                                                idUsuario: idUsuario,
+                                                idTitulo: "",
+                                                idEntidade: movimentacao.id_entidade,
+                                                idPedido: movimentacao.id,
+                                                //idNotaFiscal: compra.id_notafiscal,
+                                                nrTitulo: parseInt(movimentacao.nr_pedido) + (h + 1),
+                                                emissao: new Date(movimentacao.dt_emissao).toISOString(),
+                                                competencia: "",
                                                 valor: movimentacao.valortotal,
-                                                idBanco: "",
-                                                idFormaPagamento: movimentacao.id_formapagamento,
                                                 idContaFinanceira: "",
-                                                fluxoCaixa: "1"
+                                                idParcelamento: movimentacao.id_parcelamento,
+                                                observacao: "",
+                                                dre: 0,
+                                                idOrigem: "",
+                                                parcelas: []
                                             };
-                                            total += parseFloat(movimentacao.valortotal);
-                                            titulo.parcelas.push(parcela);
-                                        }                        
-                                        
-                                        titulo.valor = total;
-                                        Atitulo.push(titulo);
-                                    }
-
-                                    //if(total > 0){  
-                                        
-                                        funAtualizarContaReceber(Atitulo,(function(repostacallback){
-                                            j += 1;
-                                            arrayResposta.push(repostacallback);  
+                                
+                                            for(i = 0; i < respostaParcelas.parcelas.length; i++){
+                                                nrParcela++;
+                                                parcela = {
+                                                    idParcela: "",
+                                                    documento: parseInt(movimentacao.nr_pedido) + (h + 1),
+                                                    parcela: respostaParcelas.parcelas[i].parcela,
+                                                    vencimento: new Date(respostaParcelas.parcelas[i].vencimento).toISOString(),
+                                                    valor: movimentacao.valortotal,
+                                                    idBanco: "",
+                                                    idFormaPagamento: movimentacao.id_formapagamento,
+                                                    idContaFinanceira: "",
+                                                    fluxoCaixa: "1"
+                                                };
+                                                total += parseFloat(movimentacao.valortotal);
+                                                titulo.parcelas.push(parcela);
+                                            }                        
                                             
-                                            query = " SELECT movimentacao_servicos.id AS 'id' ";
-                                            query += " FROM movimentacao_servicos   ";
-                                            query += " INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade   ";
-                                            query += " WHERE  " + where + "    ";
-                                            query += " AND movimentacao_servicos.id_contas_receber  IS  NULL ";
-                                            
-                                            sql.close()
-                                            sql.connect(config).then(function() {
-                                            var request = new sql.Request();
-                                            request.query(query, function (err, recordset) {
-                                                if (err){
-                                                    resposta = {
-                                                        status: -3,
-                                                        mensagem: ["" + err],
-                                                        titulo: null
-                                                    }
-                                                    res.json(resposta);
-                                                }
-                                                else{
-                                                    
-                                                    var queryMov = "";
-                                                    for(s = 0; s < movimentacaoFinal.length; s++){
-                                                        queryMov += "UPDATE movimentacao_servicos SET id_contas_receber='" + "" +"' WHERE id='" + movimentacaoFinal[s].id + "'; ";
-                                                    }
-
-                                                    sql.close()
-                                                    sql.connect(config).then(function() {
-                                                        var request = new sql.Request();
-                                                        request.query(queryMov).then(function(recordset) {
-                                                            res.json(arrayResposta); 
-                                                        }).catch(function(err) { 
-                                                            console.log(err)                   
-                                                            res.send(false)
-                                                        });
-                                                    });
-
-                                                    
-                                                    }
-                                                })
-                                            })
-                                        }));
-                                                                            
-                                        
-                                    /*}else{
-                                        resposta = {
-                                            status: 0,
-                                            mensagem: ["Não foram geradas parcelas para esta movimentação"],
-                                            titulo: null
+                                            titulo.valor = total;
+                                            Atitulo.push(titulo);
                                         }
-                                        res.json(reposta);
-                                    } */                                   
-                                }else{                                    
-                                    sql.close();
-                                    res.json(respostaParcelas);
+
+                                        //if(total > 0){  
+                                            
+                                            funAtualizarContaReceber(Atitulo,(function(repostacallback){
+                                                j += 1;
+                                                arrayResposta.push(repostacallback);  
+                                                
+                                                query = " SELECT movimentacao_servicos.id AS 'id', movimentacao_servicos.id_entidade AS 'id_entidade', cliente_servicos.sn_notaunica AS 'notaunica' ";
+                                                query += " FROM movimentacao_servicos   ";
+                                                query += " INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade   ";
+                                                query += " LEFT JOIN cliente_servicos ON cliente_servicos.id_produtos=movimentacao_servicos.id_subservicos "
+                                                query += " WHERE  " + where + "    ";
+                                                
+                                                sql.close()
+                                                sql.connect(config).then(function() {
+                                                var request = new sql.Request();
+                                                request.query(query, function (err, recordset) {
+                                                    if (err){
+                                                        resposta = {
+                                                            status: -3,
+                                                            mensagem: ["" + err],
+                                                            titulo: null
+                                                        }
+                                                        res.json(resposta);
+                                                    }else{
+                                                            var movdetalhes = recordset.recordsets[0];
+                                                            var queryMov = "";
+                                                            for(s = 0; s < movimentacaoFinal.length; s++){
+                                                                for(x = 0; x < movdetalhes.length; x++){
+                                                                    if(arrayEntidade[s] == movdetalhes[x].id_entidade && arrayNotaUnica[s] == movdetalhes[x].notaunica){
+                                                                        queryMov += "UPDATE movimentacao_servicos SET id_contas_receber='" + movimentacaoFinal[s] +"' WHERE id='" + movdetalhes[x].id + "'; ";
+                                                                    }
+                                                                }
+                                                                    
+                                                            }
+
+                                                            sql.close()
+                                                            sql.connect(config).then(function() {
+                                                                var request = new sql.Request();
+                                                                request.query(queryMov).then(function(recordset) {
+                                                                    res.json(arrayResposta); 
+                                                                }).catch(function(err) { 
+                                                                    console.log(err)                   
+                                                                    res.send(false)
+                                                                });
+                                                            });                                                        
+                                                        }
+                                                    })
+                                                })
+                                            }));
+                                                                                
+                                            
+                                        /*}else{
+                                            resposta = {
+                                                status: 0,
+                                                mensagem: ["Não foram geradas parcelas para esta movimentação"],
+                                                titulo: null
+                                            }
+                                            res.json(reposta);
+                                        } */                                   
+                                    }else{                                    
+                                        sql.close();
+                                        
+                                        arrayResposta.push(respostaParcelas);
+                                        res.json(arrayResposta);
+                                    }
                                 }
-                            }
-                            catch(erro){
-                                resposta.status = -4;
-                                resposta.mensagem = [];
-                                resposta.mensagem.push("criarparcelas: " + erro);
-                                resposta.parcelas = [];
-                                sql.close();
-                                res.json(resposta);
-                            }
-                        }));
+                                catch(erro){
+                                    resposta.status = -4;
+                                    resposta.mensagem = [];
+                                    resposta.mensagem.push("criarparcelas: " + erro);
+                                    resposta.parcelas = [];
+                                    sql.close();
+                                    arrayResposta.push(resposta);
+                                    res.json(arrayResposta);
+                                }
+                            }));
+                        }else{
+                            //res.json(false);
+                            res.send(false)
+                        }
                     }
                 })
             }            
@@ -2261,7 +2343,9 @@ router.route('/geraContasReceber').post(function(req, res) {
             titulo: null
         }
         resposta.mensagem.push("" + erro);
-        res.json(resposta);
+        
+        arrayResposta.push(resposta);
+        res.json(arrayResposta);
     }
 
 });
@@ -2335,7 +2419,7 @@ function funAtualizarContaReceber(Aparametros,callbackf) {
 
             if(resposta.status == 1){
                 parametros.idTitulo = general.guid();
-                query += "insert into contas_receber (id,id_empresa,id_entidade,id_venda,id_notafiscal,id_parcelamento,id_plano_contas_financeiro,id_origem,nm_documento,dt_emissao,nm_competencia,vl_valor,nm_observacao) values("
+                query += "insert into contas_receber (id,id_empresa,id_entidade,id_venda,id_notafiscal,id_parcelamento,id_plano_contas_financeiro,nm_documento,dt_emissao,nm_competencia,vl_valor,nm_observacao) values("
                 query += "'" + parametros.idTitulo + "',";
                 query += "'" + EnterpriseID + "',";
                 query += "'" + parametros.idEntidade + "',";
@@ -2343,7 +2427,6 @@ function funAtualizarContaReceber(Aparametros,callbackf) {
                 query += (!parametros.idNotaFiscal ? "null" : "'" + parametros.idNotaFiscal + "'") + ",";
                 query += "'" + parametros.idParcelamento + "',";
                 query += (!parametros.idContaFinanceira ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
-                query += (!parametros.idOrigem ? "null" : "'" + parametros.idOrigem + "'") + ",";
                 query += "'" + parametros.nrTitulo + "',";
                 query += "'" + parametros.emissao + "',";
                 query += "'" + parametros.competencia  + "',";
@@ -2351,7 +2434,7 @@ function funAtualizarContaReceber(Aparametros,callbackf) {
                 query += "'" + parametros.observacao + "'";
                 query += "); ";
 
-                queryItens += "insert into contas_pagar_parcelas (id,id_empresa,id_contas_pagar,id_Banco,id_forma_pagamento,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor)";
+                queryItens += "insert into contas_receber_parcelas (id,id_empresa,id_contas_receber,id_Banco,id_forma_pagamento,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor)";
                 queryItens += " values ";
                 for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
                     if(parcela > 0)
