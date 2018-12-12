@@ -31,8 +31,8 @@ router.route('/*').get(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "intelecta10";  //"homologa"; //"foodtown";
-        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
+        dados = "broker";  //"homologa"; //"foodtown";
+        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -88,8 +88,8 @@ router.route('/*').post(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "intelecta10";  //"homologa"; //"foodtown";
-        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
+        dados = "broker";  //"homologa"; //"foodtown";
+        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -423,9 +423,11 @@ router.route('/dadostitulo').post(function(req, res) {
         query += " left join contas_receber_baixas_formaspagamento formas on formas.id_contas_receber_baixas = baixas.id and formas.id_empresa = @idempresa";
         query += " where cr.id_empresa = @idempresa";
         query += " and (@idtitulo is null or cr.id = @idtitulo)";
-        query += " and crp.id_empresa = @idempresa and crp.id_contas_receber = cr.id";
+        //query += " and crp.id_empresa = @idempresa 
+        query += " and crp.id_contas_receber = cr.id";
         query += " and (@idparcela is null or crp.id = @idparcela)";
-        query += " and ent.id = cr.id_entidade and ent.id_empresa = @idempresa";
+        query += " and ent.id = cr.id_entidade ";
+        //query += " and ent.id_empresa = @idempresa";
         query += " order by replicate(' ',10 - len(crp.nr_parcela)) + rtrim(crp.nr_parcela),baixas.dt_data";
 
         sql.close();
@@ -1005,7 +1007,8 @@ router.route('/realizarrecebimento').post(function(req, res) {
             query += " where parc.id = '" + parametros.idTitulo + "'";
             query += " and parc.id_empresa = '" + EnterpriseID + "'";
             query += " and cr.id = parc.id_contas_receber and cr.id_empresa = '" + EnterpriseID + "'";
-            query += " and ent.id = cr.id_entidade and ent.id_empresa = '" + EnterpriseID + "'";
+            //query += " and ent.id = cr.id_entidade and ent.id_empresa = '" + EnterpriseID + "'";
+            query += " and ent.id = cr.id_entidade";
 
             sql.close();
             sql.connect(config, function (err) {    
@@ -1308,7 +1311,8 @@ router.route('/realizarmultirecebimento').post(function(req, res) {
             query += " where parc.id = '" + parametros.listaParcelas[parcela] + "'";
             query += " and parc.id_empresa = '" + EnterpriseID + "'";
             query += " and cr.id = parc.id_contas_receber and cr.id_empresa = '" + EnterpriseID + "'";
-            query += " and ent.id = cr.id_entidade and ent.id_empresa = '" + EnterpriseID + "'; ";
+            query += " and ent.id = cr.id_entidade ";
+            //query += " and ent.id_empresa = '" + EnterpriseID + "'; ";
         }
         sql.close();
         sql.connect(config, function (err) {    
