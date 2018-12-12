@@ -1,1 +1,1 @@
-{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"erpcloud.menus"},{"v":2,"key":{"layoutID":1},"name":"_layoutID_","ns":"erpcloud.menus"}]}
+{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"erpcloud.menus"},{"v":2,"key":{"layoutID":1},"name":"_layoutID_","ns":"erpcloud.menus"}],"uuid":"beb467c5c01d4a81ab71476148ea0ed4"}
