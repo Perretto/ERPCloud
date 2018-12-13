@@ -327,11 +327,7 @@ router.route('/confirmasequencia').post(function(req, res) {
 
 router.route('/grupoitens').get(function(req, res) {
     
-<<<<<<< HEAD
     var select = "SELECT grupoitens.id as 'id', grupoitens.nm_grupoitem as 'descricao', grupoitens.nm_codgruitem as 'codigo', grupoitens.id_campopai as 'idpai' FROM grupoitens order by id_campopai, nr_sequencial ";
-=======
-    var select = "SELECT grupoitens.id as 'id', grupoitens.nm_grupoitem as 'descricao', grupoitens.nm_codgruitem as 'codigo', grupoitens.id_campopai as 'idpai' FROM grupoitens order by nr_sequencial";
->>>>>>> 3c20c86ea09459d7bfd1c16dbe7174ed7e18c8bc
     var resultado;
 
     sql.close(); 
@@ -340,7 +336,6 @@ router.route('/grupoitens').get(function(req, res) {
     var request = new sql.Request(); 
     request.query(select, function (err, recordset){ 
     if (err) console.log(err);
-<<<<<<< HEAD
     var html = "<div class='easy-tree' id = 'treehidro'>";
     html+= "<ul>";
     var element4 = 0;
@@ -398,42 +393,10 @@ router.route('/grupoitens').get(function(req, res) {
                                         iConta = 0;      
                                     }
                                     
-=======
-    var html = "<div class='easy-tree' id='treehidro'>";
-    html+= "<ul>";
-    
-    for (let index = 0; index < recordset.recordset.length; index++) {
-        const element = recordset.recordset[index];
-        //+ "</li>";
-        
-        if(element.idpai == null){
-            html+="<li data-elementoli='"+ element.id +"' data-elementcod = '" + element.codigo + "' data-descricao = '" + element.descricao + "' data-id = '" + element.idpai + "' data-nivel='1'>" + element.descricao;
-            for (let I = 0; I < recordset.recordset.length; I++) {
-                const element1 = recordset.recordset[I];
-                if(element.id == element1.idpai){
-                    html+= "<ul>";
-                    html+="<li data-elementoli='"+ element1.id +"' data-elementcod = '" + element1.codigo +"' data-descricao = '" + element1.descricao + "' data-id = '" + element1.idpai + "' data-nivel='2'>" + element1.descricao;
-                    
-                    for (let J = 0; J < recordset.recordset.length; J++) {
-                        const element2 = recordset.recordset[J];
-                        if(element1.id == element2.idpai){
-                            html+= "<ul>";
-                            html+="<li data-elementoli='"+ element2.id +"' data-elementcod = '" + element2.codigo +"' data-descricao = '" + element2.descricao + "' data-id = '" + element2.idpai + "' data-nivel='3'>" + element2.descricao;
-                            
-                            for (let L = 0; L < recordset.recordset.length; L++) {
-                                const element3 = recordset.recordset[L];
-                                if(element2.id == element3.idpai){
-                                    html+= "<ul>";
-                                    html+="<li data-elementoli='"+ element3.id +"' data-elementcod = '" + element3.codigo + "' data-descricao = '" + element3.descricao + "' data-id = '" + element3.idpai + "' data-nivel='4'>" + element3.descricao;
-                                    
-                                    html+= "</li>";
-                                    html+= "</ul>";
->>>>>>> 3c20c86ea09459d7bfd1c16dbe7174ed7e18c8bc
                                     
             
                                 }
                             }
-<<<<<<< HEAD
                             
                             if(recordset.recordset.length != J + 1) {
                                 if(element2.idpai != recordset.recordset[J + 1].idpai) {
@@ -454,16 +417,10 @@ router.route('/grupoitens').get(function(req, res) {
                             html+= "</li>";
                            
                            
-=======
-
-                            html+= "</li>";
-                            html+= "</ul>";
->>>>>>> 3c20c86ea09459d7bfd1c16dbe7174ed7e18c8bc
 
     
                         }
                     }
-<<<<<<< HEAD
 
                     if(recordset.recordset.length != I + 1) {
                         if(element1.idpai != recordset.recordset[I + 1].idpai) {
@@ -477,10 +434,6 @@ router.route('/grupoitens').get(function(req, res) {
                     }
                   
                     html+= "</li>";
-=======
-                    html+= "</ul>";
-
->>>>>>> 3c20c86ea09459d7bfd1c16dbe7174ed7e18c8bc
     
                 }
             }
@@ -490,11 +443,7 @@ router.route('/grupoitens').get(function(req, res) {
         html += "</li>"
     }
 
-<<<<<<< HEAD
     html+="</ul>";
-=======
-    html+="<ul>";
->>>>>>> 3c20c86ea09459d7bfd1c16dbe7174ed7e18c8bc
     html+="</div>";
     console.log(html);
     res.send(html); 
