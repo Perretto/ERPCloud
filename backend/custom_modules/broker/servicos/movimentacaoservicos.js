@@ -193,7 +193,7 @@ var arrayData = [];
     select += " FORMAT(SUM(movimentacao_servicos.vl_valor), 'c', 'pt-BR' )  AS 'dt_faturamento', "; 
     select += " FORMAT(movimentacao_servicos.dt_faturamento, 'd', 'pt-BR' )  AS 'valor', "; 
     select += " movimentacao_servicos.nm_numero_nfes AS 'numero_nfes', "; 
-    select += " movimentacao_servicos.nm_numero_boleto AS 'numero_boleto',  cliente_servicos.sn_notaunica AS 'notaunica' "; 
+    select += " movimentacao_servicos.nm_numero_boleto AS 'numero_boleto',  cliente_servicos.sn_notaunica AS 'notaunica', movimentacao_servicos.id_contas_receber AS 'idcontasreceber' "; 
     select += " FROM movimentacao_servicos "; 
     //select += " INNER JOIN produtos sub ON sub.id=movimentacao_servicos.id_subservicos "; 
     //select += " INNER JOIN produtos prod ON prod.id=movimentacao_servicos.id_produtos "; 
@@ -269,7 +269,7 @@ var arrayData = [];
     }
 
     select = select + where; 
-    select = select + "  GROUP BY entidade.nm_cnpj, entidade.nm_razaosocial,  movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,  movimentacao_servicos.nm_numero_boleto,  movimentacao_servicos.nm_numero_boleto, cliente_servicos.sn_notaunica";
+    select = select + "  GROUP BY entidade.nm_cnpj, entidade.nm_razaosocial,  movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,  movimentacao_servicos.nm_numero_boleto,  movimentacao_servicos.nm_numero_boleto, cliente_servicos.sn_notaunica, movimentacao_servicos.id_contas_receber";
     console.log("=============================================================");
     console.log(select)
     sql.close(); 
@@ -2213,7 +2213,7 @@ router.route('/gerarContasReceber').post(function(req, res) {
                                             titulo = {
                                                 idEmpresa: EnterpriseID,
                                                 idUsuario: idUsuario,
-                                                idTitulo: "",
+                                                idTitulo: movimentacao.id,
                                                 idEntidade: movimentacao.id_entidade,
                                                 idPedido: movimentacao.id,
                                                 //idNotaFiscal: compra.id_notafiscal,
@@ -2226,7 +2226,8 @@ router.route('/gerarContasReceber').post(function(req, res) {
                                                 observacao: "",
                                                 dre: 0,
                                                 idOrigem: "",
-                                                parcelas: []
+                                                parcelas: [],
+                                                id_configuracao_cnab: "087D4399-BB68-E2CF-D912-0A54138D0EBC"
                                             };
                                 
                                             for(i = 0; i < respostaParcelas.parcelas.length; i++){
@@ -2272,7 +2273,8 @@ router.route('/gerarContasReceber').post(function(req, res) {
                                                             mensagem: ["" + err],
                                                             titulo: null
                                                         }
-                                                        res.json(resposta);
+                                                        arrayResposta.push(resposta);
+                                                        res.json(arrayResposta);
                                                     }else{
                                                             var movdetalhes = recordset.recordsets[0];
                                                             var queryMov = "";
@@ -2332,8 +2334,7 @@ router.route('/gerarContasReceber').post(function(req, res) {
                         }
                     }
                 })
-            }            
-            
+            }
         })    
     }
     catch(erro){
@@ -2418,9 +2419,10 @@ function funAtualizarContaReceber(Aparametros,callbackf) {
             }
 
             if(resposta.status == 1){
-                parametros.idTitulo = general.guid();
-                query += "insert into contas_receber (id,id_empresa,id_entidade,id_venda,id_notafiscal,id_parcelamento,id_plano_contas_financeiro,nm_documento,dt_emissao,nm_competencia,vl_valor,nm_observacao) values("
-                query += "'" + parametros.idTitulo + "',";
+                //parametros.idTitulo = general.guid();
+                var idtitulo = general.guid();
+                query += "insert into contas_receber (id,id_empresa,id_entidade,id_venda,id_notafiscal,id_parcelamento,id_plano_contas_financeiro,nm_documento,dt_emissao,nm_competencia,vl_valor,nm_observacao, id_configuracao_cnab) values("
+                query += "'" + idtitulo + "',";
                 query += "'" + EnterpriseID + "',";
                 query += "'" + parametros.idEntidade + "',";
                 query += (!parametros.idPedido ? "null" : "'" + parametros.idPedido + "'") + ",";
@@ -2431,20 +2433,21 @@ function funAtualizarContaReceber(Aparametros,callbackf) {
                 query += "'" + parametros.emissao + "',";
                 query += "'" + parametros.competencia  + "',";
                 query += parametros.valor.toString().trim() + ",";
-                query += "'" + parametros.observacao + "'";
+                query += "'" + parametros.observacao + "', ";
+                query += "'" + parametros.id_configuracao_cnab + "' ";
                 query += "); ";
 
-                queryItens += "insert into contas_receber_parcelas (id,id_empresa,id_contas_receber,id_Banco,id_forma_pagamento,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor)";
+                queryItens += "insert into contas_receber_parcelas (id,id_empresa,id_contas_receber,id_Banco,id_forma_pagamento,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor, id_configuracao_cnab)";
                 queryItens += " values ";
                 for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
                     if(parcela > 0)
                         queryItens += ",";
                     
-                    parametros.parcelas[parcela].idParcela = general.guid();
+                    parametros.parcelas[parcela].idParcela = parametros.idTitulo; //general.guid();
                     queryItens += "(";
                     queryItens += "'" + parametros.parcelas[parcela].idParcela + "',";
                     queryItens += "'" + EnterpriseID + "',";
-                    queryItens += "'" + parametros.idTitulo + "',";
+                    queryItens += "'" + idtitulo + "',";
                     queryItens += (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
                     queryItens += (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
                     queryItens += (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
@@ -2453,7 +2456,9 @@ function funAtualizarContaReceber(Aparametros,callbackf) {
                     queryItens += "'1',";
                     queryItens +=  parametros.parcelas[parcela].fluxoCaixa + ",";
                     queryItens += "'" + parametros.parcelas[parcela].vencimento + "',";
-                    queryItens += parametros.parcelas[parcela].valor.toString().trim()
+                    queryItens += parametros.parcelas[parcela].valor.toString().trim() + ",";
+                    queryItens += "'" + parametros.id_configuracao_cnab + "' ";
+
                     queryItens += "); ";
                 }
                 
