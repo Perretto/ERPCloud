@@ -346,10 +346,9 @@ router.route('/grupoitens').get(function(req, res) {
 
     for (let index = 0; index < recordset.recordset.length; index++) {
         const element = recordset.recordset[index];
-          //+ "</li>";
         
         if(element.idpai == null) {
-            html+="<li class=\"isFolder\" data-elementoli='"+ element.id +"' data-elementcod = '" + element.codigo + "' data-descricao = '" + element.descricao + "' data-id = '" + element.id + "' data-nivel='1'>" + element.descricao;
+            html+="<li data-elementoli='"+ element.id +"' data-elementcod = '" + element.codigo + "' data-descricao = '" + element.descricao + "' data-id = '" + element.id + "' data-nivel='1'>" + element.descricao;
             for (let I = 0; I < recordset.recordset.length; I++) {
                 const element1 = recordset.recordset[I];
                 if(element.id == element1.idpai) {
@@ -357,11 +356,7 @@ router.route('/grupoitens').get(function(req, res) {
                     if(iConta2 == 1) {
                         html+= "<ul>";
                     }
-                    html+="<li class=\"isFolder\" data-elementoli='"+ element1.id +"' data-elementcod = '" + element1.codigo +"' data-descricao = '" + element1.descricao + "' data-id = '" + element.id + "' data-nivel='2'>" + element1.descricao;
-                    //html+= "</li>";
-                   
-                    //html+= "<ul>";
-                    //html+="<li data-elementoli='"+ element1.id +"' data-elementcod = '" + element1.codigo +"'>" + element1.descricao;
+                    html+="<li data-elementoli='"+ element1.id +"' data-elementcod = '" + element1.codigo +"' data-descricao = '" + element1.descricao + "' data-id = '" + element.id + "' data-nivel='2'>" + element1.descricao;
                     
                     for (let J = 0; J < recordset.recordset.length; J++) {
                         const element2 = recordset.recordset[J];
@@ -370,9 +365,8 @@ router.route('/grupoitens').get(function(req, res) {
                             if(iConta1 == 1) {
                                 html+= "<ul>";
                             }
-                            html+="<li class=\"isFolder\" data-elementoli='"+ element2.id +"' data-elementcod = '" + element2.codigo +"' data-descricao = '" + element2.descricao + "' data-id = '" + element.id + "' data-nivel='3'>" + element2.descricao;
-                            //html+= "</li>";
-                            for (let L = 0; L < recordset.recordset.length; L++) {
+                            html+="<li data-elementoli='"+ element2.id +"' data-elementcod = '" + element2.codigo +"' data-descricao = '" + element2.descricao + "' data-id = '" + element.id + "' data-nivel='3'>" + element2.descricao;
+                              for (let L = 0; L < recordset.recordset.length; L++) {
                                 const element3 = recordset.recordset[L];
                                 element4 = element3;
                                 if(element2.id == element3.idpai) {
@@ -390,14 +384,11 @@ router.route('/grupoitens').get(function(req, res) {
                                     }
                                     else {
                                         html+= "</ul>";
-                                        iConta = 0;      
+                                        iConta = 0;
                                     }
-                                    
-                                    
-            
                                 }
                             }
-                            
+
                             if(recordset.recordset.length != J + 1) {
                                 if(element2.idpai != recordset.recordset[J + 1].idpai) {
                                     html+= "</ul>";
@@ -409,16 +400,7 @@ router.route('/grupoitens').get(function(req, res) {
                                 iConta1 = 0;      
                             }
                             
-                            //html+= "<ul>";
-                            //html+="<li data-elementoli='"+ element2.id +"' data-elementcod = '" + element2.codigo +"'>" + element2.descricao;
-                            
- 
-                            
                             html+= "</li>";
-                           
-                           
-
-    
                         }
                     }
 
@@ -430,15 +412,14 @@ router.route('/grupoitens').get(function(req, res) {
                     }
                     else {
                         html+= "</ul>";
-                        iConta2 = 0;      
+                        iConta2 = 0;
                     }
-                  
+                 
                     html+= "</li>";
     
                 }
             }
         }
-
        
         html += "</li>"
     }
