@@ -193,10 +193,13 @@ var arrayData = [];
     select += " FORMAT(SUM(movimentacao_servicos.vl_valor), 'c', 'pt-BR' )  AS 'dt_faturamento', "; 
     select += " FORMAT(movimentacao_servicos.dt_faturamento, 'd', 'pt-BR' )  AS 'valor', "; 
     select += " movimentacao_servicos.nm_numero_nfes AS 'numero_nfes', "; 
-    select += " movimentacao_servicos.nm_numero_boleto AS 'numero_boleto',  cliente_servicos.sn_notaunica AS 'notaunica', movimentacao_servicos.id_contas_receber AS 'idcontasreceber' "; 
+    select += " contas_receber_parcelas.nm_numero_boleto AS 'numero_boleto',  cliente_servicos.sn_notaunica AS 'notaunica', movimentacao_servicos.id_contas_receber AS 'idcontasreceber' "; 
+    select += " , contas_receber_parcelas.nm_idprotocoloimpressao AS 'idboleto' "; 
     select += " FROM movimentacao_servicos "; 
     //select += " INNER JOIN produtos sub ON sub.id=movimentacao_servicos.id_subservicos "; 
     //select += " INNER JOIN produtos prod ON prod.id=movimentacao_servicos.id_produtos "; 
+    select += " LEFT JOIN contas_receber_parcelas ON contas_receber_parcelas.id=movimentacao_servicos.id_contas_receber ";
+    select += " LEFT JOIN contas_receber ON contas_receber.id=contas_receber_parcelas.id_contas_receber ";
     select += " INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade ";
     select += " LEFT JOIN cliente_servicos ON cliente_servicos.id_produtos=movimentacao_servicos.id_subservicos AND  cliente_servicos.id_entidade= movimentacao_servicos.id_entidade ";  
     if(idEntidade){ 
@@ -252,24 +255,21 @@ var arrayData = [];
     if(bol){ 
         if(bol == "true"){ 
             if(!where){ 
-                where += " WHERE movimentacao_servicos.nm_numero_boleto  IS NOT NULL "; 
+                where += " WHERE contas_receber_parcelas.nm_numero_boleto  IS NOT NULL "; 
             }else{ 
-                where += " AND  movimentacao_servicos.nm_numero_boleto  IS NOT NULL "; 
-            } 
-        } 
-    } else{
-        if(bol == "true"){ 
+                where += " AND  contas_receber_parcelas.nm_numero_boleto  IS NOT NULL "; 
+            }        
+        }else{
             if(!where){ 
-                where += " WHERE movimentacao_servicos.nm_numero_boleto  IS  NULL "; 
+                where += " WHERE contas_receber_parcelas.nm_numero_boleto  IS  NULL "; 
             }else{ 
-                where += " AND  movimentacao_servicos.nm_numero_boleto  IS  NULL "; 
+                where += " AND  contas_receber_parcelas.nm_numero_boleto  IS  NULL "; 
             } 
-        } 
-
+        }
     }
 
     select = select + where; 
-    select = select + "  GROUP BY entidade.nm_cnpj, entidade.nm_razaosocial,  movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,  movimentacao_servicos.nm_numero_boleto,  movimentacao_servicos.nm_numero_boleto, cliente_servicos.sn_notaunica, movimentacao_servicos.id_contas_receber";
+    select = select + "  GROUP BY entidade.nm_cnpj, entidade.nm_razaosocial,  movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,  contas_receber_parcelas.nm_numero_boleto,  cliente_servicos.sn_notaunica, movimentacao_servicos.id_contas_receber, contas_receber_parcelas.nm_idprotocoloimpressao";
     console.log("=============================================================");
     console.log(select)
     sql.close(); 
