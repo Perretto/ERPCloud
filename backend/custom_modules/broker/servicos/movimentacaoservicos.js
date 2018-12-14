@@ -2134,11 +2134,18 @@ router.route('/gerarContasReceber').post(function(req, res) {
                 boleto = "";
             }
 
+            var arrayDataDe = [];
+            var arrayDataAte = [];            
+
             if(datade){
+                arrayDataDe = datade.split('/');
+                datade = arrayDataDe[1] + "/" + arrayDataDe[0] + "/" + arrayDataDe[2]; 
                 where += " AND movimentacao_servicos.dt_emissao >= '" + datade + "'   ";
             }
 
             if(dataate){
+                arrayDataAte = dataate.split('/');
+                dataate = arrayDataAte[1] + "/" + arrayDataAte[0] + "/" + arrayDataAte[2]; 
                 where += " AND movimentacao_servicos.dt_emissao <= '" + dataate + "' ";
             }
                         
