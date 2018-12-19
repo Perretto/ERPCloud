@@ -2174,11 +2174,7 @@ router.route('/gerarContasReceber').post(function(req, res) {
             query += " GROUP BY entidade.nm_cnpj, entidade.nm_razaosocial,    ";
             query += " movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,   "; 
             query += " movimentacao_servicos.nm_numero_boleto, movimentacao_servicos.id_entidade, cliente_servicos.sn_notaunica ";
-
-            console.log("**********************************************************")
-            console.log(query)
-
-            
+         
 
             if (err){
                 resposta = {
@@ -2557,4 +2553,460 @@ function funAtualizarContaReceber(Aparametros,callbackf) {
         resposta.titulo = null;
         callbackf(resposta);
     }
+}
+
+
+
+
+
+
+router.route('/gerarNFSe').post(function(req, res) {
+    
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
+    res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+
+    var parametros = null;
+    var filtros = null;
+
+    var query = "";
+    var resposta = {};
+    var nrParcela = 0;
+    var arrayMovimentacao = null; //idMovimentacao.split(",");
+    var j = 0;
+    var aResposta = [];
+    var total = 0;
+    var parcela = null;
+    var titulo = null;
+    var Atitulo = [];
+    var movimentacaoFinal = [];
+    var arrayEntidade = [];
+    var arrayNotaUnica = [];
+    
+    try {
+        parametros = req.body.parametros;
+        filtros = parametros.paramArray;
+        var idcontasreceber = "";    
+        var idcontasreceber2 = "";    
+        
+        if(filtros){
+            console.log(filtros.length)
+            if(filtros.length > 0){
+                for (let i = 0; i < filtros.length; i++) {
+                    if(i == 0){
+                        idcontasreceber += " '" + filtros[i] + "'"
+                        idcontasreceber2 += " '" + filtros[i] + "'"
+                    }else{
+                        idcontasreceber += " OR movimentacao_servicos.id_contas_receber='" + filtros[i] + "'"
+                        idcontasreceber2 += " OR id='" + filtros[i] + "'"
+                    }                    
+                }
+            }
+        }
+        
+        var deletar = "";
+        var  select = "";
+
+        select += "SELECT empresa.nm_razaosocial AS RazaoSocialPrestador, empresa.sn_pessoafisica AS PessoaFisicaPrestador, empresa.nm_cpf AS CpfPrestador, "; 
+        select += "     empresa.nm_rg AS RgPrestador, empresa.nm_cnpj AS CnpjPrestador, empresa.nm_inscricaomunicipal AS InscricaoMunicipalPrestador,  ";
+        select += "     empresa.nm_inscricaoestadual AS IePrestador, empresa.nm_ddd AS DDDPrestador, empresa.nm_telefone AS TelefonePrestador, ";
+		select += "	 CddPrestador.nm_codigo AS CodigoCidadePrestador, CddPrestador.nm_descricao AS DescricaoCidadePrestador, entidade.nm_razaosocial AS RazaoSocialTomador,  ";
+        select += "     entidade.sn_pessoafisica AS PessoaFisicaTomador, entidade.nm_cpf AS CpfTomador, entidade.nm_rg AS RgTomador,  ";
+        select += "     entidade.nm_cnpj AS CnpjTomador, entidade.nm_inscricaomunicipal AS InscricaoMunicipalTomador, entidade.nm_inscricaoestadual AS InscricaoEstadualTomador,  ";
+        select += "     contato.nm_ddd AS DDDTomador, contato.nm_Telefone AS TelefoneTomador, contato.nm_email AS EmailTomador,  ";
+        select += "     dsg_pais.nm_descricao AS PaisTomador, dsg_tipo_logradouro.nm_apelido AS TipoLogradouroTomador, endereco.nm_logradouro AS EnderecoTomador,  ";
+        select += "     endereco.nm_numero AS NumeroTomador, endereco.nm_complemento AS ComplementoTomador, endereco.nm_bairro AS BairroTomador,  ";
+        select += "     endereco.nm_cep AS CepTomador, dsg_ibge_cidade.nm_codigo AS CodigoCidadeTomador, dsg_ibge_cidade.nm_descricao AS DescricaoCidadeTomador,  ";
+        select += "     dsg_ibge_uf.nm_descricao AS UfTomador, dsg_natureza_tributacao.nm_apelido AS NaturezaTributacao, dsg_codigo_tributario_servico.nm_apelido AS RegimeEspecialTributacao,  ";
+        select += "     dsg_rps.nm_apelido AS TipoTributacao, dsg_cnae.nm_apelido AS CodigoCnae, contas_receber_parcelas.nm_documento AS NumeroRpsNew,  ";
+        select += "     contas_receber_parcelas.nm_numero_rps AS NumeroRpsEnviado, contas_receber_parcelas.nm_numero_nfse AS NumeroNfseSubstituida, contas_receber_parcelas.nm_protocolo_nfse AS ProtocoloNfse, "; 
+             
+		select += "	 '' AS JustificativaDeducao,  ";
+		select += "	 '' As ValorTotalDeducao,  ";
+		select += "	 0 AS ValorTotalDesconto,  ";
+        select += "     contas_receber_parcelas.vl_valor AS ValorTotalServicos,  ";
+		select += "	 0 AS ValorTotalBaseCalculo,  ";
+		select += "	 0 AS ValorIss,  ";
+        select += "     NULL AS TipoTrib_OLD,  ";
+		select += "	 contas_receber.dt_emissao AS DataInicio,  ";
+		select += "	 0 AS ValorIssRetido,  ";
+
+        select += "     produtos_detalhes.sn_reteriss AS TemIssRetido, produtos_detalhes.vl_aliquotaiss AS AliquotaISS, produtos_detalhes.nm_codigoservico AS CodigoItemListaServico,  ";
+        select += "     produtos.nm_descricao AS DiscriminacaoServico,  ";
+        select += "     subservico.nm_descricao AS DiscriminacaoServico2, ";
+		select += "	 COUNT(movimentacao_servicos.id_subservicos) AS QuantidadeServicos,  ";
+		select += "	 SUM(movimentacao_servicos.vl_valor) AS ValorUnitarioServico,  ";
+        select += "     0 AS ValorDesconto,  ";
+		select += "	 0 AS ValorPis,  ";
+		select += "	 0 AS ValorCofins,  ";
+        select += "     0 AS AliquotaPIS,  ";
+		select += "	 0 AS AliquotaCOFINS,  ";
+		select += "	 movimentacao_servicos.id_subservicos AS IDProdutos_VendaProdutos, "; 
+
+		select += "	 contas_receber_parcelas.nm_serie_rps AS SerieRpsSubstituido , movimentacao_servicos.id_contas_receber ";
+
+        select += " ,(SELECT status FROM nfse WHERE id=movimentacao_servicos.id_contas_receber) AS status "
+
+        select += "FROM movimentacao_servicos ";
+        select += "INNER JOIN contas_receber_parcelas ON contas_receber_parcelas.id=movimentacao_servicos.id_contas_receber ";
+        select += "INNER JOIN contas_receber ON contas_receber.id=contas_receber_parcelas.id_contas_receber ";
+        select += "INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade ";
+        select += "INNER JOIN empresa ON empresa.id='9F39BDCF-6B98-45DE-A819-24B7F3EE2560' ";
+        select += "LEFT OUTER JOIN dsg_ibge_cidade AS CddPrestador ON empresa.id_dsg_ibge_cidade = CddPrestador.id  ";
+        select += "LEFT OUTER JOIN dsg_cnae ON dsg_cnae.id = empresa.id_dsg_cnae  ";
+        select += "LEFT OUTER JOIN dsg_natureza_tributacao ON dsg_natureza_tributacao.id = empresa.id_dsg_natureza_tributacao  ";
+        select += "LEFT OUTER JOIN dsg_codigo_tributario_servico ON empresa.id_dsg_codigo_tributario_servico = dsg_codigo_tributario_servico.id  ";
+
+        select += "LEFT JOIN produtos ON movimentacao_servicos.id_produtos = produtos.id  ";
+        select += "LEFT JOIN subservico ON movimentacao_servicos.id_subservicos = subservico.id ";
+        select += "LEFT JOIN produtos_detalhes ON produtos.id = produtos_detalhes.id_produtos  ";
+        select += "LEFT OUTER JOIN dsg_rps ON '70350CC4-B12F-47D7-88F1-7532A1C20F31' = dsg_rps.id  ";
+
+        select += "LEFT OUTER JOIN contato ON contato.id_entidade = entidade.id  ";
+        select += "LEFT OUTER JOIN endereco ON endereco.id_entidade = entidade.id  ";
+        select += "LEFT OUTER JOIN dsg_ibge_uf ON endereco.id_dsg_ibge_uf = dsg_ibge_uf.id  ";
+        select += "LEFT OUTER JOIN dsg_pais ON dsg_pais.id = endereco.id_dsg_pais  ";
+        select += "LEFT OUTER JOIN dsg_ibge_cidade ON endereco.id_dsg_ibge_cidade = dsg_ibge_cidade.id  ";
+        select += "LEFT OUTER JOIN dsg_tipo_logradouro ON endereco.id_dsg_tipo_logradouro = dsg_tipo_logradouro.id  ";
+        
+        select += "WHERE movimentacao_servicos.id_contas_receber=" + idcontasreceber + " ";
+
+        select += "AND nm_numero_nfes IS NULL ";
+        select += "GROUP BY  ";
+        select += "empresa.nm_razaosocial, empresa.sn_pessoafisica, empresa.nm_cpf, "; 
+        select += "empresa.nm_rg, empresa.nm_cnpj, empresa.nm_inscricaomunicipal,  ";
+        select += "empresa.nm_inscricaoestadual, empresa.nm_ddd, empresa.nm_telefone, ";
+        select += "CddPrestador.nm_codigo, CddPrestador.nm_descricao, entidade.nm_razaosocial,  ";
+        select += "entidade.sn_pessoafisica, entidade.nm_cpf, entidade.nm_rg,  ";
+        select += "entidade.nm_cnpj, entidade.nm_inscricaomunicipal, entidade.nm_inscricaoestadual,  ";
+        select += "contato.nm_ddd, contato.nm_Telefone, contato.nm_email,  ";
+        select += "dsg_pais.nm_descricao,  ";
+        select += "dsg_tipo_logradouro.nm_apelido, endereco.nm_logradouro,  ";
+        select += "endereco.nm_numero,  ";
+        select += "endereco.nm_complemento,  ";
+        select += "endereco.nm_bairro,  ";
+        select += "endereco.nm_cep,  ";
+        select += "dsg_ibge_cidade.nm_codigo,  ";
+        select += "dsg_ibge_cidade.nm_descricao,  ";
+        select += "dsg_ibge_uf.nm_descricao,  ";
+        select += "dsg_natureza_tributacao.nm_apelido,  ";
+        select += "dsg_codigo_tributario_servico.nm_apelido,  ";
+        select += "dsg_rps.nm_apelido,  ";
+        select += "dsg_cnae.nm_apelido,  ";
+        select += "contas_receber_parcelas.nm_documento,  ";
+        select += "contas_receber_parcelas.nm_numero_rps,  ";
+        select += "contas_receber_parcelas.nm_numero_nfse, ";
+        select += "contas_receber_parcelas.nm_protocolo_nfse,  ";
+             
+        select += "contas_receber_parcelas.vl_valor,  ";
+        select += "contas_receber.dt_emissao,  ";
+
+        select += "produtos_detalhes.sn_reteriss,  ";
+        select += "produtos_detalhes.vl_aliquotaiss,  ";
+        select += "produtos_detalhes.nm_codigoservico,  ";
+        select += "produtos.nm_descricao, ";
+        select += "movimentacao_servicos.id_subservicos, ";
+        select += "contas_receber_parcelas.nm_serie_rps,  ";
+        select += "subservico.nm_descricao, movimentacao_servicos.id_contas_receber ";
+        
+        sql.close(); 
+        sql.connect(config, function (err) { 
+            if (err) console.log(err); 
+            var request = new sql.Request(); 
+            request.query(select, function (err, recordset){ 
+                if (err) console.log(err);
+                      
+                try{
+                    var transacao = new sql.Transaction();
+                    transacao.begin(err =>{
+                        for (let h = 0; h < recordset.recordsets[0].length; h++) {
+                            var movimentacao = recordset.recordsets[0][h];
+                            var id = movimentacao.id_contas_receber
+                            var RazaoSocialPrestador = movimentacao.RazaoSocialPrestador
+                            var PessoaFisicaPrestador = movimentacao.PessoaFisicaPrestador
+                            var CpfPrestador = movimentacao.CpfPrestador
+                            var RgPrestador = movimentacao.RgPrestador
+                            var CnpjPrestador = movimentacao.CnpjPrestador
+                            var InscricaoMunicipalPrestador	= movimentacao.InscricaoMunicipalPrestador
+                            var IePrestador = movimentacao.IePrestador
+                            var DDDPrestador = movimentacao.DDDPrestador
+                            var TelefonePrestador = movimentacao.TelefonePrestador
+                            var CodigoCidadePrestador = movimentacao.CodigoCidadePrestador
+                            var DescricaoCidadePrestador = movimentacao.DescricaoCidadePrestador
+                            var RazaoSocialTomador = movimentacao.RazaoSocialTomador
+                            var PessoaFisicaTomador = movimentacao.PessoaFisicaTomador
+                            var CpfTomador = movimentacao.CpfTomador
+                            var RgTomador = movimentacao.RgTomador
+                            var CnpjTomador = movimentacao.CnpjTomador
+                            var InscricaoMunicipalTomador = movimentacao.InscricaoMunicipalTomador
+                            var InscricaoEstadualTomador = movimentacao.InscricaoEstadualTomador
+                            var DDDTomador = movimentacao.DDDTomador
+                            var TelefoneTomador = movimentacao.TelefoneTomador
+                            var EmailTomador = movimentacao.EmailTomador
+                            var PaisTomador = movimentacao.PaisTomador
+                            var TipoLogradouroTomador = movimentacao.TipoLogradouroTomador
+                            var EnderecoTomador = movimentacao.EnderecoTomador
+                            var NumeroTomador = movimentacao.NumeroTomador
+                            var ComplementoTomador = movimentacao.ComplementoTomador
+                            var BairroTomador = movimentacao.BairroTomador
+                            var CepTomador = movimentacao.CepTomador
+                            var CodigoCidadeTomador = movimentacao.CodigoCidadeTomador
+                            var DescricaoCidadeTomador = movimentacao.DescricaoCidadeTomador
+                            var UfTomador = movimentacao.UfTomador
+                            var NaturezaTributacao = movimentacao.NaturezaTributacao
+                            var RegimeEspecialTributacao = movimentacao.RegimeEspecialTributacao
+                            var TipoTributacao = movimentacao.TipoTributacao
+                            var CodigoCnae = movimentacao.CodigoCnae
+                            var NumeroRpsNew = movimentacao.NumeroRpsNew
+                            var NumeroRpsEnviado = movimentacao.NumeroRpsEnviado
+                            var NumeroNfseSubstituida = movimentacao.NumeroNfseSubstituida
+                            var ProtocoloNfse = movimentacao.ProtocoloNfse
+                            var JustificativaDeducao = movimentacao.JustificativaDeducao
+                            var ValorTotalDeducao = movimentacao.ValorTotalDeducao
+                            var ValorTotalDesconto = movimentacao.ValorTotalDesconto
+                            var ValorTotalServicos = movimentacao.ValorTotalServicos
+                            var ValorTotalBaseCalculo = movimentacao.ValorTotalBaseCalculo
+                            var ValorIss = movimentacao.ValorIss
+                            var TipoTrib_OLD = movimentacao.TipoTrib_OLD
+                            var DataInicio = movimentacao.DataInicio
+                            var ValorIssRetido = movimentacao.ValorIssRetido
+                            var TemIssRetido = movimentacao.TemIssRetido
+                            var AliquotaISS = movimentacao.AliquotaISS
+                            var CodigoItemListaServico = movimentacao.CodigoItemListaServico
+                            var DiscriminacaoServico = movimentacao.DiscriminacaoServico
+                            var DiscriminacaoServicoSub = movimentacao.DiscriminacaoServico2
+
+                            if(!DiscriminacaoServicoSub){
+                                DiscriminacaoServicoSub = DiscriminacaoServico;
+                            }
+
+                            var QuantidadeServicos = movimentacao.QuantidadeServicos
+                            var ValorUnitarioServico = movimentacao.ValorUnitarioServico
+                            var ValorDesconto = movimentacao.ValorDesconto
+                            var ValorPis = movimentacao.ValorPis
+                            var ValorCofins = movimentacao.ValorCofins
+                            var AliquotaPIS = movimentacao.AliquotaPIS
+                            var AliquotaCOFINS = movimentacao.AliquotaCOFINS
+                            var IDProdutos_VendaProdutos = movimentacao.IDProdutos_VendaProdutos
+                            var SerieRpsSubstituido = movimentacao.SerieRpsSubstituido
+                            var status = movimentacao.status
+
+                            if(status == "Pendente" || !status){
+
+                                deletar += " DELETE FROM nfse WHERE id='" + id + "' AND status='Pendente';  ";
+
+                                query += " INSERT INTO nfse (id, RazaoSocialPrestador, PessoaFisicaPrestador, CpfPrestador, ";
+                                query += " RgPrestador, CnpjPrestador, InscricaoMunicipalPrestador, IePrestador, ";
+                                query += "DDDPrestador, TelefonePrestador, CodigoCidadePrestador, DescricaoCidadePrestador, ";
+                                query += "RazaoSocialTomador, PessoaFisicaTomador, CpfTomador, RgTomador, CnpjTomador, ";
+                                query += "InscricaoMunicipalTomador, InscricaoEstadualTomador, DDDTomador, TelefoneTomador, ";
+                                query += " EmailTomador, PaisTomador, TipoLogradouroTomador, EnderecoTomador, NumeroTomador, ";
+                                query += " ComplementoTomador, BairroTomador, CepTomador, CodigoCidadeTomador, ";
+                                query += " DescricaoCidadeTomador, UfTomador, NaturezaTributacao, RegimeEspecialTributacao, ";
+                                query += " TipoTributacao, CodigoCnae, NumeroRpsNew, NumeroRpsEnviado, NumeroNfseSubstituida, ";
+                                query += " ProtocoloNfse, JustificativaDeducao, ValorTotalDeducao, ValorTotalDesconto, ";
+                                query += " ValorTotalServicos, ValorTotalBaseCalculo, ValorIss, TipoTrib_OLD, ";
+                                query += " DataInicio, ValorIssRetido, TemIssRetido, AliquotaISS, CodigoItemListaServico, ";
+                                query += " DiscriminacaoServico, QuantidadeServicos, ValorUnitarioServico, ";
+                                query += " ValorDesconto, ValorPis, ValorCofins, AliquotaPIS, AliquotaCOFINS, ";
+                                query += " IDProdutos_VendaProdutos, SerieRpsSubstituido, status) ";
+    
+                                query += " VALUES( '" + id + "', '";
+                                query += RazaoSocialPrestador + "', '" + PessoaFisicaPrestador + "', '" + CpfPrestador + "', '";
+                                query += RgPrestador + "', '" + CnpjPrestador + "', '" + InscricaoMunicipalPrestador + "', '";
+                                query += IePrestador + "', '" + DDDPrestador + "', '" + TelefonePrestador + "', '";
+                                query += CodigoCidadePrestador + "', '" + DescricaoCidadePrestador + "', '";
+                                query += RazaoSocialTomador + "', '" + PessoaFisicaTomador + "', '" + CpfTomador;
+                                query += "', '" + RgTomador + "', '" + CnpjTomador + "', '" + InscricaoMunicipalTomador;
+                                query +=  "', '" + InscricaoEstadualTomador + "', '" + DDDTomador + "', '" + TelefoneTomador;
+                                query +=  "', '" + EmailTomador + "', '" + PaisTomador + "', '" + TipoLogradouroTomador;
+                                query +=  "', '" + EnderecoTomador + "', '" + NumeroTomador + "', '" + ComplementoTomador;
+                                query +=  "', '" + BairroTomador + "', '" + CepTomador + "', '" + CodigoCidadeTomador;
+                                query +=  "', '" + DescricaoCidadeTomador + "', '" + UfTomador + "', '";
+                                query +=  NaturezaTributacao + "', '" + RegimeEspecialTributacao + "', '" + TipoTributacao;
+                                query +=  "', '" + CodigoCnae + "', '" + NumeroRpsNew + "', '" + NumeroRpsEnviado;
+                                query +=  "', '" + NumeroNfseSubstituida + "', '" + ProtocoloNfse + "', '";
+                                query +=  JustificativaDeducao + "', '" + ValorTotalDeducao + "', '" + ValorTotalDesconto;
+                                query +=  "', '" + ValorTotalServicos + "', '" + ValorTotalBaseCalculo;
+                                query +=  "', '" + ValorIss + "', '" + TipoTrib_OLD + "', '" + DataInicio;
+                                query +=  "', '" + ValorIssRetido + "', '" + TemIssRetido + "', '" + AliquotaISS;
+                                query +=  "', '" + CodigoItemListaServico + "', '" + DiscriminacaoServicoSub;
+                                query +=  "', '" + QuantidadeServicos;
+                                query +=  "', '" + ValorUnitarioServico + "', '" + ValorDesconto + "', '" + ValorPis;
+                                query +=  "', '" + ValorCofins + "', '" + AliquotaPIS + "', '" + AliquotaCOFINS;
+                                query +=  "', '" + IDProdutos_VendaProdutos + "', '" + SerieRpsSubstituido + "', 'Pendente'); ";
+                                
+                            }else{
+                                resposta.status = -4;
+                                resposta.mensagem = [];
+                                resposta.mensagem.push("Uma ou mais notas já foram enviadas para a prefeitura");
+                                resposta.titulo = null;
+                                aResposta.push(resposta);
+                            }
+
+                        }
+
+                        if(aResposta){
+                            if(aResposta.length > 0){
+                                res.send(aResposta); 
+                            }
+                        }
+
+                        query = deletar + query;
+
+                        if(query){
+                            
+                            var request = new sql.Request(transacao);
+                            request.query(query, function (err, recordset) {
+                                if (err){
+                                    resposta.status = -4;
+                                    resposta.mensagem = [];
+                                    resposta.mensagem.push("" + err);
+                                    resposta.titulo = null;
+                                    transacao.rollback();
+                                    aResposta.push(resposta);
+                                    res.send(aResposta);     
+                                }
+                                else{
+                                    resposta.status = 1;
+                                    resposta.mensagem = ["ok"];
+                                    resposta.titulo =  "Nota(s) gerada(s) e aguardando envio para a prefeitura";
+                                    transacao.commit();
+                                    aResposta.push(resposta);
+                                    res.send(aResposta);         
+                                }
+                            }) 
+                        }  
+                    })                                  
+                }
+                catch(err){
+                    resposta.status = -5;
+                    resposta.mensagem = [];
+                    resposta.mensagem.push("" + err);
+                    resposta.titulo = null;
+                    aResposta.push(resposta);
+                    res.send(aResposta);                                 
+                }
+
+                                        //res.send(recordset); 
+            }); 
+        }); 
+    } catch (error) {
+        
+    }
+    
+});
+
+
+
+
+router.route('/carregarNFSe').get(function(req, res) {
+    
+    var  select = "";
+    select += " SELECT cast('false' as bit)  AS 'Marcar', id AS 'id', dataemissao AS 'data',RazaoSocialTomador AS 'razaosocial',  ";
+    select += " CnpjTomador AS 'cnpj', ValorTotalServicos AS 'valor',  ";
+    select += " status AS 'status' ";
+    select += " FROM nfse ";
+    select += " WHERE status = 'Pendente' ";
+    select += " GROUP BY  id,dataemissao, RazaoSocialTomador, CnpjTomador, ValorTotalServicos, status ";
+
+    sql.close(); 
+    sql.connect(config, function (err) { 
+        if (err) console.log(err); 
+        var request = new sql.Request(); 
+        request.query(select, function (err, recordset){ 
+            if (err) console.log(err);
+
+            var retorno = recordset;
+            if(retorno){
+                if(retorno.recordset){
+                    retorno = retorno.recordset;
+                }
+            }
+            res.send(retorno); 
+        }); 
+    }); 
+});
+
+
+
+
+
+router.route('/enviarNFSe').post(function(req, res) {
+    
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
+    res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+    
+    var retorno = false;
+    var update = "";
+    var parametros = req.body;
+    var EnterpriseID = "9F39BDCF-6B98-45DE-A819-24B7F3EE2560";
+    var urlWindows = "";
+
+    callWebAPI(parametros,urlWindows, function(){
+
+        for (let index = 0; index < parametros.length; index++) {
+            const element = parametros[index];
+            update += "UPDATE nfse SET status='Enviado' WHERE id='" + element + "'; ";
+        }
+    
+        if(!update){
+            res.send("");
+        }
+    
+        sql.close(); 
+        sql.connect(config, function (err) { 
+            if (err) console.log(err); 
+       
+            try{
+                var transacao = new sql.Transaction();
+                transacao.begin(err =>{
+                    if(update){                        
+                        var request = new sql.Request(transacao);
+                        request.query(update, function (err, recordset) {
+                            if (err){
+                                res.send(err);     
+                            }
+                            else{
+                                res.send("Nota(s) enviada(s) com sucesso");         
+                            }
+                        }) 
+                    }  
+                })                                  
+            }
+            catch(err){
+                res.send(err);                                 
+            }
+        });
+    })
+    
+
+})
+
+
+
+
+
+function callWebAPI(dados,url, callback){
+    var Client = require('node-rest-client').Client;
+    
+   // direct way 
+   var client = new Client();   
+
+   var args = {
+    data: dados,
+    headers: { "Content-Type": "application/json" }
+    };
+    
+   client.post(url, args,
+       function (data, response) {
+           if (callback) {
+                callback(data);
+           }
+            
+       }
+    );
 }
