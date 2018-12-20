@@ -2946,7 +2946,6 @@ router.route('/enviarNFSe').post(function(req, res) {
     var EnterpriseID = "9F39BDCF-6B98-45DE-A819-24B7F3EE2560";
     var urlWindows = "";
 
-    callWebAPI(parametros,urlWindows, function(){
 
         for (let index = 0; index < parametros.length; index++) {
             const element = parametros[index];
@@ -2980,12 +2979,129 @@ router.route('/enviarNFSe').post(function(req, res) {
             catch(err){
                 res.send(err);                                 
             }
-        });
-    })
-    
+        });   
 
 })
 
+
+router.route('/getInfoNFSe').post(function(req, res) {
+    
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
+    res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+    
+    var retorno = false;
+    var update = "";
+    var parametros = req.body;
+
+    var enterpriseID = parametros.enterpriseID;
+    
+    var select = " SELECT empresa.nm_razaosocial AS 'NomeFantasiaPrestador', empresa.nm_nomefantasia AS 'RazaoSocialPrestador',  ";
+    select += " empresa.nm_logradouro AS 'EnderecoPrestador', dsg_ibge_uf.nm_descricao AS 'UfPrestador',  ";
+    select += " dsg_ibge_cidade.nm_codigo AS 'CodigoMunicipioPrestador','' AS 'BairroPrestador', '' AS 'CepPrestador', '' AS 'TelefonePrestador', ";
+    select += " '' AS 'EmailPrestador', dsg_ibge_cidade.nm_descricao AS 'CidadePrestador',  ";
+    select += " empresa.nm_inscricaomunicipal AS 'IncricaoMunicipalPrestador',  ";
+    select += " empresa.nm_cnpj AS 'CnpjPrestador' ";
+    select += " FROM empresa  ";
+    select += " LEFT OUTER JOIN dsg_ibge_cidade ON empresa.id_dsg_ibge_cidade = dsg_ibge_cidade.id  ";
+    select += " LEFT OUTER JOIN dsg_ibge_uf ON empresa.id_dsg_ibge_uf = dsg_ibge_uf.id  ";
+    select += " WHERE empresa.id = '" + enterpriseID + "'; ";
+
+    select += "SELECT TOP 1 nm_certificado AS 'certificadoDigital', nm_senhacertificadodigital AS 'senhaCertificado',  ";
+    select += " sn_ambienteproducao AS 'ambienteGeracaoNFse', id_dsg_tipo_certificado AS 'idTipoCertificado', ";
+    select += " nm_serie AS 'serie', nr_numerolote AS 'numeroLote', sn_enviaremail AS 'enviarEmail',  ";
+    select += " nm_assuntoemailnfe AS 'assuntoEmailNFe', nm_texto_email AS 'textoEmail', nm_emailcopia AS 'emailCopia', ";
+    select += " '' AS 'logoTipo' FROM configuracao_nfe_servico ";
+    select += "WHERE id_empresa = '" + enterpriseID + "'; ";
+
+
+
+
+
+
+    select += "SELECT RazaoSocialPrestador, PessoaFisicaPrestador, CpfPrestador, ";
+    select += " RgPrestador, CnpjPrestador, InscricaoMunicipalPrestador, ";
+    select += " IePrestador, DDDPrestador, TelefonePrestador, ";
+    select += " CodigoCidadePrestador, DescricaoCidadePrestador, RazaoSocialTomador, ";
+    select += " PessoaFisicaTomador, CpfTomador, RgTomador, ";
+    select += " CnpjTomador, InscricaoMunicipalTomador, InscricaoEstadualTomador, ";
+    select += " DDDTomador, TelefoneTomador, EmailTomador, ";
+    select += " PaisTomador, TipoLogradouroTomador, EnderecoTomador, ";
+    select += " NumeroTomador, ComplementoTomador, BairroTomador, ";
+    select += " CepTomador, CodigoCidadeTomador, DescricaoCidadeTomador, ";
+    select += " UfTomador, NaturezaTributacao, RegimeEspecialTributacao, ";
+    select += " TipoTributacao, CodigoCnae, NumeroRpsNew, ";
+    select += " NumeroRpsEnviado, NumeroNfseSubstituida, ProtocoloNfse, ";
+    select += " JustificativaDeducao, ValorTotalDeducao, ValorTotalDesconto, ";
+    select += " ValorTotalServicos, ValorTotalBaseCalculo, ValorIss, ";
+    select += " TipoTrib_OLD, DataInicio, ValorIssRetido, ";
+    select += " TemIssRetido, AliquotaISS, CodigoItemListaServico, ";
+    select += " DiscriminacaoServico, QuantidadeServicos, ValorUnitarioServico, ";
+    select += " ValorDesconto, ValorPis, ValorCofins, ";
+    select += " AliquotaPIS, AliquotaCOFINS, IDProdutos_VendaProdutos, SerieRpsSubstituido ";
+    select += " FROM nfse ";
+    select += " WHERE ";
+
+    var where = "";
+
+    for (let index = 0; index < parametros.listID.length; index++) { 
+        if(index == 0){
+            where += " (nfse.id ='" + parametros.listID[index] + "')";
+        }else{
+            where += " OR (nfse.id ='" + parametros.listID[index] + "')";
+        }        
+    }
+    
+    select = select + where;
+
+
+    sql.close(); 
+    sql.connect(config, function (err) { 
+        if (err) console.log(err); 
+        var request = new sql.Request(); 
+        request.query(select, function (err, recordset){ 
+            if (err) console.log(err);
+
+            var retorno = [1];
+            var Prestador = {};
+            var final = {};
+            var configurationNFSe = {};
+            final = {};
+            final.Prestador = {};
+            final.ConfigurationNFSe = {};
+            
+            if(recordset){
+                if(recordset.recordsets){                    
+                    for (let index = 0; index < recordset.recordsets.length; index++) {  
+                        retorno = [];
+                        if(index == 0){
+                            Prestador = recordset.recordsets[index][0];
+                            retorno.push(Prestador);
+                            final.Prestador = retorno;
+                        }
+
+                        if(index == 1){
+                            configurationNFSe = recordset.recordsets[index][0];
+                            retorno.push(configurationNFSe);
+                            final.ConfigurationNFSe = retorno;
+                        }
+
+                        if(index == 2){
+                            NotaFiscalServico = recordset.recordsets[index][0];
+                            retorno.push(NotaFiscalServico);
+                            final.NotaFiscalServico = retorno;
+                        }
+                    }
+
+
+                }
+            }
+
+            res.send(final); 
+        }); 
+    }); 
+});
 
 
 
