@@ -54,7 +54,7 @@ router.route('/*').get(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "homologa"; //"broker";
+        dados = "broker"; //"broker";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
         local = true;
     }else{
@@ -103,7 +103,7 @@ router.route('/*').get(function(req, res, next) {
 function conectionsLink(full, callback){
     if(String(full).indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "homologa"; //"broker";
+        dados = "broker"; //"broker";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
     }else{
         var parts = String(full).split('.');
@@ -3429,25 +3429,41 @@ router.route('/menucustom/:idusuario').get(function(req, res) {
                                         if(menuAdmin.length > 0){
                                             $(menuAdmin[0]).remove();
                                         }
-                                        var menu = $("li[id]");
-                                        for (let j = 0; j < menu.length; j++) {
-                                            var itemmenu = 0;
-                                            var itemHTML = $(menu[j]).attr("id").toLowerCase()
-                                            for (let i = 0; i < recordset.recordset.length; i++) {
-                                                var itemBD = recordset.recordset[i].baseObjectID.toLowerCase();
+                                        
+                                        var menu = $("li a[href]"); //$("li[id]");
 
-                                                if(itemBD==itemHTML){
-                                                    itemmenu = i;
-                                                    break;
+                                        for (let j = 0; j < menu.length; j++) {
+                                            var inicio = $(menu[j]).attr("href").indexOf("','") + 3;
+                                            var total = $(menu[j]).attr("href").length;
+                                            var fim = total - inicio;
+                                            var id = $(menu[j]).attr("href").substring(inicio, fim);
+                                            id = id.substring(0, $(menu[j]).attr("href").indexOf("','") + 2);
+                                            id = id.replace("'", "");
+
+                                            if(id.length > 36){
+                                                id = id.substring(0,36);
+                                            }
+
+                                            if(id != "#" && id){
+                                                var itemmenu = 0;
+                                                var itemHTML = id.toLowerCase();//$(menu[j]).attr("id").toLowerCase()
+                                                for (let i = 0; i < recordset.recordset.length; i++) {
+                                                    var itemBD = recordset.recordset[i].baseObjectID.toLowerCase();
+    
+                                                    if(itemBD==itemHTML){
+                                                        itemmenu = i;
+                                                        break;
+                                                    }
+                                                } 
+                                                if(itemHTML == "d82d11c8-ea16-47c7-be04-10423467f04e"){
+                                                    console.log(itemHTML)
+                                                    console.log(itemmenu)
                                                 }
-                                            } 
-                                            if(itemHTML == "d82d11c8-ea16-47c7-be04-10423467f04e"){
-                                                console.log(itemHTML)
-                                                console.log(itemmenu)
+                                                if(itemmenu == 0){
+                                                    $(menu[j]).remove(); //$("#" + itemHTML).remove()                                
+                                                }
                                             }
-                                            if(itemmenu == 0){
-                                                $("#" + itemHTML).remove()                                
-                                            }
+                                            
                                         }                
                                     }
                                 }
