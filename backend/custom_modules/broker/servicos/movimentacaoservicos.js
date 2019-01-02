@@ -1138,15 +1138,15 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
         user: 'Intelecta',
         host: 'Brokerbrasil.dyndns.org',
         database: 'BySisco',
-        password: 'Broker2018',
+        password: '$T3[K?nH|mxI:M8>zE&T',
         port: 5432,
     })
 
-    query += " SELECT venda.idvenda AS id,venda.codigo AS codigo, ";
+    query += " SELECT venda.idvenda AS idvenda,venda.codigo AS codigo, ";
     query += " TO_CHAR(venda.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, ('RVS') AS nomeservico, vendaoperacao.valor AS valortotal ";
+    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RVS') AS cnpj, vendaoperacao.valor AS valortotal, ('0') AS existe ";
     query += " FROM venda ";
-    query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoaadquirente  ";
+    query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda  ";
     query += " INNER JOIN vendaoperacao ON vendaoperacao.idvenda = venda.idvenda ";
     if(dataDe){ 
         if(dataDe != "*"){ 
@@ -1159,9 +1159,9 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
         } 
     } 
     query += " UNION ALL ";
-    query += " SELECT aquisicao.idaquisicao AS id,aquisicao.codigo AS codigo, ";
+    query += " SELECT aquisicao.idaquisicao AS idvenda,aquisicao.codigo AS codigo, ";
     query += " TO_CHAR(aquisicao.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, ('RAS') AS nomeservico, aquisicaooperacao.valor AS valortotal ";
+    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RAS') AS cnpj, aquisicaooperacao.valor AS valortotal, ('0') AS existe ";
     query += " FROM aquisicao ";
     query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
     query += " INNER JOIN aquisicaooperacao ON aquisicaooperacao.idaquisicao = aquisicao.idaquisicao ";
@@ -1177,12 +1177,12 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
     }    
     
     query += " UNION ALL ";
-    query += " SELECT faturamento.idfaturamento AS id,faturamento.codigo AS codigo, ";
+    query += " SELECT faturamento.idfaturamento AS idvenda,faturamento.codigo AS codigo, ";
     query += " TO_CHAR(faturamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, ('RF') AS nomeservico, faturamentooperacao.valorfaturado AS valortotal ";
+    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RF') AS cnpj, faturamentooperacao.valorfaturado AS valortotal, ('0') AS existe ";
     query += " FROM faturamento ";
     query += " INNER JOIN venda ON venda.idvenda = faturamento.idvenda ";
-    query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoaadquirente ";
+    query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda ";
     query += " INNER JOIN faturamentooperacao ON faturamentooperacao.idfaturamento = faturamento.idfaturamento ";
     if(dataDe){ 
         if(dataDe != "*"){ 
@@ -1196,9 +1196,9 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
     } 
 
     query += " UNION ALL ";
-    query += " SELECT pagamento.idpagamento AS id,pagamento.codigo AS codigo, ";
+    query += " SELECT pagamento.idpagamento AS idvenda,pagamento.codigo AS codigo, ";
     query += " TO_CHAR(pagamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, ('RP') AS nomeservico, pagamentooperacao.valorpago AS valortotal ";
+    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RP') AS cnpj, pagamentooperacao.valorpago AS valortotal, ('0') AS existe ";
     query += " FROM pagamento ";
     query += " INNER JOIN aquisicao ON aquisicao.idaquisicao = pagamento.idaquisicao ";
     query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
@@ -1243,13 +1243,75 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
 
 
     pool.query(query, (err, rest) => {
-        console.log(err, rest)
+        //console.log(err, rest)
         pool.end()
-        console.log(query)
-        res.send(rest);
+        
+        var select = "SELECT REPLACE(REPLACE(REPLACE(nm_cnpj, '-', ''), '/', ''), '.', '') AS 'nm_cnpj' FROM entidade WHERE ";
+        var where = "";
+
+        for (let index = 0; index < rest.rows.length; index++) {
+            const element = rest.rows[index];
+            if(index == 0){
+                where += " entidade.nm_cnpj='" + element.nomeservico + "' OR ";
+                where += " nm_cnpj=(left ('" + element.nomeservico + "',2)+'.'+ ";
+                where += "                    right(left ('" + element.nomeservico + "',5),3)+'.'+ ";
+                where += "             right(left ('" + element.nomeservico + "',8),3)+'/'+ ";
+                where += "             right(left ('" + element.nomeservico + "',12),4)+'-'+ ";
+                where += "             right(left ('" + element.nomeservico + "',14),2)) ";
+            }else{
+                where += " OR entidade.nm_cnpj='" + element.nomeservico + "' OR ";
+                where += " nm_cnpj=(left ('" + element.nomeservico + "',2)+'.'+ ";
+                where += "                    right(left ('" + element.nomeservico + "',5),3)+'.'+ ";
+                where += "             right(left ('" + element.nomeservico + "',8),3)+'/'+ ";
+                where += "             right(left ('" + element.nomeservico + "',12),4)+'-'+ ";
+                where += "             right(left ('" + element.nomeservico + "',14),2)) ";
+            }            
+        }
+
+        select = select + where;
+
+        sql.close(); 
+        sql.connect(config, function (err) { 
+            if (err) console.log(err); 
+            var request = new sql.Request(); 
+            request.query(select, function (err, recordset){ 
+                if (err) console.log(err);
+                
+                if(recordset.recordsets){
+                    for (let index = 0; index < rest.rows.length; index++) {
+                        const element = rest.rows[index];
+                        if(adicionaOuRemove(rest.rows[index].nomeservico,recordset.recordsets[0])){
+                            rest.rows[index].existe = "1";
+                        }               
+                    }
+                }
+                rest.rows.sort(compare);
+                res.send(rest); 
+            }); 
+        }); 
+
     })
      
 });
+
+function adicionaOuRemove(id, obj) {
+    let index = obj.findIndex(obj => obj.nm_cnpj == id);
+    if(index < 0) {
+        return false;
+    } else {
+        return true;
+    }
+  }
+  
+  function compare(a,b) {
+    if (a.existe < b.existe)
+       return -1;
+    if (a.existe > b.existe)
+      return 1;
+    return 0;
+  }
+  
+  
 
 router.route('/onLoadVendedorServicos/:idVendedor').get(function(req, res) {
     var idVendedor = req.param('idVendedor'); 
@@ -2609,7 +2671,7 @@ router.route('/gerarNFSe').post(function(req, res) {
         var  select = "";
 
         select += "SELECT empresa.nm_razaosocial AS RazaoSocialPrestador, empresa.sn_pessoafisica AS PessoaFisicaPrestador, empresa.nm_cpf AS CpfPrestador, "; 
-        select += "     empresa.nm_rg AS RgPrestador, empresa.nm_cnpj AS CnpjPrestador, empresa.nm_inscricaomunicipal AS InscricaoMunicipalPrestador,  ";
+        select += "     empresa.nm_rg AS RgPrestador, empresa.nm_cnpj AS CpfCnpjPrestador, empresa.nm_inscricaomunicipal AS InscricaoMunicipalPrestador,  ";
         select += "     empresa.nm_inscricaoestadual AS IePrestador, empresa.nm_ddd AS DDDPrestador, empresa.nm_telefone AS TelefonePrestador, ";
 		select += "	 CddPrestador.nm_codigo AS CodigoCidadePrestador, CddPrestador.nm_descricao AS DescricaoCidadePrestador, entidade.nm_razaosocial AS RazaoSocialTomador,  ";
         select += "     entidade.sn_pessoafisica AS PessoaFisicaTomador, entidade.nm_cpf AS CpfTomador, entidade.nm_rg AS RgTomador,  ";
@@ -2623,25 +2685,25 @@ router.route('/gerarNFSe').post(function(req, res) {
         select += "     contas_receber_parcelas.nm_numero_rps AS NumeroRpsEnviado, contas_receber_parcelas.nm_numero_nfse AS NumeroNfseSubstituida, contas_receber_parcelas.nm_protocolo_nfse AS ProtocoloNfse, "; 
              
 		select += "	 '' AS JustificativaDeducao,  ";
-		select += "	 '' As ValorTotalDeducao,  ";
-		select += "	 0 AS ValorTotalDesconto,  ";
+		select += "	 '0.00' As ValorTotalDeducao,  ";
+		select += "	 '0.00' AS ValorTotalDesconto,  ";
         select += "     contas_receber_parcelas.vl_valor AS ValorTotalServicos,  ";
-		select += "	 0 AS ValorTotalBaseCalculo,  ";
-		select += "	 0 AS ValorIss,  ";
+		select += "	 '0.00' AS ValorTotalBaseCalculo,  ";
+		select += "	 '0.00' AS ValorIss,  ";
         select += "     NULL AS TipoTrib_OLD,  ";
 		select += "	 contas_receber.dt_emissao AS DataInicio,  ";
-		select += "	 0 AS ValorIssRetido,  ";
+		select += "	 '0.00' AS ValorIssRetido,  ";
 
         select += "     produtos_detalhes.sn_reteriss AS TemIssRetido, produtos_detalhes.vl_aliquotaiss AS AliquotaISS, produtos_detalhes.nm_codigoservico AS CodigoItemListaServico,  ";
         select += "     produtos.nm_descricao AS DiscriminacaoServico,  ";
         select += "     subservico.nm_descricao AS DiscriminacaoServico2, ";
 		select += "	 COUNT(movimentacao_servicos.id_subservicos) AS QuantidadeServicos,  ";
 		select += "	 SUM(movimentacao_servicos.vl_valor) AS ValorUnitarioServico,  ";
-        select += "     0 AS ValorDesconto,  ";
-		select += "	 0 AS ValorPis,  ";
-		select += "	 0 AS ValorCofins,  ";
-        select += "     0 AS AliquotaPIS,  ";
-		select += "	 0 AS AliquotaCOFINS,  ";
+        select += "     '0.00' AS ValorDesconto,  ";
+		select += "	 '0.00' AS ValorPis,  ";
+		select += "	 '0.00' AS ValorCofins,  ";
+        select += "     '0.00' AS AliquotaPIS,  ";
+		select += "	 '0.00' AS AliquotaCOFINS,  ";
 		select += "	 movimentacao_servicos.id_subservicos AS IDProdutos_VendaProdutos, "; 
 
 		select += "	 contas_receber_parcelas.nm_serie_rps AS SerieRpsSubstituido , movimentacao_servicos.id_contas_receber ";
@@ -2722,59 +2784,188 @@ router.route('/gerarNFSe').post(function(req, res) {
                     transacao.begin(err =>{
                         for (let h = 0; h < recordset.recordsets[0].length; h++) {
                             var movimentacao = recordset.recordsets[0][h];
+
                             var id = movimentacao.id_contas_receber
                             var RazaoSocialPrestador = movimentacao.RazaoSocialPrestador
+                            RazaoSocialPrestador = (!RazaoSocialPrestador) ? "" : RazaoSocialPrestador;
+                            
                             var PessoaFisicaPrestador = movimentacao.PessoaFisicaPrestador
+                            PessoaFisicaPrestador = (!PessoaFisicaPrestador) ? "" : PessoaFisicaPrestador;
+                            
                             var CpfPrestador = movimentacao.CpfPrestador
+                            CpfPrestador = (!CpfPrestador) ? "" : CpfPrestador;
+                            
                             var RgPrestador = movimentacao.RgPrestador
-                            var CnpjPrestador = movimentacao.CnpjPrestador
+                            RgPrestador = (!RgPrestador) ? "" : RgPrestador;
+                            
+                            var CpfCnpjPrestador = movimentacao.CpfCnpjPrestador
+                            CpfCnpjPrestador = (!CpfCnpjPrestador) ? "" : CpfCnpjPrestador;
+                            
                             var InscricaoMunicipalPrestador	= movimentacao.InscricaoMunicipalPrestador
+                            InscricaoMunicipalPrestador = (!InscricaoMunicipalPrestador) ? "" : InscricaoMunicipalPrestador;
+                            
                             var IePrestador = movimentacao.IePrestador
+                            IePrestador = (!IePrestador) ? "" : IePrestador;
+                            
                             var DDDPrestador = movimentacao.DDDPrestador
+                            DDDPrestador = (!DDDPrestador) ? "" : DDDPrestador;
+                            
                             var TelefonePrestador = movimentacao.TelefonePrestador
+                            TelefonePrestador = (!TelefonePrestador) ? "" : TelefonePrestador;
+                            
                             var CodigoCidadePrestador = movimentacao.CodigoCidadePrestador
+                            CodigoCidadePrestador = (!CodigoCidadePrestador) ? "" : CodigoCidadePrestador;
+                            
                             var DescricaoCidadePrestador = movimentacao.DescricaoCidadePrestador
+                            DescricaoCidadePrestador = (!DescricaoCidadePrestador) ? "" : DescricaoCidadePrestador;
+                            
                             var RazaoSocialTomador = movimentacao.RazaoSocialTomador
+                            RazaoSocialTomador = (!RazaoSocialTomador) ? "" : RazaoSocialTomador;
+                            
                             var PessoaFisicaTomador = movimentacao.PessoaFisicaTomador
+                            PessoaFisicaTomador = (!PessoaFisicaTomador) ? "" : PessoaFisicaTomador;
+                            
                             var CpfTomador = movimentacao.CpfTomador
+                            CpfTomador = (!CpfTomador) ? "" : CpfTomador;
+                            
                             var RgTomador = movimentacao.RgTomador
+                            RgTomador = (!RgTomador) ? "" : RgTomador;
+                            
                             var CnpjTomador = movimentacao.CnpjTomador
+                            CnpjTomador = (!CnpjTomador) ? "" : CnpjTomador;
+                            
                             var InscricaoMunicipalTomador = movimentacao.InscricaoMunicipalTomador
+                            InscricaoMunicipalTomador = (!InscricaoMunicipalTomador) ? "" : InscricaoMunicipalTomador;
+                            
                             var InscricaoEstadualTomador = movimentacao.InscricaoEstadualTomador
+                            InscricaoEstadualTomador = (!InscricaoEstadualTomador) ? "" : InscricaoEstadualTomador;
+                            
                             var DDDTomador = movimentacao.DDDTomador
+                            DDDTomador = (!DDDTomador) ? "" : DDDTomador;
+                            
                             var TelefoneTomador = movimentacao.TelefoneTomador
+                            TelefoneTomador = (!TelefoneTomador) ? "" : TelefoneTomador;
+                            
                             var EmailTomador = movimentacao.EmailTomador
+                            EmailTomador = (!EmailTomador) ? "" : EmailTomador;
+                            
                             var PaisTomador = movimentacao.PaisTomador
+                            PaisTomador = (!PaisTomador) ? "" : PaisTomador;
+                            
                             var TipoLogradouroTomador = movimentacao.TipoLogradouroTomador
+                            TipoLogradouroTomador = (!TipoLogradouroTomador) ? "" : TipoLogradouroTomador;
+                            
                             var EnderecoTomador = movimentacao.EnderecoTomador
+                            EnderecoTomador = (!EnderecoTomador) ? "" : EnderecoTomador;
+                            
                             var NumeroTomador = movimentacao.NumeroTomador
+                            NumeroTomador = (!NumeroTomador) ? "" : NumeroTomador;
+                            
                             var ComplementoTomador = movimentacao.ComplementoTomador
+                            ComplementoTomador = (!ComplementoTomador) ? "" : ComplementoTomador;
+                            
                             var BairroTomador = movimentacao.BairroTomador
+                            BairroTomador = (!BairroTomador) ? "" : BairroTomador;
+                            
                             var CepTomador = movimentacao.CepTomador
+                            CepTomador = (!CepTomador) ? "" : CepTomador;
+                            
                             var CodigoCidadeTomador = movimentacao.CodigoCidadeTomador
+                            CodigoCidadeTomador = (!CodigoCidadeTomador) ? "" : CodigoCidadeTomador;
+                            
                             var DescricaoCidadeTomador = movimentacao.DescricaoCidadeTomador
+                            DescricaoCidadeTomador = (!DescricaoCidadeTomador) ? "" : DescricaoCidadeTomador;
+                            
                             var UfTomador = movimentacao.UfTomador
+                            UfTomador = (!UfTomador) ? "" : UfTomador;
+                            
                             var NaturezaTributacao = movimentacao.NaturezaTributacao
+                            NaturezaTributacao = (!NaturezaTributacao) ? "" : NaturezaTributacao;
+                            
                             var RegimeEspecialTributacao = movimentacao.RegimeEspecialTributacao
+                            RegimeEspecialTributacao = (!RegimeEspecialTributacao) ? "" : RegimeEspecialTributacao;
+                            
                             var TipoTributacao = movimentacao.TipoTributacao
+                            TipoTributacao = (!TipoTributacao) ? "" : TipoTributacao;
+                            
                             var CodigoCnae = movimentacao.CodigoCnae
+                            CodigoCnae = (!CodigoCnae) ? "" : CodigoCnae;
+                            
                             var NumeroRpsNew = movimentacao.NumeroRpsNew
+                            NumeroRpsNew = (!NumeroRpsNew) ? "" : NumeroRpsNew;
+                            
                             var NumeroRpsEnviado = movimentacao.NumeroRpsEnviado
+                            NumeroRpsEnviado = (!NumeroRpsEnviado) ? "" : NumeroRpsEnviado;
+                            
                             var NumeroNfseSubstituida = movimentacao.NumeroNfseSubstituida
+                            NumeroNfseSubstituida = (!NumeroNfseSubstituida) ? "" : NumeroNfseSubstituida;
+                            
                             var ProtocoloNfse = movimentacao.ProtocoloNfse
+                            ProtocoloNfse = (!ProtocoloNfse) ? "" : ProtocoloNfse;
+                            
                             var JustificativaDeducao = movimentacao.JustificativaDeducao
+                            JustificativaDeducao = (!JustificativaDeducao) ? "" : JustificativaDeducao;
+                            
                             var ValorTotalDeducao = movimentacao.ValorTotalDeducao
+                            ValorTotalDeducao = (!ValorTotalDeducao) ? "0.00" : ValorTotalDeducao;
+                            
+                            if(ValorTotalDeducao.toString().indexOf(',') == -1 && ValorTotalDeducao.toString().indexOf('.') == -1){
+                                ValorTotalDeducao = ValorTotalDeducao + ".00";
+                            }
+
                             var ValorTotalDesconto = movimentacao.ValorTotalDesconto
+                            ValorTotalDesconto = (!ValorTotalDesconto) ? "0.00" : ValorTotalDesconto;
+                            
+                            if(ValorTotalDesconto.toString().indexOf(',') == -1 && ValorTotalDesconto.toString().indexOf('.') == -1){
+                                ValorTotalDesconto = ValorTotalDesconto + ".00";
+                            }
+
                             var ValorTotalServicos = movimentacao.ValorTotalServicos
+                            ValorTotalServicos = (!ValorTotalServicos) ? "0.00" : ValorTotalServicos;
+                            
+                            if(ValorTotalServicos.toString().toString().indexOf(',') == -1 && ValorTotalServicos.toString().indexOf('.') == -1){
+                                ValorTotalServicos = ValorTotalServicos + ".00";
+                            }
+
                             var ValorTotalBaseCalculo = movimentacao.ValorTotalBaseCalculo
+                            ValorTotalBaseCalculo = (!ValorTotalBaseCalculo) ? "0.00" : ValorTotalBaseCalculo;
+                            
                             var ValorIss = movimentacao.ValorIss
+                            ValorIss = (!ValorIss) ? "0.00" : ValorIss;
+                            
+                            if(ValorIss.toString().indexOf(',') == -1 && ValorIss.toString().indexOf('.') == -1){
+                                ValorIss = ValorIss + ".00";
+                            }
+
                             var TipoTrib_OLD = movimentacao.TipoTrib_OLD
+                            TipoTrib_OLD = (!TipoTrib_OLD) ? "" : TipoTrib_OLD;
+                            
                             var DataInicio = movimentacao.DataInicio
+                            DataInicio = (!DataInicio) ? "" : DataInicio;
+                            
                             var ValorIssRetido = movimentacao.ValorIssRetido
+                            ValorIssRetido = (!ValorIssRetido) ? "0.00" : ValorIssRetido;
+                            
+                            if(ValorIssRetido.toString().indexOf(',') == -1 && ValorIssRetido.toString().indexOf('.') == -1){
+                                ValorIssRetido = ValorIssRetido + ".00";
+                            }
+
                             var TemIssRetido = movimentacao.TemIssRetido
+                            TemIssRetido = (!TemIssRetido) ? "" : TemIssRetido;
+                            
                             var AliquotaISS = movimentacao.AliquotaISS
+                            AliquotaISS = (!AliquotaISS) ? "" : AliquotaISS;
+                            
+                            if(AliquotaISS.toString().indexOf(',') == -1 && AliquotaISS.toString().indexOf('.') == -1){
+                                AliquotaISS = AliquotaISS + ".00";
+                            }
+
                             var CodigoItemListaServico = movimentacao.CodigoItemListaServico
+                            CodigoItemListaServico = (!CodigoItemListaServico) ? "" : CodigoItemListaServico;
+                            
                             var DiscriminacaoServico = movimentacao.DiscriminacaoServico
+                            DiscriminacaoServico = (!DiscriminacaoServico) ? "" : DiscriminacaoServico;
+                            
                             var DiscriminacaoServicoSub = movimentacao.DiscriminacaoServico2
 
                             if(!DiscriminacaoServicoSub){
@@ -2782,22 +2973,58 @@ router.route('/gerarNFSe').post(function(req, res) {
                             }
 
                             var QuantidadeServicos = movimentacao.QuantidadeServicos
+                            QuantidadeServicos = (!QuantidadeServicos) ? "0.00" : QuantidadeServicos;
+
+                            if(QuantidadeServicos.toString().indexOf(',') == -1 && QuantidadeServicos.toString().indexOf('.') == -1){
+                                QuantidadeServicos = QuantidadeServicos + ".00";
+                            }
+
                             var ValorUnitarioServico = movimentacao.ValorUnitarioServico
+                            ValorUnitarioServico = (!ValorUnitarioServico) ? "0.00" : ValorUnitarioServico;
+
+                            if(ValorUnitarioServico.toString().indexOf(',') == -1 && ValorUnitarioServico.toString().indexOf('.') == -1){
+                                ValorUnitarioServico = ValorUnitarioServico + ".00";
+                            }
+
                             var ValorDesconto = movimentacao.ValorDesconto
+                            ValorDesconto = (!ValorDesconto) ? "0.00" : ValorDesconto;
+
+                            if(ValorDesconto.toString().indexOf(',') == -1 && ValorDesconto.toString().indexOf('.') == -1){
+                                ValorDesconto = ValorDesconto + ".00";
+                            }
+
                             var ValorPis = movimentacao.ValorPis
+                            ValorPis = (!ValorPis) ? "0.00" : ValorPis;
+
+                            if(ValorPis.toString().indexOf(',') == -1 && ValorPis.toString().indexOf('.') == -1){
+                                ValorPis = ValorPis + ".00";
+                            }
+
                             var ValorCofins = movimentacao.ValorCofins
+                            ValorCofins = (!ValorCofins) ? "0.00" : ValorCofins;
+
                             var AliquotaPIS = movimentacao.AliquotaPIS
+                            AliquotaPIS = (!AliquotaPIS) ? "0.00" : AliquotaPIS;
+
                             var AliquotaCOFINS = movimentacao.AliquotaCOFINS
+                            AliquotaCOFINS = (!AliquotaCOFINS) ? "0.00" : AliquotaCOFINS;
+
                             var IDProdutos_VendaProdutos = movimentacao.IDProdutos_VendaProdutos
+                            IDProdutos_VendaProdutos = (!IDProdutos_VendaProdutos) ? "" : IDProdutos_VendaProdutos;
+
                             var SerieRpsSubstituido = movimentacao.SerieRpsSubstituido
+                            SerieRpsSubstituido = (!SerieRpsSubstituido) ? "" : SerieRpsSubstituido;
+
                             var status = movimentacao.status
+                            status = (!status) ? "" : status;
+
 
                             if(status == "Pendente" || !status){
 
                                 deletar += " DELETE FROM nfse WHERE id='" + id + "' AND status='Pendente';  ";
 
                                 query += " INSERT INTO nfse (id, RazaoSocialPrestador, PessoaFisicaPrestador, CpfPrestador, ";
-                                query += " RgPrestador, CnpjPrestador, InscricaoMunicipalPrestador, IePrestador, ";
+                                query += " RgPrestador, CpfCnpjPrestador, InscricaoMunicipalPrestador, IePrestador, ";
                                 query += "DDDPrestador, TelefonePrestador, CodigoCidadePrestador, DescricaoCidadePrestador, ";
                                 query += "RazaoSocialTomador, PessoaFisicaTomador, CpfTomador, RgTomador, CnpjTomador, ";
                                 query += "InscricaoMunicipalTomador, InscricaoEstadualTomador, DDDTomador, TelefoneTomador, ";
@@ -2814,7 +3041,7 @@ router.route('/gerarNFSe').post(function(req, res) {
     
                                 query += " VALUES( '" + id + "', '";
                                 query += RazaoSocialPrestador + "', '" + PessoaFisicaPrestador + "', '" + CpfPrestador + "', '";
-                                query += RgPrestador + "', '" + CnpjPrestador + "', '" + InscricaoMunicipalPrestador + "', '";
+                                query += RgPrestador + "', '" + CpfCnpjPrestador + "', '" + InscricaoMunicipalPrestador + "', '";
                                 query += IePrestador + "', '" + DDDPrestador + "', '" + TelefonePrestador + "', '";
                                 query += CodigoCidadePrestador + "', '" + DescricaoCidadePrestador + "', '";
                                 query += RazaoSocialTomador + "', '" + PessoaFisicaTomador + "', '" + CpfTomador;
@@ -3002,7 +3229,7 @@ router.route('/getInfoNFSe').post(function(req, res) {
     select += " dsg_ibge_cidade.nm_codigo AS 'CodigoMunicipioPrestador','' AS 'BairroPrestador', '' AS 'CepPrestador', '' AS 'TelefonePrestador', ";
     select += " '' AS 'EmailPrestador', dsg_ibge_cidade.nm_descricao AS 'CidadePrestador',  ";
     select += " empresa.nm_inscricaomunicipal AS 'IncricaoMunicipalPrestador',  ";
-    select += " empresa.nm_cnpj AS 'CnpjPrestador' ";
+    select += " empresa.nm_cnpj AS 'CpfCnpjPrestador' ";
     select += " FROM empresa  ";
     select += " LEFT OUTER JOIN dsg_ibge_cidade ON empresa.id_dsg_ibge_cidade = dsg_ibge_cidade.id  ";
     select += " LEFT OUTER JOIN dsg_ibge_uf ON empresa.id_dsg_ibge_uf = dsg_ibge_uf.id  ";
@@ -3016,16 +3243,19 @@ router.route('/getInfoNFSe').post(function(req, res) {
     select += "WHERE id_empresa = '" + enterpriseID + "'; ";
 
 
+    select += "SELECT nm_email_remetente, nm_porta, nm_senha_email, nm_servidor_smtp, sn_requer_autenticacao, nm_usuario_email ";
+    select += " FROM configuracao_email configuracaoemail";
+    select += " WHERE id_empresa='" + enterpriseID + "'; ";
 
 
 
 
-    select += "SELECT RazaoSocialPrestador, PessoaFisicaPrestador, CpfPrestador, ";
-    select += " RgPrestador, CnpjPrestador, InscricaoMunicipalPrestador, ";
+    select += "SELECT id, RazaoSocialPrestador, PessoaFisicaPrestador, CpfPrestador, ";
+    select += " RgPrestador, CpfCnpjPrestador, InscricaoMunicipalPrestador, ";
     select += " IePrestador, DDDPrestador, TelefonePrestador, ";
-    select += " CodigoCidadePrestador, DescricaoCidadePrestador, RazaoSocialTomador, ";
+    select += " CodigoCidadePrestador, DescricaoCidadePrestador AS DescricaoCidadePrestacao, RazaoSocialTomador, ";
     select += " PessoaFisicaTomador, CpfTomador, RgTomador, ";
-    select += " CnpjTomador, InscricaoMunicipalTomador, InscricaoEstadualTomador, ";
+    select += " CnpjTomador AS CpfCnpjTomador, InscricaoMunicipalTomador, InscricaoEstadualTomador, ";
     select += " DDDTomador, TelefoneTomador, EmailTomador, ";
     select += " PaisTomador, TipoLogradouroTomador, EnderecoTomador, ";
     select += " NumeroTomador, ComplementoTomador, BairroTomador, ";
@@ -3033,7 +3263,7 @@ router.route('/getInfoNFSe').post(function(req, res) {
     select += " UfTomador, NaturezaTributacao, RegimeEspecialTributacao, ";
     select += " TipoTributacao, CodigoCnae, NumeroRpsNew, ";
     select += " NumeroRpsEnviado, NumeroNfseSubstituida, ProtocoloNfse, ";
-    select += " JustificativaDeducao, ValorTotalDeducao, ValorTotalDesconto, ";
+    select += " JustificativaDeducao, ValorTotalDeducao AS 'ValorTotalDeducoes  ', ValorTotalDesconto, ";
     select += " ValorTotalServicos, ValorTotalBaseCalculo, ValorIss, ";
     select += " TipoTrib_OLD, DataInicio, ValorIssRetido, ";
     select += " TemIssRetido, AliquotaISS, CodigoItemListaServico, ";
@@ -3067,9 +3297,11 @@ router.route('/getInfoNFSe').post(function(req, res) {
             var Prestador = {};
             var final = {};
             var configurationNFSe = {};
+            var configuracaoemail = {};
             final = {};
             final.Prestador = {};
             final.ConfigurationNFSe = {};
+            final.configuracaoemail = {};
             
             if(recordset){
                 if(recordset.recordsets){                    
@@ -3088,13 +3320,19 @@ router.route('/getInfoNFSe').post(function(req, res) {
                         }
 
                         if(index == 2){
-                            NotaFiscalServico = recordset.recordsets[index][0];
-                            retorno.push(NotaFiscalServico);
+                            configuracaoemail = recordset.recordsets[index][0];
+                            retorno.push(configuracaoemail);
+                            final.configuracaoemail = retorno;
+                        }
+
+                        if(index >= 3){
+                            for (let i = 0; i < recordset.recordsets[index].length; i++) {
+                                NotaFiscalServico = recordset.recordsets[index][i];
+                                retorno.push(NotaFiscalServico);                                                                
+                            }
                             final.NotaFiscalServico = retorno;
                         }
                     }
-
-
                 }
             }
 
