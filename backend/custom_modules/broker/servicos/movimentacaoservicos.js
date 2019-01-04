@@ -1245,7 +1245,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
     pool.query(query, (err, rest) => {
         //console.log(err, rest)
         pool.end();
-        
+        /*
         rest = {}
         rest.rows = [];
 
@@ -1310,7 +1310,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
                 existe: "1"
                 }
             );
-            
+            */
         console.log(rest)
         var select = "SELECT REPLACE(REPLACE(REPLACE(nm_cnpj, '-', ''), '/', ''), '.', '') AS 'nm_cnpj',";
         select += " cliente_servicos.vl_valor AS 'valor', sub.nm_tiposervico AS 'tipo' ";
