@@ -1429,25 +1429,6 @@ router.route('/carregarClienteServico/:idEntidade').get(function(req, res) {
     
     var  select = "";
 
-    select += " SELECT produtos.id as 'id', produtos.nm_descricao as 'descricao', ";
-    select += " IIF((SELECT vl_valor FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
-    select += " AND id_produtos=produtos.id) IS NULL,0,(SELECT vl_valor FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
-    select += " AND id_produtos=produtos.id)) AS 'valor',";
-
-    select += " IIF((SELECT id_dsg_moeda FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
-    select += " AND id_produtos=produtos.id) IS NULL,NULL,(SELECT id_dsg_moeda FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
-    select += " AND id_produtos=produtos.id)) AS 'idmoeda',";
-
-    select += " IIF((SELECT nm_descricao FROM cliente_servicos INNER JOIN dsg_moeda ON dsg_moeda.id=cliente_servicos.id_dsg_moeda WHERE id_entidade='" + idEntidade + "' ";
-    select += " AND id_produtos=produtos.id) IS NULL,NULL,(SELECT nm_descricao FROM cliente_servicos INNER JOIN dsg_moeda ON dsg_moeda.id=cliente_servicos.id_dsg_moeda WHERE id_entidade='" + idEntidade + "' ";
-    select += " AND id_produtos=produtos.id)) AS 'moeda',";
-
-    select += " IIF((SELECT sn_notaunica FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
-    select += " AND id_produtos=produtos.id) IS NULL,0,(SELECT sn_notaunica FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
-    select += " AND id_produtos=produtos.id)) AS 'notaunica'";
-    
-    select += " FROM produtos WHERE id_tipoproduto='5F1FCE95-1AAC-43D8-BB0C-689ECEE69574'; ";
-
     select += " SELECT subservico.id as 'id', subservico.nm_descricao as 'descricao', ";
     select += " IIF((SELECT vl_valor FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
     select += " AND id_produtos=subservico.id) IS NULL,0,(SELECT vl_valor FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
@@ -1465,16 +1446,63 @@ router.route('/carregarClienteServico/:idEntidade').get(function(req, res) {
     select += " AND id_produtos=subservico.id) IS NULL,0,(SELECT sn_notaunica FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
     select += " AND id_produtos=subservico.id)) AS 'notaunica' ";
 
-    select += " FROM subservico ";
+    select += " FROM subservico ORDER BY valor DESC";
 
+    select += " SELECT produtos.id as 'id', produtos.nm_descricao as 'descricao', ";
+    select += " IIF((SELECT vl_valor FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
+    select += " AND id_produtos=produtos.id) IS NULL,0,(SELECT vl_valor FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
+    select += " AND id_produtos=produtos.id)) AS 'valor',";
+
+    select += " IIF((SELECT id_dsg_moeda FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
+    select += " AND id_produtos=produtos.id) IS NULL,NULL,(SELECT id_dsg_moeda FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
+    select += " AND id_produtos=produtos.id)) AS 'idmoeda',";
+
+    select += " IIF((SELECT nm_descricao FROM cliente_servicos INNER JOIN dsg_moeda ON dsg_moeda.id=cliente_servicos.id_dsg_moeda WHERE id_entidade='" + idEntidade + "' ";
+    select += " AND id_produtos=produtos.id) IS NULL,NULL,(SELECT nm_descricao FROM cliente_servicos INNER JOIN dsg_moeda ON dsg_moeda.id=cliente_servicos.id_dsg_moeda WHERE id_entidade='" + idEntidade + "' ";
+    select += " AND id_produtos=produtos.id)) AS 'moeda',";
+
+    select += " IIF((SELECT sn_notaunica FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
+    select += " AND id_produtos=produtos.id) IS NULL,0,(SELECT sn_notaunica FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
+    select += " AND id_produtos=produtos.id)) AS 'notaunica'";
+    
+    select += " FROM produtos WHERE id_tipoproduto='5F1FCE95-1AAC-43D8-BB0C-689ECEE69574' ORDER BY valor DESC; ";
+
+    console.log(select)
     sql.close(); 
     sql.connect(config, function (err) { 
         if (err) console.log(err); 
         var request = new sql.Request(); 
         request.query(select, function (err, recordset){ 
             if (err) console.log(err);
+
+            var obj = {};
+            obj.recordsets = [[]];
+
+            for (let index = 0; index < recordset.recordsets[0].length; index++) {
+                if(recordset.recordsets[0][index].valor > 0){
+                    obj.recordsets[0].push(recordset.recordsets[0][index]);
+                }
+            }
             
-            res.send(recordset); 
+            for (let index = 0; index < recordset.recordsets[1].length; index++) {
+                if(recordset.recordsets[1][index].valor > 0){
+                    obj.recordsets[0].push(recordset.recordsets[1][index]);
+                }
+            }
+
+            for (let index = 0; index < recordset.recordsets[0].length; index++) {
+                if(recordset.recordsets[0][index].valor == 0){
+                    obj.recordsets[0].push(recordset.recordsets[0][index]);
+                }
+            }
+            
+            for (let index = 0; index < recordset.recordsets[1].length; index++) {
+                if(recordset.recordsets[1][index].valor == 0){
+                    obj.recordsets[0].push(recordset.recordsets[1][index]);
+                }
+            }
+
+            res.send(obj); 
         }); 
     }); 
 });
@@ -3600,5 +3628,205 @@ router.route('/importarSiscoserv').post(function(req, res) {
         }); 
     }); 
 });
+
+
+
+
+function gerarComissaoBloco(arrayID) { 
+    
+    var select = " SELECT  ";
+    select += " (SELECT TOP 1 id FROM comiss WHERE id_venda=movimentacao_servicos.id AND comiss.id_vendedor=movimentacao_servicos.id_operador) AS 'idop', ";
+    select += " (SELECT TOP 1 id FROM comiss WHERE id_venda=movimentacao_servicos.id AND comiss.id_vendedor=movimentacao_servicos.id_indicador) AS 'idind', ";
+    select += " movimentacao_servicos.id_operador AS 'idoperador', ";
+    select += " movimentacao_servicos.id_indicador AS 'idindicador',  ";
+    select += " (SELECT TOP 1 nm_status FROM comiss WHERE id_venda=movimentacao_servicos.id AND id_operador=movimentacao_servicos.id_operador) AS 'statusop', ";
+    select += " (SELECT TOP 1 nm_status FROM comiss WHERE id_venda=movimentacao_servicos.id AND id_operador=movimentacao_servicos.id_indicador) AS 'statusind', ";
+    select += " (SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=movimentacao_servicos.id_operador AND vendedor_servicos.id_produtos=movimentacao_servicos.id_subservicos) AS 'comissaopercop', ";
+    select += " (SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=movimentacao_servicos.id_indicador AND vendedor_servicos.id_produtos=movimentacao_servicos.id_subservicos) AS 'comissaopercind'  ";
+    select += " , movimentacao_servicos.vl_valor AS 'valormov' ";
+ 
+    select += " FROM movimentacao_servicos ";
+    select += " LEFT JOIN comiss ON comiss.id_venda=movimentacao_servicos.id ";
+
+    select += " WHERE ";
+
+    var where  = "";
+    for (let i = 0; i < arrayID.length; i++) {
+        if(i == 0){
+            where  += " movimentacao_servicos.nm_numero_operacao='" + arrayID[i] + "' ";
+        }else{
+            where  += " OR movimentacao_servicos.nm_numero_operacao='" + arrayID[i] + "' ";
+        }        
+    }
+
+
+    console.log("+++++++++++++COMISSAO++++++++++++++++++");
+    console.log(select);
+
+    sql.close(); 
+    sql.connect(config, function (err) { 
+        if (err) console.log(err); 
+        var request = new sql.Request(); 
+        request.query(select, function (err, recordset){ 
+            if (err) console.log(err);
+                                 
+
+            if(recordset.recordset.length > 0){
+                for (let i = 0; i < recordset.recordset.length; i++) {
+
+                    if(recordset.recordset[i].statusop == "Concluído"){
+                        var sucesso = false;
+                        var message = "Status Concluído não gera comissão";
+
+                        var resposta = {
+                            success: sucesso,
+                            message: message
+                        }
+                        //res.json(resposta);
+                    }else{                    
+
+                        var idcomissop =  recordset.recordset[i].idop;
+                        var idcomissind =  recordset.recordset[i].idind;
+                        var idcomiss = recordset.recordset[i].id;
+                        var id_operador = recordset.recordset[i].idoperador;
+                        var id_indicador = recordset.recordset[i].idindicador;
+                        var nm_status = "Pendente";
+                        var id_empresa = "9F39BDCF-6B98-45DE-A819-24B7F3EE2560";
+                        var numero_pedido = "";
+                        var dt_emissao = "";
+                        var vl_venda =  recordset.recordset[i].valormov;
+                        var vl_comissaoOp = "";
+                        var vl_comissaoInd = "";
+                        var vl_comissaopercOP = recordset.recordset[i].comissaopercop;
+                        var vl_comissaopercIND = recordset.recordset[i].comissaopercind;
+                        
+                        var insertupdate = ""; 
+
+                        var today = new Date();
+                        var dd = today.getDate();
+                        var mm = today.getMonth() + 1;
+
+                        var yyyy = today.getFullYear();
+                        if(dd<10){
+                            dd='0'+dd;
+                        } 
+                        if(mm<10){
+                            mm='0'+mm;
+                        } 
+                        var dt_emissao = mm + '/' + dd + '/' + yyyy;   
+                        var valorcomiss = 0;
+
+                        console.log("idcomissop=" + idcomissop);
+                        console.log("idcomissind=" + idcomissind);
+
+                        if((id_operador != null && id_indicador == null) || (id_operador == id_indicador && id_operador != null && id_indicador != null)){
+                        
+                            if(vl_comissaopercOP){
+                                valorcomiss = (parseFloat(vl_venda) * parseFloat(vl_comissaopercOP).toFixed(2)) / 100;
+                                valorcomiss = valorcomiss.toFixed(2);
+                                vl_comissaoOp = valorcomiss.toString();
+                            }
+                            id_indicador = "";
+                        }else{
+                            if(id_operador != id_indicador){
+                                if(vl_comissaopercIND){
+                                    valorcomiss = (parseFloat(vl_venda) * parseFloat(vl_comissaopercIND).toFixed(2)) / 100;
+                                    valorcomiss = valorcomiss.toFixed(2);                                
+                                    vl_comissaoInd = valorcomiss.toString();
+                                    if(vl_comissaopercOP){
+                                        valorcomiss = ((parseFloat(vl_venda) - parseFloat(vl_comissaoInd)) * parseFloat(vl_comissaopercOP).toFixed(2)) / 100;
+                                        valorcomiss = valorcomiss.toFixed(2); 
+                                        vl_comissaoOp = valorcomiss.toString();
+                                    }
+                                    
+                                }
+                            }
+                        }
+
+                        if(vl_comissaoOp == ""){
+                            vl_comissaoOp = "0";
+                            var sucesso = false;
+                            var message = "Não existe configuração para gerar a comissão";
+
+                            var resposta = {
+                                success: sucesso,
+                                message: message
+                            }
+                            //res.json(resposta);
+                        }
+
+                        if(idcomissop == null){
+                            if(id_operador){
+                                insertupdate += " INSERT INTO comiss ";
+                                insertupdate += " (id, id_vendedor, id_venda, nm_status, id_empresa, numero_pedido, dt_emissao, vl_venda, vl_comissao)";
+                                insertupdate += " VALUES(newID(), '" + id_operador + "', '" + id + "', '" + nm_status + "', '" + id_empresa + "', '" + numero_pedido + "', '" + dt_emissao + "', " + vl_venda + ", " + vl_comissaoOp + ");";          
+                            }
+                        }else{
+                            if(id_operador){
+                                insertupdate += " UPDATE comiss SET id_vendedor='" + id_operador + "',id_venda='" + id + "', nm_status='" + nm_status + "', id_empresa='" + id_empresa + "', numero_pedido='" + numero_pedido + "', dt_emissao='" + dt_emissao + "', vl_venda=" + vl_venda + ", vl_comissao=" + vl_comissaoOp + " WHERE id='" + idcomissop + "' ;";
+                            }
+                        }
+                        
+                        if(vl_comissaoInd == ""){
+                            vl_comissaoInd = "0";
+                        }
+                        
+                        if(idcomissind == null){
+                            if(id_indicador){
+                                insertupdate += " INSERT INTO comiss ";
+                                insertupdate += " (id, id_vendedor, id_venda, nm_status, id_empresa, numero_pedido, dt_emissao, vl_venda, vl_comissao)";
+                                insertupdate += " VALUES(newID(), '" + id_indicador + "', '" + id + "', '" + nm_status + "', '" + id_empresa + "', '" + numero_pedido + "', '" + dt_emissao + "', " + vl_venda + ", " + vl_comissaoInd + ");";          
+                            }
+                        }else{
+                            if(id_indicador){
+                                insertupdate += " UPDATE comiss SET id_vendedor='" + id_indicador + "',id_venda='" + id + "', nm_status='" + nm_status + "', id_empresa='" + id_empresa + "', numero_pedido='" + numero_pedido + "', dt_emissao='" + dt_emissao + "', vl_venda=" + vl_venda + ", vl_comissao=" + vl_comissaoInd + " WHERE id='" + idcomissind + "' ;";
+                            }
+                        }
+                    }
+                } 
+
+                console.log("insertupdate === ")
+                console.log(insertupdate)
+                sql.close(); 
+                sql.connect(config, function (err) { 
+                    if (err) console.log(err); 
+                    
+                    var request = new sql.Request();
+                    request.query(insertupdate).then(function(recordset) {
+                        var sucesso = true;
+                        var message = "Comissão gerada com sucesso!";
+
+                        var resposta = {
+                            success: sucesso,
+                            message: message
+                        }
+                        return resposta;
+                        //res.json(resposta); 
+                    }).catch(function(err) { 
+                        console.log(err)
+                        var sucesso = false;
+                        var message = "Falha ao gerar a comissão";
+
+                        var resposta = {
+                            success: sucesso,
+                            message: message
+                        }
+                        return resposta;
+                    });
+                });
+                   
+            }else{
+                var sucesso = false;
+                var message = "Não existe gerar a comissão";
+
+                var resposta = {
+                    success: sucesso,
+                    message: message
+                }
+                return resposta; 
+            }
+        });
+    });     
+}
 
 
