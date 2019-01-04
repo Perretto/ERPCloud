@@ -1311,7 +1311,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
                 }
             );
             */
-           
+
         console.log(rest)
         var select = "SELECT REPLACE(REPLACE(REPLACE(nm_cnpj, '-', ''), '/', ''), '.', '') AS 'nm_cnpj',";
         select += " cliente_servicos.vl_valor AS 'valor', sub.nm_tiposervico AS 'tipo' ";
@@ -3581,7 +3581,7 @@ router.route('/importarSiscoserv').post(function(req, res) {
                                 resposta.status = -4;
                                 resposta.mensagem = [];
                                 resposta.mensagem.push("ops");
-                                resposta.titulo = err;
+                                resposta.titulo = "Falha ao importar os dados, verifique no cadastro de clientes a aba de Subserviços e Operadores ";
                                 transacao.rollback();
                                 res.send(resposta);     
                             }
