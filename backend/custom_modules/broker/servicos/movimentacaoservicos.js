@@ -1311,6 +1311,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
                 }
             );
             */
+           
         console.log(rest)
         var select = "SELECT REPLACE(REPLACE(REPLACE(nm_cnpj, '-', ''), '/', ''), '.', '') AS 'nm_cnpj',";
         select += " cliente_servicos.vl_valor AS 'valor', sub.nm_tiposervico AS 'tipo' ";
