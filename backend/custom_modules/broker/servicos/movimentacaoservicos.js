@@ -1144,7 +1144,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
 
     query += " SELECT venda.idvenda AS idvenda,venda.codigo AS codigo, ";
     query += " TO_CHAR(venda.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RVS') AS cnpj, vendaoperacao.valor AS valortotal, ('0') AS existe ";
+    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RVS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
     query += " FROM venda ";
     query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda  ";
     query += " INNER JOIN vendaoperacao ON vendaoperacao.idvenda = venda.idvenda ";
@@ -1161,7 +1161,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
     query += " UNION ALL ";
     query += " SELECT aquisicao.idaquisicao AS idvenda,aquisicao.codigo AS codigo, ";
     query += " TO_CHAR(aquisicao.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RAS') AS cnpj, aquisicaooperacao.valor AS valortotal, ('0') AS existe ";
+    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RAS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
     query += " FROM aquisicao ";
     query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
     query += " INNER JOIN aquisicaooperacao ON aquisicaooperacao.idaquisicao = aquisicao.idaquisicao ";
@@ -1179,7 +1179,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
     query += " UNION ALL ";
     query += " SELECT faturamento.idfaturamento AS idvenda,faturamento.codigo AS codigo, ";
     query += " TO_CHAR(faturamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RF') AS cnpj, faturamentooperacao.valorfaturado AS valortotal, ('0') AS existe ";
+    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RF') AS cnpj, ('') AS valortotal, ('0') AS existe ";
     query += " FROM faturamento ";
     query += " INNER JOIN venda ON venda.idvenda = faturamento.idvenda ";
     query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda ";
@@ -1198,7 +1198,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
     query += " UNION ALL ";
     query += " SELECT pagamento.idpagamento AS idvenda,pagamento.codigo AS codigo, ";
     query += " TO_CHAR(pagamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RP') AS cnpj, pagamentooperacao.valorpago AS valortotal, ('0') AS existe ";
+    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RP') AS cnpj, ('') AS valortotal, ('0') AS existe ";
     query += " FROM pagamento ";
     query += " INNER JOIN aquisicao ON aquisicao.idaquisicao = pagamento.idaquisicao ";
     query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
@@ -1244,27 +1244,98 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
 
     pool.query(query, (err, rest) => {
         //console.log(err, rest)
-        pool.end()
-        
-        var select = "SELECT REPLACE(REPLACE(REPLACE(nm_cnpj, '-', ''), '/', ''), '.', '') AS 'nm_cnpj' FROM entidade WHERE ";
+        pool.end();
+        /*
+        rest = {}
+        rest.rows = [];
+
+        rest.rows.push({
+            idvenda: 111392,
+            codigo: "RA18/00111392",
+            datacadastro: "20/12/2018",
+            nomepessoa: "VIAVI SOLUTIONS DO BRASIL LTDA. ",
+            nomeservico: "31449861000185",
+            cnpj: "RAS",
+            valortotal: 23.41,
+            existe: "1"
+            },
+            {
+            idvenda: 111390,
+            codigo: "RA18/00111390",
+            datacadastro: "20/12/2018",
+            nomepessoa: "VIAVI SOLUTIONS DO BRASIL LTDA. ",
+            nomeservico: "31449861000185",
+            cnpj: "RAS",
+            valortotal: 23.41,
+            existe: "1"
+            },
+            {
+                idvenda: 112892,
+                codigo: "RA19/00112892",
+                datacadastro: "02/01/2019",
+                nomepessoa: "VISCOFAN / 65.019.655/0002-38",
+                nomeservico: "65019655000238",
+                cnpj: "RAS",
+                valortotal: 123.45,
+                existe: "1"
+                },
+                {
+                idvenda: 112891,
+                codigo: "RA19/00112891",
+                datacadastro: "02/01/2019",
+                nomepessoa: "VISCOFAN / 65.019.655/0002-38",
+                nomeservico: "65019655000238",
+                cnpj: "RAS",
+                valortotal: 123.45,
+                existe: "1"
+                },
+                {
+                idvenda: 112890,
+                codigo: "RA19/00112890",
+                datacadastro: "02/01/2019",
+                nomepessoa: "VISCOFAN / 65.019.655/0002-38",
+                nomeservico: "65019655000238",
+                cnpj: "RAS",
+                valortotal: 123.45,
+                existe: "1"
+                },
+                {
+                idvenda: 111000,
+                codigo: "RA18/00111000",
+                datacadastro: "12/12/2018",
+                nomepessoa: "VISCOFAN / 65.019.655/0002-38",
+                nomeservico: "65019655000238",
+                cnpj: "RAS",
+                valortotal: 123.45,
+                existe: "1"
+                }
+            );
+            */
+        console.log(rest)
+        var select = "SELECT REPLACE(REPLACE(REPLACE(nm_cnpj, '-', ''), '/', ''), '.', '') AS 'nm_cnpj',";
+        select += " cliente_servicos.vl_valor AS 'valor', sub.nm_tiposervico AS 'tipo' ";
+        select += " FROM entidade ";
+        select += " INNER JOIN cliente_servicos ON cliente_servicos.id_entidade=entidade.id ";
+        select += " INNER JOIN subservico sub ON sub.id=cliente_servicos.id_produtos ";
+        select += " WHERE ";
         var where = "";
 
         for (let index = 0; index < rest.rows.length; index++) {
             const element = rest.rows[index];
             if(index == 0){
-                where += " entidade.nm_cnpj='" + element.nomeservico + "' OR ";
+                where += " (entidade.nm_cnpj='" + element.nomeservico + "' OR ";
                 where += " nm_cnpj=(left ('" + element.nomeservico + "',2)+'.'+ ";
                 where += "                    right(left ('" + element.nomeservico + "',5),3)+'.'+ ";
                 where += "             right(left ('" + element.nomeservico + "',8),3)+'/'+ ";
                 where += "             right(left ('" + element.nomeservico + "',12),4)+'-'+ ";
-                where += "             right(left ('" + element.nomeservico + "',14),2)) ";
+                where += "             right(left ('" + element.nomeservico + "',14),2)) AND sub.nm_tiposervico='" + element.cnpj + "')";
             }else{
-                where += " OR entidade.nm_cnpj='" + element.nomeservico + "' OR ";
+                where += " OR (entidade.nm_cnpj='" + element.nomeservico + "' OR ";
                 where += " nm_cnpj=(left ('" + element.nomeservico + "',2)+'.'+ ";
                 where += "                    right(left ('" + element.nomeservico + "',5),3)+'.'+ ";
                 where += "             right(left ('" + element.nomeservico + "',8),3)+'/'+ ";
                 where += "             right(left ('" + element.nomeservico + "',12),4)+'-'+ ";
-                where += "             right(left ('" + element.nomeservico + "',14),2)) ";
+                where += "             right(left ('" + element.nomeservico + "',14),2))  AND sub.nm_tiposervico='" + element.cnpj + "')";
             }            
         }
 
@@ -1277,12 +1348,17 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
             request.query(select, function (err, recordset){ 
                 if (err) console.log(err);
                 
-                if(recordset.recordsets){
-                    for (let index = 0; index < rest.rows.length; index++) {
-                        const element = rest.rows[index];
-                        if(adicionaOuRemove(rest.rows[index].nomeservico,recordset.recordsets[0])){
-                            rest.rows[index].existe = "1";
-                        }               
+                if(recordset){
+                    if(recordset.recordsets){
+                        for (let index = 0; index < rest.rows.length; index++) {
+                            const element = rest.rows[index];
+                            var i = adicionaOuRemove(rest.rows[index].nomeservico,rest.rows[index].cnpj ,recordset.recordsets[0]);
+                            if(i >= 0){
+                                rest.rows[index].existe = "1";
+                                rest.rows[index].valortotal = recordset.recordsets[0][i].valor;   
+                            }    
+                                    
+                        }
                     }
                 }
                 rest.rows.sort(compare);
@@ -1294,22 +1370,22 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
      
 });
 
-function adicionaOuRemove(id, obj) {
-    let index = obj.findIndex(obj => obj.nm_cnpj == id);
+function adicionaOuRemove(id, tipo, obj) {
+    let index = obj.findIndex(obj => obj.nm_cnpj == id && obj.tipo == tipo);
     if(index < 0) {
-        return false;
+        return index;
     } else {
-        return true;
+        return index;
     }
-  }
+}
   
-  function compare(a,b) {
+function compare(a,b) {
     if (a.existe < b.existe)
-       return -1;
+        return -1;
     if (a.existe > b.existe)
-      return 1;
+        return 1;
     return 0;
-  }
+}
   
   
 
@@ -3364,3 +3440,164 @@ function callWebAPI(dados,url, callback){
        }
     );
 }
+
+
+
+
+
+router.route('/importarSiscoserv').post(function(req, res) {
+    
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
+    res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+    
+    var retorno = false;
+    var parametros = req.body.parametros;
+    var  select = "";
+    var  where = "";
+    var  insert = "";
+
+    console.log(parametros);
+
+    select += " SELECT IIF((SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) > 0 , ";
+    select += " (SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) + 1,1 ";
+    select += " ) AS 'numdoc',  ";
+
+    select += " (SELECT cliente.id_vendedor FROM cliente WHERE cliente.id=entidade.id) AS idoperador, ";
+    select += " (SELECT cliente.id_indicador FROM cliente WHERE cliente.id=entidade.id) AS idindicador, ";
+
+    select += " entidade.id AS 'identidade', ";
+
+    select += " (SELECT produtos.id FROM produtos  ";
+    select += " INNER JOIN produtos_subservicos ON produtos.id=produtos_subservicos.id_produtos  ";
+    select += " INNER JOIN subservico sub ON sub.id=produtos_subservicos.id_subservicos  ";
+    select += " WHERE sub.id=subservico.id) AS idservico, ";
+
+    select += " (subservico.id) AS idsubservico, ";
+
+    select += " (vl_valor) AS valor, REPLACE(REPLACE(REPLACE(REPLACE(entidade.nm_cnpj, '.', ''), '/', ''), '-', ''), '.', '') AS 'nm_cnpj' ";
+
+    select += " FROM entidade  ";
+    select += " LEFT JOIN cliente_servicos ON cliente_servicos.id_entidade=entidade.id  ";
+    select += " LEFT JOIN subservico ON subservico.id=cliente_servicos.id_produtos WHERE ";
+
+    if(parametros.cnpj){
+        for (let index = 0; index < parametros.cnpj.length; index++) {
+            const cnpj = parametros.cnpj[index];
+            const servico = parametros.servico[index];
+            
+            if(index == 0){
+                where += " ((entidade.nm_cnpj='" + cnpj + "' OR ";
+                
+                where += " nm_cnpj=(left ('" + cnpj + "',2)+'.'+ ";
+                where += "                    right(left ('" + cnpj + "',5),3)+'.'+ ";
+                where += "             right(left ('" + cnpj + "',8),3)+'/'+ ";
+                where += "             right(left ('" + cnpj + "',12),4)+'-'+ ";
+                where += "             right(left ('" + cnpj + "',14),2)))";
+
+                where += " AND nm_tiposervico='" + servico + "' ) ";
+            }else{
+                where += " OR ((entidade.nm_cnpj='" + cnpj + "' OR ";
+                
+                where += " nm_cnpj=(left ('" + cnpj + "',2)+'.'+ ";
+                where += "                    right(left ('" + cnpj + "',5),3)+'.'+ ";
+                where += "             right(left ('" + cnpj + "',8),3)+'/'+ ";
+                where += "             right(left ('" + cnpj + "',12),4)+'-'+ ";
+                where += "             right(left ('" + cnpj + "',14),2)))";
+
+                where += " AND nm_tiposervico='" + servico + "' ) ";
+            }
+        }
+    }
+    
+    select = select + where;
+    sql.close(); 
+    sql.connect(config, function (err) { 
+        if (err) console.log(err); 
+        var request = new sql.Request(); 
+        request.query(select, function (err, recordset){ 
+            if (err) console.log(err);
+
+            var retorno = recordset;
+            if(retorno){
+                if(retorno.recordset){
+                    //for (let index = 0; index < retorno.recordset.length; index++) {
+                    for (let i = 0; i < parametros.codigo.length; i++) {
+                        var index = 0;
+                        for (let index2 = 0; index2 < retorno.recordset.length; index2++) {
+                            index = retorno.recordset[index2].nm_cnpj.indexOf(parametros.cnpj[i]);
+                            if(index > -1){
+                                index = index2;
+                                break;
+                            }
+                        }
+                        
+                        const element = retorno.recordset[index];
+                        element.nm_cnpj = element.nm_cnpj.replace(".", "").replace(".", "").replace("-", "").replace("/", "");
+                        //var i = parametros.cnpj.indexOf(element.nm_cnpj);
+
+                        var identidade = element.identidade;
+                        var idservico = element.idservico;
+                        var numdoc = element.numdoc;
+                        var idoperador = element.idoperador
+                        var idindicador = element.idindicador
+                        var idsubservico = element.idsubservico
+                        var valor = element.valor
+
+                        if(!idindicador){
+                            idindicador = "NULL";
+                        }else{
+                            idindicador = "'" + idindicador + "'";
+                        }
+
+                        var arrayData = parametros.data[i].split('/');
+                        parametros.data[i] = arrayData[1] + "/" + arrayData[0] + "/" + arrayData[2];
+
+                        insert += " DELETE FROM movimentacao_servicos WHERE nm_numero_operacao='" + parametros.codigo[i] + "'; "; 
+                        insert += " INSERT INTO movimentacao_servicos (id, dt_emissao, id_entidade, id_produtos, nm_documento, nm_obs,  ";
+                        insert += " vl_valor, id_operador,id_indicador,id_subservicos,vl_cotacao,id_dsg_movimentacao_status, ";
+                        insert += " nm_numero_nfes,nm_numero_boleto,dt_faturamento,nm_numero_operacao,nm_status,id_contas_receber) ";
+                        
+                        insert += " VALUES (newID(), '" + parametros.data[i] + "', '" + identidade + "', ";
+                        insert += "'" + idservico + "', IIF((SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) > 0 ,";
+                        insert += "(SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) + 1,1 ";
+                        insert += "), '',";
+                        insert += valor + ", '" + idoperador + "'," + idindicador + ", '" + idsubservico + "', 0, NULL,";
+                        insert += " NULL, NULL, NULL, '" + parametros.codigo[i] + "', NULL, NULL";
+                        insert += "); ";
+                        
+                    }
+
+
+                    console.log(insert)
+                    var resposta = {};
+                    var transacao = new sql.Transaction();
+                    transacao.begin(err =>{
+                        var request = new sql.Request(transacao);
+                        request.query(insert, function (err, recordset) {
+                            if (err){
+                                resposta.status = -4;
+                                resposta.mensagem = [];
+                                resposta.mensagem.push("ops");
+                                resposta.titulo = err;
+                                transacao.rollback();
+                                res.send(resposta);     
+                            }
+                            else{
+                                resposta.status = 1;
+                                resposta.mensagem = ["ok"];
+                                resposta.titulo =  "Importação realizada com sucesso";
+                                transacao.commit();
+                                res.send(resposta);         
+                            }
+                        }) 
+                    })
+                }
+            }
+            //res.send(insert); 
+        }); 
+    }); 
+});
+
+

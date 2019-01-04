@@ -1145,3 +1145,90 @@ function indexArrayJS(arr, procurar) {
     var pos = arr.map(function(e) { return e.controlID; });
     return pos.indexOf(valor);
 }
+
+
+
+function sharpGridPager(containerID) {
+    var pageactive = $("[activepage='" + containerID + "_true']").html();
+    var activeobject = $("[activepage='" + containerID + "_true']");
+
+    $("#" + containerID + "_table").find(".pager").remove();
+
+    var table = $("#" + containerID + "_table table")
+
+    var currentPage = 0;
+
+    if (pageactive) {
+        currentPage = parseInt(pageactive)
+        currentPage = currentPage - 1;
+    }
+    var numPerPage = 10;
+    var numPage = $("#" + containerID + "_table").attr("data-numberpage");
+    if (numPage) {
+        numPerPage = numPage;
+    }
+
+    var $table = table;
+
+    $table.bind('repaginate', function () {
+        $table.find('tr.filtered').hide().slice(currentPage * numPerPage, (currentPage + 1) * numPerPage).show();
+
+
+    });
+
+    $table.trigger('repaginate');
+    var numRows = $table.find('tr.filtered').length;
+    var numPages = Math.ceil(numRows / numPerPage);
+    var $pager = $('<div class="pager"></div>');
+
+    for (var page = 0; page < numPages; page++) {
+        $('<span class="page-number btn btn-default"></span>').text(page + 1).bind('click', {
+            newPage: page
+        }, function (event) {
+            currentPage = event.data['newPage'];
+            $table.trigger('repaginate');
+            $(this).siblings().attr("activepage", containerID + "_false");
+            $(this).siblings().attr("numberpage", currentPage);
+            $(this).addClass('active')
+                .switchClass("btn-default", "btn-primary", 1000, "easeInOutQuad")
+                .siblings()
+                .removeClass('active')
+                .switchClass("btn-primary", "btn-default", 1000, "easeInOutQuad");
+
+            $(this).attr("activepage", containerID + "_true");
+            $(this).attr("numberpage", currentPage);
+        }).appendTo($pager).addClass('clickable');
+    }
+
+    if (numPages > 0) {
+        //$pager.insertAfter($table).find('span.page-number:first').addClass('active')
+        //            .switchClass("btn-default", "btn-primary", 1000, "easeInOutQuad");
+
+        $pager.insertAfter($table).find('span.page-number')
+                          .switchClass("btn-default", "btn-default", 1000, "easeInOutQuad");
+
+        if ($pager) {
+            if ($pager.length > 0) {
+                if ($pager[0].children) {
+                    if ($pager[0].children.length > 0) {
+                        var classList = $pager[0].children;
+                        for (i = 0; i < classList.length; i++) {
+                            if ($(classList[i]).html() == (currentPage + 1).toString()) {
+                                $(classList[i]).attr("activepage", containerID + "_true");
+                                $(classList[i]).addClass("active");
+                                $(classList[i]).addClass("btn-primary")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    var btnnovodisabled = $("#" + containerID + "_btnnovo").hasClass("disabled");
+    if (btnnovodisabled) {
+        $("." + containerID.replace("_nav", "").replace("table_", "") + "_edit").addClass("disabled");
+    } else {
+        $("." + containerID.replace("_nav", "").replace("table_", "") + "_edit").removeClass("disabled");
+    }
+}
