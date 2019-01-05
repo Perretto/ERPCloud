@@ -1122,14 +1122,20 @@ router.route('/gerarContasReceber/:id').get(function(req, res) {
     }); 
 });
 
-router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get(function(req, res) {
+router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cotacao').get(function(req, res) {
 
     var dataDe = req.param('dataDe');
     var dataAte = req.param('dataAte');
 
-
     var cliente = req.param('cliente');
     var servico = req.param('servico');
+    var cotacao = req.param('cotacao');
+    var valorcotacao = 0;
+
+    if(cotacao.indexOf(',') >= 0){
+        cotacao = cotacao.replace(".","").replace(",",".");
+    }
+
     var where = "";
     var query = "";
 
@@ -1142,9 +1148,10 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
         port: 5432,
     })
 
-    query += " SELECT venda.idvenda AS idvenda,venda.codigo AS codigo, ";
+    query += " SELECT REPLACE(venda.codigo, '/', '-' ) AS idvenda,venda.codigo AS codigo, ";
     query += " TO_CHAR(venda.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
     query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RVS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
+    query += " , venda.informacoescomplementares AS info, vendaoperacao.suareferencia AS referencia , NULL AS obs ";
     query += " FROM venda ";
     query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda  ";
     query += " INNER JOIN vendaoperacao ON vendaoperacao.idvenda = venda.idvenda ";
@@ -1159,9 +1166,10 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
         } 
     } 
     query += " UNION ALL ";
-    query += " SELECT aquisicao.idaquisicao AS idvenda,aquisicao.codigo AS codigo, ";
+    query += " SELECT REPLACE(aquisicao.codigo, '/', '-' ) AS idvenda,aquisicao.codigo AS codigo, ";
     query += " TO_CHAR(aquisicao.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
     query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RAS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
+    query += " , aquisicao.informacoescomplementares AS info, aquisicaooperacao.suareferencia AS referencia , NULL AS obs ";
     query += " FROM aquisicao ";
     query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
     query += " INNER JOIN aquisicaooperacao ON aquisicaooperacao.idaquisicao = aquisicao.idaquisicao ";
@@ -1177,9 +1185,10 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
     }    
     
     query += " UNION ALL ";
-    query += " SELECT faturamento.idfaturamento AS idvenda,faturamento.codigo AS codigo, ";
+    query += " SELECT REPLACE(faturamento.codigo, '/', '-' ) AS idvenda,faturamento.codigo AS codigo, ";
     query += " TO_CHAR(faturamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
     query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RF') AS cnpj, ('') AS valortotal, ('0') AS existe ";
+    query += " , faturamento.observacoes AS info, NULL AS referencia , NULL AS obs ";
     query += " FROM faturamento ";
     query += " INNER JOIN venda ON venda.idvenda = faturamento.idvenda ";
     query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda ";
@@ -1196,9 +1205,10 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
     } 
 
     query += " UNION ALL ";
-    query += " SELECT pagamento.idpagamento AS idvenda,pagamento.codigo AS codigo, ";
+    query += " SELECT REPLACE(pagamento.codigo, '/', '-' ) AS idvenda,pagamento.codigo AS codigo, ";
     query += " TO_CHAR(pagamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
     query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RP') AS cnpj, ('') AS valortotal, ('0') AS existe ";
+    query += " , pagamento.observacoes AS info, NULL AS referencia , NULL AS obs ";
     query += " FROM pagamento ";
     query += " INNER JOIN aquisicao ON aquisicao.idaquisicao = pagamento.idaquisicao ";
     query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
@@ -1241,10 +1251,11 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
 
     query += " ORDER BY datacadastro ASC ";
 
-
+    console.log(query)
     pool.query(query, (err, rest) => {
         //console.log(err, rest)
         pool.end();
+        
         /*
         rest = {}
         rest.rows = [];
@@ -1310,11 +1321,12 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
                 existe: "1"
                 }
             );
-            */
+          */  
 
         console.log(rest)
         var select = "SELECT REPLACE(REPLACE(REPLACE(nm_cnpj, '-', ''), '/', ''), '.', '') AS 'nm_cnpj',";
-        select += " cliente_servicos.vl_valor AS 'valor', sub.nm_tiposervico AS 'tipo' ";
+        select += " cliente_servicos.vl_valor AS 'valor', sub.nm_tiposervico AS 'tipo', ";
+        select += " cliente_servicos.id_dsg_moeda AS idmoeda ";
         select += " FROM entidade ";
         select += " INNER JOIN cliente_servicos ON cliente_servicos.id_entidade=entidade.id ";
         select += " INNER JOIN subservico sub ON sub.id=cliente_servicos.id_produtos ";
@@ -1341,6 +1353,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
         }
 
         select = select + where;
+        console.log(select);
 
         sql.close(); 
         sql.connect(config, function (err) { 
@@ -1356,9 +1369,23 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico').get
                             var i = adicionaOuRemove(rest.rows[index].nomeservico,rest.rows[index].cnpj ,recordset.recordsets[0]);
                             if(i >= 0){
                                 rest.rows[index].existe = "1";
-                                rest.rows[index].valortotal = recordset.recordsets[0][i].valor;   
+
+                                if(recordset.recordsets[0][i].idmoeda == "8E42C4B2-AC2A-4102-AE1F-6CADEEAA5E3B"){
+                                    rest.rows[index].valortotal = recordset.recordsets[0][i].valor; 
+                                }else{
+                                    valorcotacao = parseFloat(recordset.recordsets[0][i].valor) * parseFloat(cotacao);
+                                    rest.rows[index].valortotal = valorcotacao;
+                                }                                  
                             }    
-                                    
+                            
+                            rest.rows[index].obs = "";
+                            if(rest.rows[index].info){
+                                rest.rows[index].obs = "- Informações complementares: " + rest.rows[index].info;
+                            }
+                            
+                            if(rest.rows[index].referencia){
+                                rest.rows[index].obs += " - Referência: " + rest.rows[index].referencia;
+                            }
                         }
                     }
                 }
@@ -3592,7 +3619,7 @@ router.route('/importarSiscoserv').post(function(req, res) {
                         insert += "'" + idservico + "', IIF((SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) > 0 ,";
                         insert += "(SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) + 1,1 ";
                         insert += "), '',";
-                        insert += valor + ", '" + idoperador + "'," + idindicador + ", '" + idsubservico + "', 0, NULL,";
+                        insert += parametros.valor[i] + ", '" + idoperador + "'," + idindicador + ", '" + idsubservico + "', 0, NULL,";
                         insert += " NULL, NULL, NULL, '" + parametros.codigo[i] + "', NULL, NULL";
                         insert += "); ";
                         
