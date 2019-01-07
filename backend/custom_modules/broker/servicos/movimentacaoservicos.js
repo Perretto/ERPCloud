@@ -1256,7 +1256,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         //console.log(err, rest)
         pool.end();
         
-        /*
+        
         rest = {}
         rest.rows = [];
 
@@ -1296,7 +1296,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                 datacadastro: "02/01/2019",
                 nomepessoa: "VISCOFAN / 65.019.655/0002-38",
                 nomeservico: "65019655000238",
-                cnpj: "RAS",
+                cnpj: "RP",
                 valortotal: 123.45,
                 existe: "1"
                 },
@@ -1306,7 +1306,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                 datacadastro: "02/01/2019",
                 nomepessoa: "VISCOFAN / 65.019.655/0002-38",
                 nomeservico: "65019655000238",
-                cnpj: "RAS",
+                cnpj: "RF",
                 valortotal: 123.45,
                 existe: "1"
                 },
@@ -1321,7 +1321,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                 existe: "1"
                 }
             );
-          */  
+            
 
         console.log(rest)
         var select = "SELECT REPLACE(REPLACE(REPLACE(nm_cnpj, '-', ''), '/', ''), '.', '') AS 'nm_cnpj',";
@@ -3000,7 +3000,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                             BairroTomador = (!BairroTomador) ? "" : BairroTomador;
                             
                             var CepTomador = movimentacao.CepTomador
-                            CepTomador = (!CepTomador) ? "" : CepTomador;
+                            CepTomador = (!CepTomador) ? "" : CepTomador.replace("-","");
                             
                             var CodigoCidadeTomador = movimentacao.CodigoCidadeTomador
                             CodigoCidadeTomador = (!CodigoCidadeTomador) ? "" : CodigoCidadeTomador;
@@ -3150,6 +3150,21 @@ router.route('/gerarNFSe').post(function(req, res) {
                             var status = movimentacao.status
                             status = (!status) ? "" : status;
 
+                            var d = new Date();
+                            var da = d.getUTCDate().toString();
+                            var m = (d.getMonth() + 1).toString();
+                            var y = d.getFullYear().toString();
+                            
+                            if(da.length == 1){
+                                da = "0" + da;
+                            }
+                            
+                            if(m.length == 1){
+                                m = "0" + m;
+                            }
+                            
+                            
+                            var dataemissao = da + "/" + m + "/" + y;
 
                             if(status == "Pendente" || !status){
 
@@ -3169,7 +3184,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                                 query += " DataInicio, ValorIssRetido, TemIssRetido, AliquotaISS, CodigoItemListaServico, ";
                                 query += " DiscriminacaoServico, QuantidadeServicos, ValorUnitarioServico, ";
                                 query += " ValorDesconto, ValorPis, ValorCofins, AliquotaPIS, AliquotaCOFINS, ";
-                                query += " IDProdutos_VendaProdutos, SerieRpsSubstituido, status) ";
+                                query += " IDProdutos_VendaProdutos, SerieRpsSubstituido, status, dataemissao) ";
     
                                 query += " VALUES( '" + id + "', '";
                                 query += RazaoSocialPrestador + "', '" + PessoaFisicaPrestador + "', '" + CpfPrestador + "', '";
@@ -3194,7 +3209,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                                 query +=  "', '" + QuantidadeServicos;
                                 query +=  "', '" + ValorUnitarioServico + "', '" + ValorDesconto + "', '" + ValorPis;
                                 query +=  "', '" + ValorCofins + "', '" + AliquotaPIS + "', '" + AliquotaCOFINS;
-                                query +=  "', '" + IDProdutos_VendaProdutos + "', '" + SerieRpsSubstituido + "', 'Pendente'); ";
+                                query +=  "', '" + IDProdutos_VendaProdutos + "', '" + SerieRpsSubstituido + "', 'Pendente', '" + dataemissao + "'); ";
                                 
                             }else{
                                 resposta.status = -4;
@@ -3567,7 +3582,23 @@ router.route('/importarSiscoserv').post(function(req, res) {
         }
     }
     
-    select = select + where;
+    select = select + where + "; ";
+    select += " SELECT nm_codigo AS codigo, nm_status AS status FROM comiss WHERE "
+    for (let i = 0; i < parametros.codigo.length; i++) {
+        if(i == 0){
+            select += " nm_codigo='" + parametros.codigo[i] + "' "
+        }else{
+            select += " OR nm_codigo='" + parametros.codigo[i] + "' "
+        }
+        
+    }
+
+    select += "; SELECT id AS id, nm_tiposervico AS tiposervico FROM subservico WHERE nm_tiposervico IS NOT NULL ";
+
+
+    console.log(select);
+    console.log("===========================================");
+
     sql.close(); 
     sql.connect(config, function (err) { 
         if (err) console.log(err); 
@@ -3575,53 +3606,73 @@ router.route('/importarSiscoserv').post(function(req, res) {
         request.query(select, function (err, recordset){ 
             if (err) console.log(err);
 
-            var retorno = recordset;
+            var retorno = recordset.recordsets[0];
+            var retornoStatus = recordset.recordsets[1];
+            var retornoSubservicos = recordset.recordsets[2];
             if(retorno){
-                if(retorno.recordset){
                     //for (let index = 0; index < retorno.recordset.length; index++) {
                     for (let i = 0; i < parametros.codigo.length; i++) {
-                        var index = 0;
-                        for (let index2 = 0; index2 < retorno.recordset.length; index2++) {
-                            index = retorno.recordset[index2].nm_cnpj.indexOf(parametros.cnpj[i]);
-                            if(index > -1){
-                                index = index2;
-                                break;
+                        var status = "";
+                        for (let ind = 0; ind < retornoStatus.length; ind++) {                            
+                            if(parametros.codigo[i] == retornoStatus[ind].codigo){
+                                status = retornoStatus[ind].status;
+                                break;                                
                             }
                         }
-                        
-                        const element = retorno.recordset[index];
-                        element.nm_cnpj = element.nm_cnpj.replace(".", "").replace(".", "").replace("-", "").replace("/", "");
-                        //var i = parametros.cnpj.indexOf(element.nm_cnpj);
 
-                        var identidade = element.identidade;
-                        var idservico = element.idservico;
-                        var numdoc = element.numdoc;
-                        var idoperador = element.idoperador
-                        var idindicador = element.idindicador
-                        var idsubservico = element.idsubservico
-                        var valor = element.valor
+                        if(status == "Pendente" || !status){
+                            var index = 0;
+                            for (let index2 = 0; index2 < retorno.length; index2++) {
+                                index = retorno[index2].nm_cnpj.indexOf(parametros.cnpj[i]);
+                                if(index > -1){
+                                    index = index2;
+                                    break;
+                                }
+                            }
+                            
+                            const element = retorno[index];
+                            element.nm_cnpj = element.nm_cnpj.replace(".", "").replace(".", "").replace("-", "").replace("/", "");
+                            //var i = parametros.cnpj.indexOf(element.nm_cnpj);
+    
+                            var identidade = element.identidade;
+                            var idservico = element.idservico;
+                            var numdoc = element.numdoc;
+                            var idoperador = element.idoperador
+                            var idindicador = element.idindicador
+                            var idsubservico = element.idsubservico
 
-                        if(!idindicador){
-                            idindicador = "NULL";
-                        }else{
-                            idindicador = "'" + idindicador + "'";
+                            for (let index3 = 0; index3 < retornoSubservicos.length; index3++) {                                
+                                if(retornoSubservicos[index3].tiposervico == parametros.servico[i]){
+                                    idsubservico = retornoSubservicos[index3].id;
+                                    break;
+                                }
+                            }
+
+
+                            var valor = element.valor
+    
+                            if(!idindicador){
+                                idindicador = "NULL";
+                            }else{
+                                idindicador = "'" + idindicador + "'";
+                            }
+    
+                            var arrayData = parametros.data[i].split('/');
+                            parametros.data[i] = arrayData[1] + "/" + arrayData[0] + "/" + arrayData[2];
+    
+                            insert += " DELETE FROM movimentacao_servicos WHERE nm_numero_operacao='" + parametros.codigo[i] + "'; "; 
+                            insert += " INSERT INTO movimentacao_servicos (id, dt_emissao, id_entidade, id_produtos, nm_documento, nm_obs,  ";
+                            insert += " vl_valor, id_operador,id_indicador,id_subservicos,vl_cotacao,id_dsg_movimentacao_status, ";
+                            insert += " nm_numero_nfes,nm_numero_boleto,dt_faturamento,nm_numero_operacao,nm_status,id_contas_receber) ";
+                            
+                            insert += " VALUES (newID(), '" + parametros.data[i] + "', '" + identidade + "', ";
+                            insert += "'" + idservico + "', IIF((SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) > 0 ,";
+                            insert += "(SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) + 1,1 ";
+                            insert += "), '',";
+                            insert += parametros.valor[i] + ", '" + idoperador + "'," + idindicador + ", '" + idsubservico + "', 0, NULL,";
+                            insert += " NULL, NULL, NULL, '" + parametros.codigo[i] + "', NULL, NULL";
+                            insert += "); ";
                         }
-
-                        var arrayData = parametros.data[i].split('/');
-                        parametros.data[i] = arrayData[1] + "/" + arrayData[0] + "/" + arrayData[2];
-
-                        insert += " DELETE FROM movimentacao_servicos WHERE nm_numero_operacao='" + parametros.codigo[i] + "'; "; 
-                        insert += " INSERT INTO movimentacao_servicos (id, dt_emissao, id_entidade, id_produtos, nm_documento, nm_obs,  ";
-                        insert += " vl_valor, id_operador,id_indicador,id_subservicos,vl_cotacao,id_dsg_movimentacao_status, ";
-                        insert += " nm_numero_nfes,nm_numero_boleto,dt_faturamento,nm_numero_operacao,nm_status,id_contas_receber) ";
-                        
-                        insert += " VALUES (newID(), '" + parametros.data[i] + "', '" + identidade + "', ";
-                        insert += "'" + idservico + "', IIF((SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) > 0 ,";
-                        insert += "(SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) + 1,1 ";
-                        insert += "), '',";
-                        insert += parametros.valor[i] + ", '" + idoperador + "'," + idindicador + ", '" + idsubservico + "', 0, NULL,";
-                        insert += " NULL, NULL, NULL, '" + parametros.codigo[i] + "', NULL, NULL";
-                        insert += "); ";
                         
                     }
 
@@ -3641,6 +3692,9 @@ router.route('/importarSiscoserv').post(function(req, res) {
                                 res.send(resposta);     
                             }
                             else{
+
+                                gerarComissaoBloco(parametros.codigo);
+
                                 resposta.status = 1;
                                 resposta.mensagem = ["ok"];
                                 resposta.titulo =  "Importação realizada com sucesso";
@@ -3649,7 +3703,7 @@ router.route('/importarSiscoserv').post(function(req, res) {
                             }
                         }) 
                     })
-                }
+                
             }
             //res.send(insert); 
         }); 
@@ -3661,7 +3715,8 @@ router.route('/importarSiscoserv').post(function(req, res) {
 
 function gerarComissaoBloco(arrayID) { 
     
-    var select = " SELECT  ";
+    var insertupdate = ""; 
+    var select = " SELECT  movimentacao_servicos.id AS idmovimentacao, movimentacao_servicos.nm_numero_operacao AS codigo,";
     select += " (SELECT TOP 1 id FROM comiss WHERE id_venda=movimentacao_servicos.id AND comiss.id_vendedor=movimentacao_servicos.id_operador) AS 'idop', ";
     select += " (SELECT TOP 1 id FROM comiss WHERE id_venda=movimentacao_servicos.id AND comiss.id_vendedor=movimentacao_servicos.id_indicador) AS 'idind', ";
     select += " movimentacao_servicos.id_operador AS 'idoperador', ";
@@ -3686,7 +3741,7 @@ function gerarComissaoBloco(arrayID) {
         }        
     }
 
-
+    select = select + where;
     console.log("+++++++++++++COMISSAO++++++++++++++++++");
     console.log(select);
 
@@ -3726,8 +3781,9 @@ function gerarComissaoBloco(arrayID) {
                         var vl_comissaoInd = "";
                         var vl_comissaopercOP = recordset.recordset[i].comissaopercop;
                         var vl_comissaopercIND = recordset.recordset[i].comissaopercind;
+                        var id = recordset.recordset[i].idmovimentacao;
+                        var codigo = recordset.recordset[i].codigo;
                         
-                        var insertupdate = ""; 
 
                         var today = new Date();
                         var dd = today.getDate();
@@ -3784,13 +3840,14 @@ function gerarComissaoBloco(arrayID) {
 
                         if(idcomissop == null){
                             if(id_operador){
+                                insertupdate += " DELETE FROM comiss WHERE nm_codigo='" + codigo + "'; ";
                                 insertupdate += " INSERT INTO comiss ";
-                                insertupdate += " (id, id_vendedor, id_venda, nm_status, id_empresa, numero_pedido, dt_emissao, vl_venda, vl_comissao)";
-                                insertupdate += " VALUES(newID(), '" + id_operador + "', '" + id + "', '" + nm_status + "', '" + id_empresa + "', '" + numero_pedido + "', '" + dt_emissao + "', " + vl_venda + ", " + vl_comissaoOp + ");";          
+                                insertupdate += " (id, id_vendedor, id_venda, nm_status, id_empresa, numero_pedido, dt_emissao, vl_venda, vl_comissao, nm_codigo)";
+                                insertupdate += " VALUES(newID(), '" + id_operador + "', '" + id + "', '" + nm_status + "', '" + id_empresa + "', '" + numero_pedido + "', '" + dt_emissao + "', " + vl_venda + ", " + vl_comissaoOp + ", '" + codigo + "');";          
                             }
                         }else{
                             if(id_operador){
-                                insertupdate += " UPDATE comiss SET id_vendedor='" + id_operador + "',id_venda='" + id + "', nm_status='" + nm_status + "', id_empresa='" + id_empresa + "', numero_pedido='" + numero_pedido + "', dt_emissao='" + dt_emissao + "', vl_venda=" + vl_venda + ", vl_comissao=" + vl_comissaoOp + " WHERE id='" + idcomissop + "' ;";
+                                //insertupdate += " UPDATE comiss SET id_vendedor='" + id_operador + "',id_venda='" + id + "', nm_status='" + nm_status + "', id_empresa='" + id_empresa + "', numero_pedido='" + numero_pedido + "', dt_emissao='" + dt_emissao + "', vl_venda=" + vl_venda + ", vl_comissao=" + vl_comissaoOp + " WHERE id='" + idcomissop + "' ;";
                             }
                         }
                         
@@ -3800,13 +3857,14 @@ function gerarComissaoBloco(arrayID) {
                         
                         if(idcomissind == null){
                             if(id_indicador){
+                                insertupdate += " DELETE FROM comiss WHERE nm_codigo='" + codigo + "'; ";
                                 insertupdate += " INSERT INTO comiss ";
-                                insertupdate += " (id, id_vendedor, id_venda, nm_status, id_empresa, numero_pedido, dt_emissao, vl_venda, vl_comissao)";
-                                insertupdate += " VALUES(newID(), '" + id_indicador + "', '" + id + "', '" + nm_status + "', '" + id_empresa + "', '" + numero_pedido + "', '" + dt_emissao + "', " + vl_venda + ", " + vl_comissaoInd + ");";          
+                                insertupdate += " (id, id_vendedor, id_venda, nm_status, id_empresa, numero_pedido, dt_emissao, vl_venda, vl_comissao, nm_codigo)";
+                                insertupdate += " VALUES(newID(), '" + id_indicador + "', '" + id + "', '" + nm_status + "', '" + id_empresa + "', '" + numero_pedido + "', '" + dt_emissao + "', " + vl_venda + ", " + vl_comissaoInd  + ", '" + codigo + "');";          
                             }
                         }else{
                             if(id_indicador){
-                                insertupdate += " UPDATE comiss SET id_vendedor='" + id_indicador + "',id_venda='" + id + "', nm_status='" + nm_status + "', id_empresa='" + id_empresa + "', numero_pedido='" + numero_pedido + "', dt_emissao='" + dt_emissao + "', vl_venda=" + vl_venda + ", vl_comissao=" + vl_comissaoInd + " WHERE id='" + idcomissind + "' ;";
+                                //insertupdate += " UPDATE comiss SET id_vendedor='" + id_indicador + "',id_venda='" + id + "', nm_status='" + nm_status + "', id_empresa='" + id_empresa + "', numero_pedido='" + numero_pedido + "', dt_emissao='" + dt_emissao + "', vl_venda=" + vl_venda + ", vl_comissao=" + vl_comissaoInd + " WHERE id='" + idcomissind + "' ;";
                             }
                         }
                     }
