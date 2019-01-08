@@ -2749,7 +2749,8 @@
 
         _createInsertButton: function() {
             return this._createGridButton(this.insertButtonClass, this.insertButtonTooltip, function(grid) {
-                var itensid = $("[id*='CoItensVenda_txtitensid']").attr("data-valuegrid");
+                //var itensid = $("[id*='CoItensVenda_txtitensid']").attr("data-valuegrid");
+                var itensid = $(".jsgrid-insert-row > td > input[id*='CoItensVenda_txtitensid']").attr("data-valuegrid");
                 if(itensid){
                     grid.insertItem().done(function() {
                         grid.clearInsert();

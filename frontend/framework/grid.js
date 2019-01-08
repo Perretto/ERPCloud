@@ -1062,11 +1062,10 @@ function AfterSelectItemGrid(element) {
     var ddllistaprecos = $("[id*='CoCabecalhoVenda_ddllistaprecos']").val();
     var idTela = $(element).attr("data-idgrid").replace("CoItensVenda_txtitensid", "");
     var quantidade = $("#" + idTela + "CoItensVenda_txtquantidade").val();
-
-
     var text = "";
     var valor = "";
     var Dados = "";
+
     Dados = Dados + "EnterpriseID=" + returnCookie("EnterpriseID");
     Dados = Dados + "&Class=ClassVenda&Function=BuscarDadosProduto&ValueParameters[0]=" + idProduto;
     Dados = Dados + "&ValueParameters[1]=" + ddllistaprecos;
@@ -1120,6 +1119,8 @@ function AfterSelectItemGrid(element) {
         }        
     }
 
+    if(!(quantidade))
+        quantidade = "0";
 
     parameters = new Object();
     parameters.url = getGlobalParameters("urlPlataform") + "/ntlct_modules/venda/telavendas/carregarPeso";
@@ -1128,6 +1129,24 @@ function AfterSelectItemGrid(element) {
     parameters.async = false;
     parameters.type = "GET";
     
+
+    $.ajax({
+        type: "GET",
+        url: getGlobalParameters("urlPlataform") + "/ntlct_modules/venda/telavendas/carregarPeso" + "/" + idProduto + "/" + quantidade,
+        async: false,
+        success: function (result) {
+            if (result) {
+                if (result.recordset) {
+                    if (result.recordset.length > 0) {
+                        $("#" + idTela + "CoDadosTransportadoraMovimentacao_txtpesobruto").val(result.recordset[0].pesobruto);
+                        $("#" + idTela + "CoDadosTransportadoraMovimentacao_txtpesoliquido").val(result.recordset[0].pesoliquido);
+                    }
+                }
+            }
+        }
+    });
+
+/*
     result = AjaxParameter(parameters);
     if (result) {
         if (result.recordset) {
@@ -1137,6 +1156,7 @@ function AfterSelectItemGrid(element) {
             }
         }
     }
+    */
 }
 
 function indexArrayJS(arr, procurar) {

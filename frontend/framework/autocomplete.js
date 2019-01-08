@@ -32,6 +32,9 @@ function bindAutocomplete(controlID, nameLayout, LayoutID, TitleMenu, PropertyID
             select: function (event, ui) {
                 loaderImage(containerID + "_panel", true);
                 var id = $(this).attr("id");
+                var elementoInput = null;
+                var inputsGrid = null;
+
                 id = id.replace("_autocomplete", "");
 
                 var chaveid = "";
@@ -95,7 +98,17 @@ function bindAutocomplete(controlID, nameLayout, LayoutID, TitleMenu, PropertyID
                 }
                 loaderImage(containerID + "_panel", false);
                 if($(this).hasClass("gridjs")){
-                    $("#" + id).attr("data-valuegrid", ui.item.id);
+                    inputsGrid = document.querySelectorAll(".jsgrid-edit-row > td > input[id='" + id + "']");
+                    if(inputsGrid.length == 0)
+                        inputsGrid = document.querySelectorAll(".jsgrid-insert-row > td > input[id='" + id + "']");
+
+                    if(inputsGrid.length > 0)
+                        elementoInput = inputsGrid[0];
+                    else 
+                        elementoInput = $("#" + id);
+
+                    $(elementoInput).attr('name', ui.item.id[0]);
+                    $(elementoInput).attr("data-valuegrid", ui.item.id);
 
                     var idtable = $($(this).parents("table[id]")).attr("id");
                     var objArray = $("#" + idtable).data("JSGrid").fields;

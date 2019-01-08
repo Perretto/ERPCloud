@@ -569,14 +569,59 @@ function executeFunctionByName(functionName, context, args) {
 
 }
 
+function convertToNumber(numeroStr) {
+    var numeroRet = 0;
+    var numeroAux = 0;
+    var posVirgula = 0;
+    var posPonto = 0;
+    var strAux = "";
+    var separadores = null;
+
+    if (numeroStr) {
+        numeroAux = Number(numeroStr);
+        if(isNaN(numeroAux)){
+            posVirgula = numeroStr.lastIndexOf(",");
+            posPonto = numeroStr.lastIndexOf(".");
+            if(posVirgula > posPonto){
+                separadores = numeroStr.match(/\,/g);
+                if(separadores != null && separadores.length == 1)
+                    strAux = numeroStr.substring(0,posVirgula) + "*" + numeroStr.substring(posVirgula + 1);
+                else
+                    strAux = numeroStr;
+            }
+            else{
+                separadores = numeroStr.match(/\./g);
+                if(separadores != null && separadores.length == 1)
+                    strAux = numeroStr.substring(0,posPonto) + "*" + numeroStr.substring(posPonto + 1);
+                else
+                    strAux = numeroStr;
+            }
+            strAux = strAux.replace(/\./g,"").replace(/\,/g, "");
+            strAux = strAux.replace("*",".");
+            numeroAux = Number(strAux);
+        }
+        if(isNaN(numeroAux))
+            numeroRet = 0;
+        else
+            numeroRet = numeroAux;
+    }
+    return numeroRet;
+}
+
 
 function ConvertToNumberFixed(string) {
     var number = 0;
+    var numero = 0;
+
     if (string) {
         number = string.replace(".", "").replace(",", ".").replace(/[^0-9\.-]+/g, "");
         number = parseFloat(number).toFixed(2);
     }
-    return number;
+
+    numero = convertToNumber(string);
+    number = numero.toFixed(2);
+
+    return number
 }
 
 function gerarGUID(){
