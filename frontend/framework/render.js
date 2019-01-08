@@ -904,6 +904,7 @@ function openLayout(button, tabGenID) {
         }
     }
     //$("[data-field='id_empresa']").val(returnCookie("EnterpriseID"));   
+    $("#" + formID + " [name*=_PK]").val("");
 }
 
 

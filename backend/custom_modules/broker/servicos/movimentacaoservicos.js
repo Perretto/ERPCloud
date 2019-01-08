@@ -1147,83 +1147,120 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         password: '$T3[K?nH|mxI:M8>zE&T',
         port: 5432,
     })
-
-    query += " SELECT REPLACE(venda.codigo, '/', '-' ) AS idvenda,venda.codigo AS codigo, ";
-    query += " TO_CHAR(venda.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RVS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
-    query += " , venda.informacoescomplementares AS info, vendaoperacao.suareferencia AS referencia , NULL AS obs ";
-    query += " FROM venda ";
-    query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda  ";
-    query += " INNER JOIN vendaoperacao ON vendaoperacao.idvenda = venda.idvenda ";
-    if(dataDe){ 
-        if(dataDe != "*"){ 
-            query += " WHERE venda.datacadastro >= '" + dataDe + " 00:00:00' "; 
-            if(dataAte){ 
-                if(dataAte != "*"){ 
-                    query += " AND venda.datacadastro <= '" + dataAte + " 23:59:59' ";         
-                } 
-            } 
-        } 
-    } 
-    query += " UNION ALL ";
-    query += " SELECT REPLACE(aquisicao.codigo, '/', '-' ) AS idvenda,aquisicao.codigo AS codigo, ";
-    query += " TO_CHAR(aquisicao.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RAS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
-    query += " , aquisicao.informacoescomplementares AS info, aquisicaooperacao.suareferencia AS referencia , NULL AS obs ";
-    query += " FROM aquisicao ";
-    query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
-    query += " INNER JOIN aquisicaooperacao ON aquisicaooperacao.idaquisicao = aquisicao.idaquisicao ";
-    if(dataDe){ 
-        if(dataDe != "*"){ 
-            query += " WHERE aquisicao.datacadastro >= '" + dataDe + " 00:00:00' "; 
-            if(dataAte){ 
-                if(dataAte != "*"){ 
-                    query += " AND aquisicao.datacadastro <= '" + dataAte + " 23:59:59' ";         
-                } 
-            } 
-        } 
-    }    
     
-    query += " UNION ALL ";
-    query += " SELECT REPLACE(faturamento.codigo, '/', '-' ) AS idvenda,faturamento.codigo AS codigo, ";
-    query += " TO_CHAR(faturamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RF') AS cnpj, ('') AS valortotal, ('0') AS existe ";
-    query += " , faturamento.observacoes AS info, NULL AS referencia , NULL AS obs ";
-    query += " FROM faturamento ";
-    query += " INNER JOIN venda ON venda.idvenda = faturamento.idvenda ";
-    query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda ";
-    query += " INNER JOIN faturamentooperacao ON faturamentooperacao.idfaturamento = faturamento.idfaturamento ";
-    if(dataDe){ 
-        if(dataDe != "*"){ 
-            query += " WHERE faturamento.datacadastro >= '" + dataDe + " 00:00:00' "; 
-            if(dataAte){ 
-                if(dataAte != "*"){ 
-                    query += " AND faturamento.datacadastro <= '" + dataAte + " 23:59:59' ";         
-                } 
-            } 
-        } 
-    } 
+    if(servico == "*" || servico == "RVS"){
 
-    query += " UNION ALL ";
-    query += " SELECT REPLACE(pagamento.codigo, '/', '-' ) AS idvenda,pagamento.codigo AS codigo, ";
-    query += " TO_CHAR(pagamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
-    query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RP') AS cnpj, ('') AS valortotal, ('0') AS existe ";
-    query += " , pagamento.observacoes AS info, NULL AS referencia , NULL AS obs ";
-    query += " FROM pagamento ";
-    query += " INNER JOIN aquisicao ON aquisicao.idaquisicao = pagamento.idaquisicao ";
-    query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
-    query += " INNER JOIN pagamentooperacao ON pagamentooperacao.idpagamento = pagamento.idpagamento ";
-    if(dataDe){ 
-        if(dataDe != "*"){ 
-            query += " WHERE pagamento.datacadastro >= '" + dataDe + " 00:00:00' "; 
-            if(dataAte){ 
-                if(dataAte != "*"){ 
-                    query += " AND pagamento.datacadastro <= '" + dataAte + " 23:59:59' ";         
+        query += " SELECT REPLACE(venda.codigo, '/', '-' ) AS idvenda,venda.codigo AS codigo, ";
+        query += " TO_CHAR(venda.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
+        query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RVS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
+        query += " , venda.informacoescomplementares AS info, vendaoperacao.suareferencia AS referencia , NULL AS obs ";
+        query += " FROM venda ";
+        query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda  ";
+        query += " INNER JOIN vendaoperacao ON vendaoperacao.idvenda = venda.idvenda ";
+        if(dataDe){ 
+            if(dataDe != "*"){ 
+                query += " WHERE venda.datacadastro >= '" + dataDe + " 00:00:00' "; 
+                if(dataAte){ 
+                    if(dataAte != "*"){ 
+                        query += " AND venda.datacadastro <= '" + dataAte + " 23:59:59' "; 
+                        
+                        if(cliente != "*"){
+                            query += " AND pessoa.cpfcnpj = '" + cliente +  "'";
+                        }
+                    } 
                 } 
             } 
         } 
-    } 
+    }
+    if(servico == "*"){
+        query += " UNION ALL ";
+    }
+
     
+    if(servico == "*" || servico == "RAS"){
+        query += " SELECT REPLACE(aquisicao.codigo, '/', '-' ) AS idvenda,aquisicao.codigo AS codigo, ";
+        query += " TO_CHAR(aquisicao.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
+        query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RAS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
+        query += " , aquisicao.informacoescomplementares AS info, aquisicaooperacao.suareferencia AS referencia , NULL AS obs ";
+        query += " FROM aquisicao ";
+        query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
+        query += " INNER JOIN aquisicaooperacao ON aquisicaooperacao.idaquisicao = aquisicao.idaquisicao ";
+        if(dataDe){ 
+            if(dataDe != "*"){ 
+                query += " WHERE aquisicao.datacadastro >= '" + dataDe + " 00:00:00' "; 
+                if(dataAte){ 
+                    if(dataAte != "*"){ 
+                        query += " AND aquisicao.datacadastro <= '" + dataAte + " 23:59:59' ";   
+                        
+                        if(cliente != "*"){
+                            query += " AND pessoa.cpfcnpj = '" + cliente +  "'";
+                        }  
+                    } 
+                } 
+            } 
+        }    
+    }
+
+    if(servico == "*"){
+        query += " UNION ALL ";
+    }
+
+    
+    if(servico == "*" || servico == "RF"){
+        query += " SELECT REPLACE(faturamento.codigo, '/', '-' ) AS idvenda,faturamento.codigo AS codigo, ";
+        query += " TO_CHAR(faturamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
+        query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RF') AS cnpj, ('') AS valortotal, ('0') AS existe ";
+        query += " , faturamento.observacoes AS info, NULL AS referencia , NULL AS obs ";
+        query += " FROM faturamento ";
+        query += " INNER JOIN venda ON venda.idvenda = faturamento.idvenda ";
+        query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda ";
+        query += " INNER JOIN faturamentooperacao ON faturamentooperacao.idfaturamento = faturamento.idfaturamento ";
+        if(dataDe){ 
+            if(dataDe != "*"){ 
+                query += " WHERE faturamento.datacadastro >= '" + dataDe + " 00:00:00' "; 
+                if(dataAte){ 
+                    if(dataAte != "*"){ 
+                        query += " AND faturamento.datacadastro <= '" + dataAte + " 23:59:59' ";  
+                        
+                        if(cliente != "*"){
+                            query += " AND pessoa.cpfcnpj = '" + cliente +  "'";
+                        }       
+                    } 
+                } 
+            } 
+        } 
+    }
+
+    if(servico == "*"){
+        query += " UNION ALL ";
+    }
+   
+
+    
+    if(servico == "*" || servico == "RP"){
+        query += " SELECT REPLACE(pagamento.codigo, '/', '-' ) AS idvenda,pagamento.codigo AS codigo, ";
+        query += " TO_CHAR(pagamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
+        query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RP') AS cnpj, ('') AS valortotal, ('0') AS existe ";
+        query += " , pagamento.observacoes AS info, NULL AS referencia , NULL AS obs ";
+        query += " FROM pagamento ";
+        query += " INNER JOIN aquisicao ON aquisicao.idaquisicao = pagamento.idaquisicao ";
+        query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
+        query += " INNER JOIN pagamentooperacao ON pagamentooperacao.idpagamento = pagamento.idpagamento ";
+        if(dataDe){ 
+            if(dataDe != "*"){ 
+                query += " WHERE pagamento.datacadastro >= '" + dataDe + " 00:00:00' "; 
+                if(dataAte){ 
+                    if(dataAte != "*"){ 
+                        query += " AND pagamento.datacadastro <= '" + dataAte + " 23:59:59' "; 
+                        
+                        if(cliente != "*"){
+                            query += " AND pessoa.cpfcnpj = '" + cliente +  "'";
+                        }        
+                    } 
+                } 
+            } 
+        } 
+    }
     
 
     
