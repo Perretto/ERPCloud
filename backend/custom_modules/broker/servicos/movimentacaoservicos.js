@@ -1153,7 +1153,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         query += " SELECT REPLACE(venda.codigo, '/', '-' ) AS idvenda,venda.codigo AS codigo, ";
         query += " TO_CHAR(venda.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RVS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
-        query += " , venda.informacoescomplementares AS info, vendaoperacao.suareferencia AS referencia , NULL AS obs ";
+        query += " , REPLACE(REPLACE(loread(lo_open(venda.informacoescomplementares, 262144), 1000000)::varchar,'x',''),'\\','')::varchar AS info, vendaoperacao.suareferencia AS referencia , NULL AS obs ";
         query += " FROM venda ";
         query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda  ";
         query += " INNER JOIN vendaoperacao ON vendaoperacao.idvenda = venda.idvenda ";
@@ -1181,7 +1181,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         query += " SELECT REPLACE(aquisicao.codigo, '/', '-' ) AS idvenda,aquisicao.codigo AS codigo, ";
         query += " TO_CHAR(aquisicao.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RAS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
-        query += " , aquisicao.informacoescomplementares AS info, aquisicaooperacao.suareferencia AS referencia , NULL AS obs ";
+        query += " , REPLACE(REPLACE(loread(lo_open(aquisicao.informacoescomplementares, 262144), 1000000)::varchar,'x',''),'\\','')::varchar  AS info, aquisicaooperacao.suareferencia AS referencia , NULL AS obs ";
         query += " FROM aquisicao ";
         query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
         query += " INNER JOIN aquisicaooperacao ON aquisicaooperacao.idaquisicao = aquisicao.idaquisicao ";
@@ -1210,7 +1210,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         query += " SELECT REPLACE(faturamento.codigo, '/', '-' ) AS idvenda,faturamento.codigo AS codigo, ";
         query += " TO_CHAR(faturamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RF') AS cnpj, ('') AS valortotal, ('0') AS existe ";
-        query += " , faturamento.observacoes AS info, NULL AS referencia , NULL AS obs ";
+        query += " , REPLACE(REPLACE(loread(lo_open(faturamento.observacoes, 262144), 1000000)::varchar,'x',''),'\\','')::varchar  AS info, NULL AS referencia , NULL AS obs ";
         query += " FROM faturamento ";
         query += " INNER JOIN venda ON venda.idvenda = faturamento.idvenda ";
         query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda ";
@@ -1241,7 +1241,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         query += " SELECT REPLACE(pagamento.codigo, '/', '-' ) AS idvenda,pagamento.codigo AS codigo, ";
         query += " TO_CHAR(pagamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pessoa.cpfcnpj AS nomeservico, ('RP') AS cnpj, ('') AS valortotal, ('0') AS existe ";
-        query += " , pagamento.observacoes AS info, NULL AS referencia , NULL AS obs ";
+        query += " , REPLACE(REPLACE(loread(lo_open(pagamento.observacoes, 262144), 1000000)::varchar,'x',''),'\\','')::varchar  AS info, NULL AS referencia , NULL AS obs ";
         query += " FROM pagamento ";
         query += " INNER JOIN aquisicao ON aquisicao.idaquisicao = pagamento.idaquisicao ";
         query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
@@ -1287,9 +1287,9 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
     //query += " WHERE venda.datacadastro >= '01/02/2018' AND venda.datacadastro <= '01/03/2018'";
 
     query += " ORDER BY datacadastro ASC ";
-
+    
     console.log(query)
-    pool.query(query, (err, rest) => {
+    pool.query(query,  (err, rest) => {
         //console.log(err, rest)
         pool.end();
         
@@ -1402,6 +1402,10 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                 if(recordset){
                     if(recordset.recordsets){
                         for (let index = 0; index < rest.rows.length; index++) {
+                            if(rest.rows[index].info){
+                                rest.rows[index].info = hexToAscii(rest.rows[index].info)
+                            }
+                            
                             const element = rest.rows[index];
                             var i = adicionaOuRemove(rest.rows[index].nomeservico,rest.rows[index].cnpj ,recordset.recordsets[0]);
                             if(i >= 0){
@@ -1434,6 +1438,15 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
     })
      
 });
+
+function hexToAscii(str){
+    hexString = str;
+    strOut = '';
+        for (x = 0; x < hexString.length; x += 2) {
+            strOut += String.fromCharCode(parseInt(hexString.substr(x, 2), 16));
+        }
+    return strOut;    
+}
 
 function adicionaOuRemove(id, tipo, obj) {
     let index = obj.findIndex(obj => obj.nm_cnpj == id && obj.tipo == tipo);
@@ -3705,7 +3718,7 @@ router.route('/importarSiscoserv').post(function(req, res) {
                             insert += " VALUES (newID(), '" + parametros.data[i] + "', '" + identidade + "', ";
                             insert += "'" + idservico + "', IIF((SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) > 0 ,";
                             insert += "(SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) + 1,1 ";
-                            insert += "), '',";
+                            insert += "), '" + parametros.obs[i] + "',";
                             insert += parametros.valor[i] + ", '" + idoperador + "'," + idindicador + ", '" + idsubservico + "', 0, NULL,";
                             insert += " NULL, NULL, NULL, '" + parametros.codigo[i] + "', NULL, NULL";
                             insert += "); ";
