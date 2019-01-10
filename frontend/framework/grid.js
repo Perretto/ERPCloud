@@ -1182,9 +1182,9 @@ function sharpGridPager(containerID) {
         currentPage = parseInt(pageactive)
         currentPage = currentPage - 1;
     }
-    var numPerPage = 20;
+    var numPerPage = 100;
     var numPage = $("#" + containerID + "_table").attr("data-numberpage");
-    numPage = "20";
+    numPage = "100";
     if (numPage) {
         numPerPage = numPage;
     }
