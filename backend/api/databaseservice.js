@@ -2690,40 +2690,41 @@ router.route('/containergrid/:id/:filtro').get(function(req, res) {
         if (err) throw err;
         if (result) {
             if (result.length > 0) {
-                select = result[0].fillgrid;                                
+                select = result[0].fillgrid; 
+                
+                sql.close()    
+
+                // connect to your database
+                sql.connect(config, function (err) {    
+                    if (err) console.log(err);
+                    
+                    // create Request object
+                    var request = new sql.Request();
+                    
+                    
+                    if (filtro == "*") {
+                        select = select.substr(0,select.lastIndexOf("WHERE"));
+                    }else{
+                        select = select.replace("{{id}}", filtro);
+                    }
+                    
+                    // query to the database and get the records
+                    request.query(select, function (err, recordset) {            
+                        if (err) {
+                            console.log(err)
+                            res.send(err)
+                        }
+                        // send records as a response 
+                        res.send(recordset)            
+                    });
+                });                                 
             }
         }
         
         db.close();
       });
     });
-
-    sql.close()    
-
-    // connect to your database
-    sql.connect(config, function (err) {    
-        if (err) console.log(err);
-         
-        // create Request object
-        var request = new sql.Request();
-        
-        
-        if (filtro == "*") {
-            select = select.substr(0,select.lastIndexOf("WHERE"));
-        }else{
-            select = select.replace("{{id}}", filtro);
-        }
-        
-         // query to the database and get the records
-        request.query(select, function (err, recordset) {            
-            if (err) {
-                console.log(err)
-                res.send(err)
-            }
-            // send records as a response 
-            res.send(recordset)            
-        });
-    });    
+  
 });
 
 
