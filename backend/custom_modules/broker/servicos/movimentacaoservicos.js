@@ -299,7 +299,7 @@ router.route('/carregaListaComissao/:idEntidade/:dataDe/:dataAte/:equipe/:servic
     select += " SELECT  comiss.id as 'id', FORMAT (comiss.dt_emissao, 'd', 'pt-BR' ) as 'dt_emissao', entidade.nm_razaosocial as 'cliente',  ";
     select += " op.nm_razaosocial as 'operador', produtos.nm_descricao as 'produto', FORMAT (comiss.vl_venda, 'c', 'pt-BR' ) as 'valorvenda', comiss.nm_status as 'status', FORMAT(comiss.vl_comissao, 'c', 'pt-BR' ) as 'valor', ";
     select += " CAST((SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=comiss.id_vendedor AND vendedor_servicos.id_produtos = movimentacao_servicos.id_subservicos) AS varchar(200)) as'percentualcomiss', ";
-    select += " FORMAT ((comiss.vl_comissao - ((SELECT vl_tributoservicos FROM empresa WHERE empresa.id='9F39BDCF-6B98-45DE-A819-24B7F3EE2560')) * movimentacao_servicos.vl_valor / 100 ), 'c', 'pt-BR' ) AS 'valorliquido' ";
+    select += " FORMAT ((comiss.vl_comissao - ((SELECT vl_tributoservicos FROM empresa WHERE empresa.id='9F39BDCF-6B98-45DE-A819-24B7F3EE2560')) * comiss.vl_comissao / 100 ), 'c', 'pt-BR' ) AS 'valorliquido' ";
     select += " FROM movimentacao_servicos ";
     select += " INNER JOIN comiss ON comiss.id_venda=movimentacao_servicos.id ";
     select += " INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade ";
@@ -3924,7 +3924,7 @@ function gerarComissaoBloco(arrayID) {
                         
                         if(idcomissind == null){
                             if(id_indicador){
-                                insertupdate += " DELETE FROM comiss WHERE nm_codigo='" + codigo + "'; ";
+                                //insertupdate += " DELETE FROM comiss WHERE nm_codigo='" + codigo + "'; ";
                                 insertupdate += " INSERT INTO comiss ";
                                 insertupdate += " (id, id_vendedor, id_venda, nm_status, id_empresa, numero_pedido, dt_emissao, vl_venda, vl_comissao, nm_codigo)";
                                 insertupdate += " VALUES(newID(), '" + id_indicador + "', '" + id + "', '" + nm_status + "', '" + id_empresa + "', '" + numero_pedido + "', '" + dt_emissao + "', " + vl_venda + ", " + vl_comissaoInd  + ", '" + codigo + "');";          

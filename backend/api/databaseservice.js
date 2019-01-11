@@ -2646,31 +2646,31 @@ router.route('/DeleteData/:layoutID/:containerID/:userID/:id').get(function(req,
                         res.send(obje)
                     }
 
-                sql.close()
+                    sql.close()
+                    
+                    sql.connect(config).then(function() {
+                            request = new sql.Request();
+                            request.query(deletedata).then(function(recordset) {
+                                var retorno = '{ "status": "success", "id": "' + id + '" }'
+                                var obj = JSON.parse(retorno)
+                                res.send(obj)
+                            }).catch(function(err) {                    
+                                //var retorno = "{ 'status': 'error', 'message': '" + err + "'}"
+                                res.send(err)
+                            });
+                    }).catch(function(err) {
+                        if (err) {
+                        console.log('SQL Connection Error: ' + err);
+                        var obj = JSON.parse(err)
+                        res.send(obj)
+                        }
+                    });
                 
-                sql.connect(config).then(function() {
-                        request = new sql.Request();
-                        request.query(deletedata).then(function(recordset) {
-                            var retorno = '{ "status": "success", "id": "' + id + '" }'
-                            var obj = JSON.parse(retorno)
-                            res.send(obj)
-                        }).catch(function(err) {                    
-                            //var retorno = "{ 'status': 'error', 'message': '" + err + "'}"
-                            res.send(err)
-                        });
-                }).catch(function(err) {
-                    if (err) {
-                    console.log('SQL Connection Error: ' + err);
-                    var obj = JSON.parse(err)
-                    res.send(obj)
-                    }
-                });
-            
+                }
             }
-        }
 
-        db.close();
-        }); 
+            db.close();
+            }); 
         });
     })
 });
