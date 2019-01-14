@@ -713,7 +713,7 @@ router.route('/carregaControleComissaoPagar/:dataDe/:dataAte/:equipe').get(funct
 
             if(retorno){
                 if(retorno.recordset){
-                    //sqlstring += " DELETE FROM comissao_apuracao WHERE nm_datade='" + dataDe + "' AND nm_dataate='" + dataAte + "' AND id_equipe " + campoequipe + "; ";
+                    sqlstring += " DELETE FROM comissao_apuracao WHERE nm_datade='" + dataDe + "' AND nm_dataate='" + dataAte + "' AND id_equipe " + campoequipe + "; ";
                     
                     for(var i = 0; i < retorno.recordset.length; i++){
                         if(!retorno.recordset[i].idcomissaoapuracao){
