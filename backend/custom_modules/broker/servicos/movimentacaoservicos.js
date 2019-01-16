@@ -187,8 +187,8 @@ var bol = req.param('bol');
 var arrayData = [];
 
     var where = ""; 
-    var select = "SELECT newID() AS 'id', "; 
-    select += " entidade.nm_cnpj AS 'cnpj', "; 
+    var select = "SELECT IIF(nm_tiposervico IS NULL,NULL,'SISCOSERV') AS 'siscoserv',  newID() AS 'id', "; 
+    select += " entidade.nm_cnpj AS 'cnpj', entidade.id AS 'entidadeid',"; 
     select += " entidade.nm_razaosocial AS 'razaosocial', "; 
     select += " FORMAT(SUM(movimentacao_servicos.vl_valor), 'c', 'pt-BR' )  AS 'dt_faturamento', "; 
     select += " FORMAT(movimentacao_servicos.dt_faturamento, 'd', 'pt-BR' )  AS 'valor', "; 
@@ -202,6 +202,9 @@ var arrayData = [];
     select += " LEFT JOIN contas_receber ON contas_receber.id=contas_receber_parcelas.id_contas_receber ";
     select += " INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade ";
     select += " LEFT JOIN cliente_servicos ON cliente_servicos.id_produtos=movimentacao_servicos.id_subservicos AND  cliente_servicos.id_entidade= movimentacao_servicos.id_entidade ";  
+    
+    select += " LEFT JOIN  subservico ON subservico.id=movimentacao_servicos.id_subservicos";
+
     if(idEntidade){ 
         if(idEntidade != "*"){ 
             where = " WHERE movimentacao_servicos.id_entidade='" + idEntidade + "' "; 
@@ -269,7 +272,7 @@ var arrayData = [];
     }
 
     select = select + where; 
-    select = select + "  GROUP BY entidade.nm_cnpj, entidade.nm_razaosocial,  movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,  contas_receber_parcelas.nm_numero_boleto,  cliente_servicos.sn_notaunica, movimentacao_servicos.id_contas_receber, contas_receber_parcelas.nm_idprotocoloimpressao";
+    select = select + "  GROUP BY nm_tiposervico,  entidade.id, entidade.nm_cnpj, entidade.nm_razaosocial,  movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,  contas_receber_parcelas.nm_numero_boleto,  cliente_servicos.sn_notaunica, movimentacao_servicos.id_contas_receber, contas_receber_parcelas.nm_idprotocoloimpressao";
     console.log("=============================================================");
     console.log(select)
     sql.close(); 
@@ -298,8 +301,9 @@ router.route('/carregaListaComissao/:idEntidade/:dataDe/:dataAte/:equipe/:servic
     var select = "";
     select += " SELECT  comiss.id as 'id', FORMAT (comiss.dt_emissao, 'd', 'pt-BR' ) as 'dt_emissao', entidade.nm_razaosocial as 'cliente',  ";
     select += " op.nm_razaosocial as 'operador', produtos.nm_descricao as 'produto', FORMAT (comiss.vl_venda, 'c', 'pt-BR' ) as 'valorvenda', comiss.nm_status as 'status', FORMAT(comiss.vl_comissao, 'c', 'pt-BR' ) as 'valor', ";
-    select += " CAST((SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=comiss.id_vendedor AND vendedor_servicos.id_produtos = movimentacao_servicos.id_subservicos) AS varchar(200)) as'percentualcomiss', ";
+    select += " IIF(comiss.vl_percentual_comissao IS NULL, CAST((SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=comiss.id_vendedor AND vendedor_servicos.id_produtos = movimentacao_servicos.id_subservicos) AS varchar(200)),comiss.vl_percentual_comissao) as'percentualcomiss', ";
     select += " FORMAT ((comiss.vl_comissao - ((SELECT vl_tributoservicos FROM empresa WHERE empresa.id='9F39BDCF-6B98-45DE-A819-24B7F3EE2560')) * comiss.vl_comissao / 100 ), 'c', 'pt-BR' ) AS 'valorliquido' ";
+    select += " , IIF(comiss.vl_percentual_comissao IS NULL, '','true') AS alterado";
     select += " FROM movimentacao_servicos ";
     select += " INNER JOIN comiss ON comiss.id_venda=movimentacao_servicos.id ";
     select += " INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade ";
@@ -1150,7 +1154,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
     
     if(servico == "*" || servico == "RVS"){
 
-        query += " SELECT REPLACE(venda.nrrvs, '/', '-' ) AS idvenda,venda.nrrvs AS codigo, ";
+        query += " SELECT REPLACE(venda.codigo, '/', '-' ) AS idvenda,venda.codigo AS codigo, ";
         query += " TO_CHAR(venda.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pex.nome AS nomepessoaextrangeira, pessoa.cpfcnpj AS nomeservico, ('RVS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
         query += " , REPLACE(REPLACE(loread(lo_open(venda.informacoescomplementares, 262144), 1000000)::varchar,'x',''),'\\','')::varchar AS info, vendaoperacao.suareferencia AS referencia , NULL AS obs ";
@@ -1181,7 +1185,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
 
     
     if(servico == "*" || servico == "RAS"){
-        query += " SELECT REPLACE(aquisicao.nrras, '/', '-' ) AS idvenda,aquisicao.nrras AS codigo, ";
+        query += " SELECT REPLACE(aquisicao.codigo, '/', '-' ) AS idvenda,aquisicao.codigo AS codigo, ";
         query += " TO_CHAR(aquisicao.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pex.nome AS nomepessoaextrangeira, pessoa.cpfcnpj AS nomeservico, ('RAS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
         query += " , REPLACE(REPLACE(loread(lo_open(aquisicao.informacoescomplementares, 262144), 1000000)::varchar,'x',''),'\\','')::varchar  AS info, aquisicaooperacao.suareferencia AS referencia , NULL AS obs ";
@@ -1214,7 +1218,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
 
     
     if(servico == "*" || servico == "RF"){
-        query += " SELECT REPLACE(faturamento.nrrf, '/', '-' ) AS idvenda,faturamento.nrrf AS codigo, ";
+        query += " SELECT REPLACE(faturamento.codigo, '/', '-' ) AS idvenda,faturamento.codigo AS codigo, ";
         query += " TO_CHAR(faturamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pex.nome AS nomepessoaextrangeira,  pessoa.cpfcnpj AS nomeservico, ('RF') AS cnpj, ('') AS valortotal, ('0') AS existe ";
         query += " , REPLACE(REPLACE(loread(lo_open(faturamento.observacoes, 262144), 1000000)::varchar,'x',''),'\\','')::varchar  AS info, NULL AS referencia , NULL AS obs ";
@@ -1250,7 +1254,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
 
     
     if(servico == "*" || servico == "RP"){
-        query += " SELECT REPLACE(pagamento.nrrp, '/', '-' ) AS idvenda,pagamento.nrrp AS codigo, ";
+        query += " SELECT REPLACE(pagamento.codigo, '/', '-' ) AS idvenda,pagamento.codigo AS codigo, ";
         query += " TO_CHAR(pagamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pex.nome AS nomepessoaextrangeira, pessoa.cpfcnpj AS nomeservico, ('RP') AS cnpj, ('') AS valortotal, ('0') AS existe ";
         query += " , REPLACE(REPLACE(loread(lo_open(pagamento.observacoes, 262144), 1000000)::varchar,'x',''),'\\','')::varchar  AS info, NULL AS referencia , NULL AS obs ";
@@ -1377,7 +1381,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
             );
             */
 
-        console.log(rest)
+        //console.log(rest)
         var select = "SELECT REPLACE(REPLACE(REPLACE(nm_cnpj, '-', ''), '/', ''), '.', '') AS 'nm_cnpj',";
         select += " cliente_servicos.vl_valor AS 'valor', sub.nm_tiposervico AS 'tipo', ";
         select += " cliente_servicos.id_dsg_moeda AS idmoeda ";
@@ -1407,7 +1411,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         }
 
         select = select + where;
-        console.log(select);
+        //console.log(select);
 
         sql.close(); 
         sql.connect(config, function (err) { 
@@ -3982,3 +3986,107 @@ function gerarComissaoBloco(arrayID) {
 }
 
 
+
+
+
+router.route('/alterarComissao/:idcomiss/:percentualcomiss').get(function(req, res) {
+    
+    var idcomiss = req.param('idcomiss');
+    var percentualcomiss = req.param('percentualcomiss');
+
+    var update = "";
+
+    if(percentualcomiss.indexOf(',') >= 0){
+        percentualcomiss = percentualcomiss.replace(".", "").replace(",", ".");
+    }
+
+    update = "UPDATE comiss SET  vl_comissao=(vl_venda * " + percentualcomiss + " / 100), vl_percentual_comissao=" + percentualcomiss + "  WHERE id='" + idcomiss + "'; ";
+       
+    sql.close(); 
+    sql.connect(config, function (err) { 
+        if (err) console.log(err); 
+    
+        try{
+                              
+            var request = new sql.Request();
+            request.query(update, function (err, recordset) {
+                if (err){
+                    //res.send(err);  
+                    res.send("");     
+                }
+                else{
+                    res.send("Valores atualizados com sucesso");         
+                }
+            })                       
+        }
+        catch(err){
+            //res.send(err);  
+            res.send("");                                
+        }
+    });   
+
+})
+
+
+router.route('/enviarEmail').get(function(req, res) {
+    var sender = {};
+    var mail = {};
+
+    sender.service = 'hotmail';
+    sender.user = 'andreperretto@hotmail.com';
+    sender.pass = 'barra586270';
+
+    mail.from = 'andreperretto@hotmail.com';
+    mail.to = 'barra1985@hotmail.com';
+    mail.subject = 'Relatorio de siscoServ';
+    mail.text = 'Segue anexo o relatório de SiscoServ';
+    mail.path = 'http://localhost:3002/api/r/detalhesservicos/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,%22datainicial%22:%7B%22value%22:%222019-01-01%22,%22type%22:%22caracter%22,%22text%22:%2201-01-2019%22%7D,%22datafinal%22:%7B%22value%22:%222019-01-31%22,%22type%22:%22caracter%22,%22text%22:%2231-01-2019%22%7D,%22cliente%22:%7B%22value%22:%2257060C34-9B7B-423C-957C-45E09E970E6A%22,%22type%22:%22caracter%22,%22text%22:%22SIDEL%20DO%20BRASIL%20LTDA%22%7D%7D';
+
+    enviarEmail(sender, mail, function(error, info){
+        if (error) {
+            console.log(error);
+            res.send(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+            res.send('Email sent: ' + info.response);
+        }
+    })
+})
+
+function enviarEmail(sender, mail, callback) {   
+    var nodemailer = require('nodemailer');
+
+    var transporter = nodemailer.createTransport({
+    service: sender.service,
+    auth: {
+        user: sender.user,
+        pass: sender.pass
+    }
+    });
+
+    var mailOptions = {
+    from: mail.from,
+    to: mail.to,
+    subject: mail.subject,
+    text: mail.text,  
+    attachments: [  
+        {   
+            filename: "relatorio.pdf",
+            path: mail.path
+        }   
+    ]   
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+        callback(error, info);
+        /*
+        if (error) {
+            console.log(error);
+            res.send(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+            res.send('Email sent: ' + info.response);
+        }
+        */
+    });
+}
