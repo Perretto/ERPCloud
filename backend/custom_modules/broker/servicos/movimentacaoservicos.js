@@ -14,6 +14,8 @@ var url = "";
 var host = "";
 var config = {};
 const prefixoModulo = "Financeiro_";
+  
+var nodemailer = require('nodemailer');
 
 router.route('/*').get(function(req, res, next) {
     var full = req.host;
@@ -35,7 +37,8 @@ router.route('/*').get(function(req, res, next) {
     var database = "";
     var server = "";
     var password = "";
-    var user = "";    var select = "SELECT id AS idempresa,nm_CompanyName nome,nm_DatabaseName_Aplication AS 'database',  ";
+    var user = "";    
+    var select = "SELECT id AS idempresa,nm_CompanyName nome,nm_DatabaseName_Aplication AS 'database',  ";
     select += " nm_ServerIP_Aplication AS 'server', ";
     select += " password_Aplication AS 'password', ";
     select += " nm_User_Aplication AS 'user', ";
@@ -4028,35 +4031,162 @@ router.route('/alterarComissao/:idcomiss/:percentualcomiss').get(function(req, r
 })
 
 
-router.route('/enviarEmail').get(function(req, res) {
-    var sender = {};
-    var mail = {};
+router.route('/enviarEmailLote').post(function(req, res) {
+    
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
+    res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+    
+    var retorno = false;
+    var parametros = req.body.parametros;
+    var  select = "";
+    var  where = "";
+    var  insert = "";
 
-    sender.service = 'hotmail';
-    sender.user = 'andreperretto@hotmail.com';
-    sender.pass = 'barra586270';
+    /*
+    var arrayDatade = parametros.datade.split('-');
+    parametros.datade = arrayDatade[0] + "-" + arrayDatade[2] + "-" + arrayDatade[1];
 
-    mail.from = 'andreperretto@hotmail.com';
-    mail.to = 'barra1985@hotmail.com';
-    mail.subject = 'Relatorio de siscoServ';
-    mail.text = 'Segue anexo o relatório de SiscoServ';
-    mail.path = 'http://localhost:3002/api/r/detalhesservicos/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,%22datainicial%22:%7B%22value%22:%222019-01-01%22,%22type%22:%22caracter%22,%22text%22:%2201-01-2019%22%7D,%22datafinal%22:%7B%22value%22:%222019-01-31%22,%22type%22:%22caracter%22,%22text%22:%2231-01-2019%22%7D,%22cliente%22:%7B%22value%22:%2257060C34-9B7B-423C-957C-45E09E970E6A%22,%22type%22:%22caracter%22,%22text%22:%22SIDEL%20DO%20BRASIL%20LTDA%22%7D%7D';
+    var arrayDataate = parametros.dataate.split('-');
+    parametros.dataate = arrayDataate[0] + "-" + arrayDataate[2] + "-" + arrayDataate[1];
+    console.log(parametros);
+*/
+    select += " SELECT contato.id_entidade AS 'entidade', contato.nm_email AS 'emaildestinatario',  ";
+    select += " cadastro_email.nm_servidor AS 'servidor', ";
+    select += " cadastro_email.nm_emailenvio AS 'emailremetente' , ";
+    select += " cadastro_email.nm_senha AS 'senha' , ";
+    select += " cadastro_email.nm_assunto AS 'assunto' , ";
+    select += " cadastro_email.nm_texto AS 'texto',  ";
+    select += " contato.id_dsg_tipo_contato AS 'tipocontato' ";
+    select += " FROM contato  ";
+    select += " INNER JOIN cadastro_email ON cadastro_email.id_dsg_tipo_contato=contato.id_dsg_tipo_contato ";
+    
+    select += " WHERE ";
 
-    enviarEmail(sender, mail, function(error, info){
-        if (error) {
-            console.log(error);
-            res.send(error);
-        } else {
-            console.log('Email sent: ' + info.response);
-            res.send('Email sent: ' + info.response);
+    for (let i = 0; i < parametros.entidades.length; i++) {
+        var tipo = parametros.tipocontato[i];
+        var entidade = parametros.entidades[i];
+
+        switch(tipo) {
+            case "0":   
+                //Envia todos             
+                tipo = "23849113-24f5-45ed-a959-3f953eb2d6cb";
+                break;
+            case "1":
+                //Envia Relatorio Geral           
+                tipo = "6537b77b-2229-42fb-995d-0e4ead8af4bc";
+                break;
+            case "2":
+                //Envia Relatorio SiscoServ           
+                tipo = "746cb5ec-4f09-4470-9c8e-b47077c92cf9";
+                break;            
+            default:
+                break;
         }
-    })
+
+        if(i == 0){
+            where += " (contato.id_dsg_tipo_contato='" + tipo + "' AND id_entidade = '" + entidade + "') ";
+        }else{
+            where += " OR (contato.id_dsg_tipo_contato='" + tipo + "' AND id_entidade = '" + entidade + "') ";
+        }
+        
+    }
+    
+    select += where;
+    console.log(select);
+
+    sql.close(); 
+    sql.connect(config, function (err) { 
+        if (err) console.log(err); 
+        var request = new sql.Request(); 
+        request.query(select, function (err, recordset){ 
+            if (err) console.log(err);
+
+            var retorno = recordset;
+            if(retorno){
+                if(retorno.recordset){
+                    for (let i = 0; i < retorno.recordset.length; i++) {
+                        var sender = {};
+                        var mail = {};
+
+                        sender.service = retorno.recordset[i].servidor ;
+                        sender.user = retorno.recordset[i].emailremetente ;
+                        sender.pass = retorno.recordset[i].senha ;
+
+                        mail.from = retorno.recordset[i].emailremetente ;
+                        mail.to = retorno.recordset[i].emaildestinatario;
+
+                        mail.subject = retorno.recordset[i].assunto ;
+                        mail.text = retorno.recordset[i].texto ;
+
+                        switch(retorno.recordset[i].tipocontato.toLowerCase()) {
+                            case "":   
+                                //Envia todos             
+                                 
+                                break;
+                            case "6537b77b-2229-42fb-995d-0e4ead8af4bc":
+                                //Envia Relatorio Geral           
+                                mail.path = "http://" + req.host + ":3002/api/r/detalhesservicosgerais";
+                                mail.path += "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
+                                mail.path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
+                                mail.path += "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Retrato%22%7D,";
+                                mail.path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22pdf%22%7D,";
+                                mail.path += "%22datainicial%22:%7B%22value%22:%22" + parametros.datade + "%22,%22type%22:%22caracter%22,%22text%22:%22" + parametros.datade + "%22%7D,";
+                                mail.path += "%22datafinal%22:%7B%22value%22:%22" + parametros.dataate + "%22,%22type%22:%22caracter%22,%22text%22:%22" + parametros.dataate + "%22%7D,";
+                                mail.path += "%22cliente%22:%7B%22value%22:%22" + retorno.recordset[i].entidade + "%22,%22type%22:%22caracter%22,%22text%22:%22" + retorno.recordset[i].entidade + "%22%7D%7D";
+                                
+                                break;
+                            case "746cb5ec-4f09-4470-9c8e-b47077c92cf9":
+                                //Envia Relatorio SiscoServ           
+                                mail.path = "http://" + req.host + ":3002/api/r/detalhesservicos";
+                                mail.path += "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
+                                mail.path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
+                                mail.path += "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Retrato%22%7D,";
+                                mail.path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22pdf%22%7D,";
+                                mail.path += "%22datainicial%22:%7B%22value%22:%22" + parametros.datade + "%22,%22type%22:%22caracter%22,%22text%22:%22" + parametros.datade + "%22%7D,";
+                                mail.path += "%22datafinal%22:%7B%22value%22:%22" + parametros.dataate + "%22,%22type%22:%22caracter%22,%22text%22:%22" + parametros.dataate + "%22%7D,";
+                                mail.path += "%22cliente%22:%7B%22value%22:%22" + retorno.recordset[i].entidade + "%22,%22type%22:%22caracter%22,%22text%22:%22" + retorno.recordset[i].entidade + "%22%7D%7D";
+                                
+                                break;            
+                            default:
+                                break;
+                        }
+
+                        //mail.path = 'http://localhost:3002/api/r/detalhesservicos/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,%22datainicial%22:%7B%22value%22:%222019-01-01%22,%22type%22:%22caracter%22,%22text%22:%2201-01-2019%22%7D,%22datafinal%22:%7B%22value%22:%222019-01-31%22,%22type%22:%22caracter%22,%22text%22:%2231-01-2019%22%7D,%22cliente%22:%7B%22value%22:%2257060C34-9B7B-423C-957C-45E09E970E6A%22,%22type%22:%22caracter%22,%22text%22:%22SIDEL%20DO%20BRASIL%20LTDA%22%7D%7D';
+                       
+                            enviarEmail(sender, mail, function(error, info){
+                                if (error) {
+                                    console.log(error.response);
+                                    var ret = {};
+                                    ret.status = false;
+                                    ret.message = error.response;
+                                    res.send(ret);
+                                } else {
+                                    console.log('Email sent: ' + info.response);
+                                    var ret = {};
+                                    ret.status = true;
+                                    ret.message = 'Email sent: ' + info.response;
+                                    res.send(ret);
+                                }
+                                
+                            })
+                    }
+                }
+            }
+            //res.send(retorno); 
+        }); 
+    }); 
+
 })
 
-function enviarEmail(sender, mail, callback) {   
-    var nodemailer = require('nodemailer');
+function enviarEmail(sender, mail, callback) { 
 
     var transporter = nodemailer.createTransport({
+    pool: true,
+    maxConnections: 1000,
+    maxMessages: 1000,
+    rateDelta: 5000,
     service: sender.service,
     auth: {
         user: sender.user,
@@ -4078,6 +4208,7 @@ function enviarEmail(sender, mail, callback) {
     };
 
     transporter.sendMail(mailOptions, function(error, info){
+        transporter.close();
         callback(error, info);
         /*
         if (error) {

@@ -209,7 +209,7 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
         });
 
         if (onBeforeSaving) {
-            if (onBeforeSaving != "null") {
+            if (onBeforeSaving != "null" && onBeforeSaving != "undefined") {
                 var result_before = executeFunctionByName(onBeforeSaving.substring(0, onBeforeSaving.indexOf("(")), window);
                 if (!result_before) {
                     loaderImage(form + "_panel", false);
@@ -278,7 +278,7 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                     }
                    
                     if (onAfterSaving) {
-                        if (onAfterSaving != "null") {
+                        if (onAfterSaving != "null"  && onBeforeSaving != "undefined") {
                             executeFunctionByName(onAfterSaving.substring(0, onAfterSaving.indexOf("(")), window, result);
                         }
                     }

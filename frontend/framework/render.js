@@ -1029,8 +1029,9 @@ function openLayout(button, tabGenID) {
 
     
 function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID, fillgrid, containerID) {
-
-    $.ajax({url: returnCookie("urlPlataform") + "/api/findid2/" + filtro + "/" + LayoutID, success: function(result){
+    
+    loaderImage("table_" + tabGenID, true);
+    $.ajax({url: returnCookie("urlPlataform") + "/api/findid2/" + filtro + "/" + LayoutID,async: true, success: function(result){
         var EnterpriseID = returnCookie("EnterpriseID");
 
         var formTelaIDNavigation = $("#table_" + tabGenID + "_btnnovo");
@@ -1092,6 +1093,7 @@ function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID, fillgri
                     CalculaTotaisVenda();
                 }
                 
+                loaderImage("table_" + tabGenID, false);
 
                 //        var onload = $("[tabgenid='" + formID + "']");
                 //        if (onload) {
@@ -2196,3 +2198,6 @@ function openReport(name){
 
     $('#alertaModalShow').modal();
 }
+
+
+
