@@ -4080,7 +4080,11 @@ router.route('/enviarEmailLote').post(function(req, res) {
             case "2":
                 //Envia Relatorio SiscoServ           
                 tipo = "746cb5ec-4f09-4470-9c8e-b47077c92cf9";
-                break;            
+                break; 
+            case "3":
+                //Envia Relatorio Comissao           
+                tipo = "3dc8e464-d65b-4149-ae0e-a64828bfbdf5";
+                break;              
             default:
                 break;
         }
@@ -4148,7 +4152,19 @@ router.route('/enviarEmailLote').post(function(req, res) {
                                 mail.path += "%22datafinal%22:%7B%22value%22:%22" + parametros.dataate + "%22,%22type%22:%22caracter%22,%22text%22:%22" + parametros.dataate + "%22%7D,";
                                 mail.path += "%22cliente%22:%7B%22value%22:%22" + retorno.recordset[i].entidade + "%22,%22type%22:%22caracter%22,%22text%22:%22" + retorno.recordset[i].entidade + "%22%7D%7D";
                                 
-                                break;            
+                                break; 
+                            case "3dc8e464-d65b-4149-ae0e-a64828bfbdf5":
+                                //Envia Relatorio comissao
+                                mail.path = "http://" + req.host + ":3002/api/r/detalhescomissaopagar";
+                                mail.path += "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
+                                mail.path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,";
+                                mail.path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,";
+                                mail.path += "%22datainicial%22:%7B%22value%22:%22" + parametros.datade + "%22,%22type%22:%22caracter%22,%22text%22:%22" + parametros.datade + "%22%7D,";
+                                mail.path += "%22datafinal%22:%7B%22value%22:%22" + parametros.dataate + "%22,%22type%22:%22caracter%22,%22text%22:%22" + parametros.dataate + "%22%7D,";
+                                mail.path += "%22operador%22:%7B%22value%22:%22" + retorno.recordset[i].entidade + "%22,%22type%22:%22caracter%22,%22text%22:%22" + retorno.recordset[i].entidade + "%22%7D%7D";
+                                         
+                                
+                                break;           
                             default:
                                 break;
                         }
