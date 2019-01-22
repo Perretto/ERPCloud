@@ -54,7 +54,7 @@ router.route('/*').get(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "broker"; //"broker";
+        dados = "homologa"; //"broker";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
         local = true;
     }else{

@@ -1504,7 +1504,7 @@ function fillScreen(data, template, layoutID, fillgrid, tabGenID){
                                 }
                                 
 
-                                fielddata =  {nativedatatype: nativedatatype,  derivedfrom: derivedFrom, datafield: sfield, datatable: stable, iditem: iditem, selectid: selectid, name: valor, title: text, type: type,
+                                fielddata =  {nativedatatype: nativedatatype,  derivedfrom: derivedFrom, datafield: sfield, datatable: stable, controlType: controlT, iditem: iditem, selectid: selectid, name: valor, title: text, type: type,
                                 items: items,
                                 valueField: "Id",
                                 textField: "Name", width: 150  };  
