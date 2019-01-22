@@ -1374,6 +1374,7 @@ function fillScreen(data, template, layoutID, fillgrid, tabGenID){
                     var controlType = [];
                     var aIditem = [];
 
+                    
                     for (var i = 0; i < tabela.length; i++) {
                         var fielddata; 
                         var stable = $(tabela[i]).attr("data-table");
