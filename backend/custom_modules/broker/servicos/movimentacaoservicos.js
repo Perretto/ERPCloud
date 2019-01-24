@@ -671,7 +671,7 @@ router.route('/carregaControleComissaoPagar/:dataDe/:dataAte/:equipe').get(funct
 
     select += "IIF((SELECT id FROM comissao_apuracao WHERE comissao_apuracao.id_entidade=op.id  AND comissao_apuracao.nm_status IS NULL  ";
     select += "    AND comissao_apuracao.nm_datade='" + dataDe + "' AND comissao_apuracao.nm_dataate='" + dataAte + "'  ";
-    select += "    AND comissao_apuracao.id_equipe  IS NULL) IS NULL, '0', '1') as 'insup',  ";
+    select += "    AND comissao_apuracao.id_equipe " + campoequipe + ") IS NULL, '0', '1') as 'insup',  ";
 
     select += " op.id as 'idoperador',  ";
     select += " op.nm_razaosocial as 'operador',  FORMAT(SUM(comiss.vl_venda), 'c', 'pt-BR' ) as 'valorvenda', FORMAT(SUM(comiss.vl_comissao), 'c', 'pt-BR' ) as 'valor',  ";
@@ -1060,7 +1060,6 @@ router.route('/editarControleComissaoPagarDesconto/:id').get(function(req, res) 
     }); 
 });
 
-
 router.route('/deletarControleComissaoPagarDesconto/:id').get(function(req, res) {
     var id = req.param('id'); 
     var where = ""; 
@@ -1086,10 +1085,8 @@ router.route('/deletarControleComissaoPagarDesconto/:id').get(function(req, res)
     }) 
 });
 
-
-
-router.route('/carregaControleComissaoPagarEquipe/:id/:equipe').get(function(req, res) {
-    var id = req.param('id'); 
+router.route('/carregaControleComissaoPagarEquipe/:equipe').get(function(req, res) {
+   
     var equipe = req.param('equipe'); 
     var where = ""; 
     var select = "SELECT entidade.id AS 'id', entidade.nm_razaosocial AS 'descricao', ('0') AS 'valor'  ";
@@ -1489,8 +1486,6 @@ function compare(a,b) {
     return 0;
 }
   
-  
-
 router.route('/onLoadVendedorServicos/:idVendedor').get(function(req, res) {
     var idVendedor = req.param('idVendedor'); 
     
@@ -1646,7 +1641,6 @@ router.route('/gravarClienteServico/:idprodutos/:valor/:idmoeda/:unicamoeda/:idE
     });  
 });
 
-
 router.route('/gerarContasPagar').post(function(req, res) {     
 
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -1694,10 +1688,10 @@ router.route('/gerarContasPagar').post(function(req, res) {
             query += " SUM(comiss.vl_comissao) AS 'valor',  ";
             
             query += " SUM(comiss.vl_comissao) - IIF((SELECT SUM(vl_desconto) FROM comissao_desconto WHERE id_contas_pagar= ";
-            query += " (SELECT id FROM comissao_apuracao WHERE  comissao_apuracao.nm_status IS NULL  AND  comissao_apuracao.id_entidade=op.id   ";
+            query += " (SELECT  TOP 1 id FROM comissao_apuracao WHERE  comissao_apuracao.nm_status IS NULL  AND  comissao_apuracao.id_entidade=op.id   ";
             query += " AND comissao_apuracao.id_entidade=op.id )) IS NULL, ";
             query += " 0,(SELECT SUM(vl_desconto) FROM comissao_desconto WHERE id_contas_pagar= ";
-            query += " (SELECT id FROM comissao_apuracao WHERE  comissao_apuracao.nm_status IS NULL  AND comissao_apuracao.id_entidade=op.id   ";
+            query += " (SELECT  TOP 1 id FROM comissao_apuracao WHERE  comissao_apuracao.nm_status IS NULL  AND comissao_apuracao.id_entidade=op.id   ";
             query += " AND comissao_apuracao.id_entidade=op.id ))) AS 'valortotal',  ";
             
             query += " (SELECT TOP 1 id FROM parcelamento WHERE nr_numeroparcelas=1) AS 'id_parcelamento', ";
@@ -1712,7 +1706,9 @@ router.route('/gerarContasPagar').post(function(req, res) {
             query += " WHERE " + where + " ";
             query += " GROUP BY op.nm_razaosocial, op.id, ca.id ";
 
+            console.log(query);
 
+            err = "true"
             if (err){
                 resposta = {
                     status: -2,
@@ -1885,7 +1881,6 @@ router.route('/gerarContasPagar').post(function(req, res) {
     }
 
 });
-
 
 function funAtualizarConta(Aparametros,callbackf) {
     var query = "";
@@ -2093,7 +2088,6 @@ function funAtualizarConta(Aparametros,callbackf) {
         callbackf(resposta);
     }
 }
-
 
 function gerarparcelas(config,idEmpresa,idParcelamento,valor,dataInicial,callbackf){
     var sql = require("mssql");
@@ -2315,15 +2309,6 @@ function truncateDecimal(value,precision){
     var tmp = Math.trunc(step * value);
     return(tmp / step);
 }
-
-
-
-
-
-
-
-
-
 
 router.route('/gerarContasReceber').post(function(req, res) {     
 
@@ -2622,7 +2607,6 @@ router.route('/gerarContasReceber').post(function(req, res) {
 
 });
 
-
 function funAtualizarContaReceber(Aparametros,callbackf) {
     var query = "";
     var queryItens = "";
@@ -2822,11 +2806,6 @@ function funAtualizarContaReceber(Aparametros,callbackf) {
         callbackf(resposta);
     }
 }
-
-
-
-
-
 
 router.route('/gerarNFSe').post(function(req, res) {
     
@@ -3346,9 +3325,6 @@ router.route('/gerarNFSe').post(function(req, res) {
     
 });
 
-
-
-
 router.route('/carregarNFSe').get(function(req, res) {
     
     var  select = "";
@@ -3376,10 +3352,6 @@ router.route('/carregarNFSe').get(function(req, res) {
         }); 
     }); 
 });
-
-
-
-
 
 router.route('/enviarNFSe').post(function(req, res) {
     
@@ -3430,7 +3402,6 @@ router.route('/enviarNFSe').post(function(req, res) {
         });   
 
 })
-
 
 router.route('/getInfoNFSe').post(function(req, res) {
     
@@ -3562,9 +3533,6 @@ router.route('/getInfoNFSe').post(function(req, res) {
     }); 
 });
 
-
-
-
 function callWebAPI(dados,url, callback){
     var Client = require('node-rest-client').Client;
     
@@ -3585,10 +3553,6 @@ function callWebAPI(dados,url, callback){
        }
     );
 }
-
-
-
-
 
 router.route('/importarSiscoserv').post(function(req, res) {
     
@@ -3783,9 +3747,6 @@ router.route('/importarSiscoserv').post(function(req, res) {
         }); 
     }); 
 });
-
-
-
 
 function gerarComissaoBloco(arrayID) { 
     
@@ -3988,10 +3949,6 @@ function gerarComissaoBloco(arrayID) {
     });     
 }
 
-
-
-
-
 router.route('/alterarComissao/:idcomiss/:percentualcomiss').get(function(req, res) {
     
     var idcomiss = req.param('idcomiss');
@@ -4029,7 +3986,6 @@ router.route('/alterarComissao/:idcomiss/:percentualcomiss').get(function(req, r
     });   
 
 })
-
 
 router.route('/enviarEmailLote').post(function(req, res) {
     
@@ -4237,3 +4193,246 @@ function enviarEmail(sender, mail, callback) {
         */
     });
 }
+
+router.route('/gerarContasPagarRateio').post(function(req, res) {     
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
+    res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+
+    var aValor = null;
+    var idMovimentacao = null; //req.param('idMovimentacao'); 
+    var EnterpriseID = null; //req.param('EnterpriseID'); 
+    var idUsuario = null; //req.param('idUsuario'); 
+    var parametros = null;
+
+    var query = "";
+    var resposta = {};
+    var nrParcela = 0;
+    var arrayMovimentacao = null; //idMovimentacao.split(",");
+    var j = 0;
+    var arrayResposta = [];
+    var total = 0;
+    var parcela = null;
+    var titulo = null;
+    var Atitulo = [];
+
+    try{
+        parametros = req.body.parametros;
+        arrayMovimentacao = parametros.idTitulo;
+        EnterpriseID = parametros.idEmpresa;
+        idUsuario = parametros.idUsuario;
+        aValor = parametros.aValor;
+
+        sql.close();
+        sql.connect(config, function (err) {
+            var where = "";
+            for (let k = 0; k < arrayMovimentacao.length; k++) {
+                if(k == 0){
+                    where += " op.id='" + arrayMovimentacao[k] + "' ";
+                }else{
+                    where += " OR op.id='" + arrayMovimentacao[k] + "' ";
+                }
+                
+            }
+
+            query += "SELECT  newID() AS 'id',    ";
+            query += " op.id AS 'id_entidade',     ";
+            query += " op.nm_razaosocial AS 'operador',     ";
+            query += " (0) AS 'valor',    ";
+            query += " (0) AS 'valortotal',    ";
+            query += " (SELECT TOP 1 id FROM parcelamento WHERE nr_numeroparcelas=1) AS 'id_parcelamento',  ";
+            query += " GETDATE() AS 'dt_emissao',  ";
+            query += " IIF((SELECT TOP 1 nm_documento FROM contas_pagar ORDER BY nm_documento DESC) IS NULL,0, ";
+            query += " (SELECT TOP 1 nm_documento FROM contas_pagar ORDER BY nm_documento DESC)) AS 'nr_pedido'   ";
+            
+            query += " FROM entidade op     ";           
+            
+            query += " WHERE " + where + " ";
+            query += " GROUP BY op.nm_razaosocial, op.id ";
+
+            console.log(query);
+
+            
+            if (err){
+                resposta = {
+                    status: -2,
+                    mensagem: ["" + err],
+                    titulo: null
+                }
+                res.json(resposta);
+            }
+            else{
+                var request = new sql.Request();
+                request.query(query, function (err, recordset) {
+                    if (err){
+                        resposta = {
+                            status: -3,
+                            mensagem: ["" + err],
+                            titulo: null
+                        }
+                        res.json(resposta);
+                    }
+                    else{
+                        var movimentacao = recordset.recordsets[0][0];
+
+                        gerarparcelas(config,EnterpriseID,movimentacao.id_parcelamento,1,new Date(movimentacao.dt_emissao),(function(respostaParcelas){
+                            
+                            try{
+                                if(respostaParcelas.status > 0){
+                                    for (let h = 0; h < recordset.recordsets[0].length; h++) {
+                                        movimentacao = recordset.recordsets[0][h];
+                                        var valor;
+                                        for (let z = 0; z < arrayMovimentacao.length; z++) {
+                                            if(arrayMovimentacao[z] == movimentacao.id_entidade){
+                                                valor = aValor[z];
+                                                break;
+                                            }
+                                        }
+
+                                        
+                                        total = 0;
+                                        parcela = null;
+                                        titulo = {
+                                            idEmpresa: EnterpriseID,
+                                            idUsuario: idUsuario,
+                                            idTitulo: "",
+                                            idEntidade: movimentacao.id_entidade,
+                                            idPedido: movimentacao.id,
+                                            //idNotaFiscal: compra.id_notafiscal,
+                                            nrTitulo: parseInt(movimentacao.nr_pedido) + (h + 1),
+                                            emissao: new Date(movimentacao.dt_emissao).toISOString(),
+                                            competencia: "",
+                                            valor: valor,
+                                            idContaFinanceira: "",
+                                            idParcelamento: movimentacao.id_parcelamento,
+                                            observacao: "",
+                                            dre: 0,
+                                            idOrigem: movimentacao.id,
+                                            parcelas: []
+                                        };
+                            
+                                        for(i = 0; i < respostaParcelas.parcelas.length; i++){
+                                            nrParcela++;
+                                            parcela = {
+                                                idParcela: "",
+                                                documento: parseInt(movimentacao.nr_pedido) + (h + 1),
+                                                parcela: respostaParcelas.parcelas[i].parcela,
+                                                vencimento: new Date(respostaParcelas.parcelas[i].vencimento).toISOString(),
+                                                valor: valor,
+                                                idBanco: "",
+                                                idFormaPagamento: movimentacao.id_formapagamento,
+                                                idContaFinanceira: "",
+                                                fluxoCaixa: "1"
+                                            };
+                                            total += parseFloat(valor);
+                                            titulo.parcelas.push(parcela);
+                                        }                        
+                                        
+                                        titulo.valor = total;
+                                        Atitulo.push(titulo);
+                                    }
+
+                                    //if(total > 0){  
+                                        
+                                        funAtualizarConta(Atitulo,(function(repostacallback){
+                                            j += 1;
+                                            arrayResposta.push(repostacallback);  
+                                            
+                                            query = "SELECT  comiss.id AS 'id', ";
+                                            query += " comiss.nm_status AS 'status' ";
+                                            query += " FROM movimentacao_servicos   "; 
+                                            query += " INNER JOIN comiss ON comiss.id_venda=movimentacao_servicos.id   ";
+                                            query += " INNER JOIN entidade op ON op.id=comiss.id_vendedor   ";
+                                            query += " INNER JOIN comissao_apuracao ca ON ca.id_entidade=op.id  ";
+                                            query += " WHERE " + where + " AND comiss.nm_status='Em Pagamento' ";
+                                            sql.close()
+                                            sql.connect(config).then(function() {
+                                            var request = new sql.Request();
+                                            request.query(query, function (err, recordset) {
+                                                if (err){
+                                                    resposta = {
+                                                        status: -3,
+                                                        mensagem: ["" + err],
+                                                        titulo: null
+                                                    }
+                                                    res.json(resposta);
+                                                }
+                                                else{
+                                                    var comissaoFinal = [];
+                                                    comissaoFinal = recordset.recordsets[0];
+                                                    var queryComiss = "";
+                                                    for(s = 0; s < comissaoFinal.length; s++){
+                                                        queryComiss += "UPDATE comiss SET nm_status='Concluído' WHERE id='" + comissaoFinal[s].id + "'; ";
+                                                    }
+
+                                                    where = "";
+                                                    for (let k = 0; k < arrayMovimentacao.length; k++) {
+                                                        if(k == 0){
+                                                            where += " comissao_apuracao.id='" + arrayMovimentacao[k] + "' ";
+                                                        }else{
+                                                            where += " OR comissao_apuracao.id='" + arrayMovimentacao[k] + "' ";
+                                                        }                                                        
+                                                    }
+
+                                                    queryComiss += " UPDATE comissao_apuracao SET nm_status='Concluído' WHERE " + where + " AND nm_status IS NULL; ";
+                                                    console.log(queryComiss);
+
+                                                    sql.close()
+                                                    sql.connect(config).then(function() {
+                                                        var request = new sql.Request();
+                                                        request.query(queryComiss).then(function(recordset) {
+                                                            res.json(arrayResposta); 
+                                                        }).catch(function(err) { 
+                                                            console.log(err)                   
+                                                            res.send(false)
+                                                        });
+                                                    });
+
+                                                    
+                                                    }
+                                                })
+                                            })
+                                        }));
+                                                                            
+                                        
+                                    /*}else{
+                                        resposta = {
+                                            status: 0,
+                                            mensagem: ["Não foram geradas parcelas para esta movimentação"],
+                                            titulo: null
+                                        }
+                                        res.json(reposta);
+                                    } */                                   
+                                }else{                                    
+                                    sql.close();
+                                    res.json(respostaParcelas);
+                                }
+                            }
+                            catch(erro){
+                                resposta.status = -4;
+                                resposta.mensagem = [];
+                                resposta.mensagem.push("criarparcelas: " + erro);
+                                resposta.parcelas = [];
+                                sql.close();
+                                res.json(resposta);
+                            }
+                        }));
+                    }
+                })
+            }            
+            
+        })    
+    }
+    catch(erro){
+        resposta = {
+            status: -1,
+            mensagem: [],
+            titulo: null
+        }
+        resposta.mensagem.push("" + erro);
+        res.json(resposta);
+    }
+
+});
