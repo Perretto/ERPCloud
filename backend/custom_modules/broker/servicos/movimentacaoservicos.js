@@ -1319,6 +1319,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
     pool.query(query,  (err, rest) => {
         //console.log(err, rest)
         pool.end();
+
         
         /*
         rest = {}
@@ -2871,7 +2872,7 @@ router.route('/gerarNFSe').post(function(req, res) {
         var deletar = "";
         var  select = "";
 
-        select += "SELECT IIF(entidade.sn_bancoparceiro=1,'', entidade.nm_descricao_nota_fiscal) AS DescricaoNota, empresa.nm_razaosocial AS RazaoSocialPrestador, empresa.sn_pessoafisica AS PessoaFisicaPrestador, empresa.nm_cpf AS CpfPrestador, "; 
+        select += "SELECT IIF(entidade.sn_bancoparceiro=1,entidade.nm_descricao_nota_fiscal, '') AS DescricaoNota, empresa.nm_razaosocial AS RazaoSocialPrestador, empresa.sn_pessoafisica AS PessoaFisicaPrestador, empresa.nm_cpf AS CpfPrestador, "; 
         select += "     empresa.nm_rg AS RgPrestador, empresa.nm_cnpj AS CpfCnpjPrestador, empresa.nm_inscricaomunicipal AS InscricaoMunicipalPrestador,  ";
         select += "     empresa.nm_inscricaoestadual AS IePrestador, empresa.nm_ddd AS DDDPrestador, empresa.nm_telefone AS TelefonePrestador, ";
 		select += "	 CddPrestador.nm_codigo AS CodigoCidadePrestador, CddPrestador.nm_descricao AS DescricaoCidadePrestador, entidade.nm_razaosocial AS RazaoSocialTomador,  ";
@@ -3451,7 +3452,7 @@ router.route('/getInfoNFSe').post(function(req, res) {
     select += " sn_ambienteproducao AS 'ambienteGeracaoNFse', id_dsg_tipo_certificado AS 'idTipoCertificado', ";
     select += " nm_serie AS 'serie', nr_numerolote AS 'numeroLote', sn_enviaremail AS 'enviarEmail',  ";
     select += " nm_assuntoemailnfe AS 'assuntoEmailNFe', nm_texto_email AS 'textoEmail', nm_emailcopia AS 'emailCopia', ";
-    select += " '' AS 'logoTipo' FROM configuracao_nfe_servico ";
+    select += " '' AS 'logoTipo', nm_descricaonota AS 'descricaoNota' FROM configuracao_nfe_servico ";
     select += "WHERE id_empresa = '" + enterpriseID + "'; ";
 
 
