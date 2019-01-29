@@ -69,6 +69,13 @@ exports.validarDados = function(formaPagamento){
                 case "DD877131-20DD-45D1-ACC9-FA6BC76CAA4E": 	//Transferência
                     validarDadosTransferencia(formaPagamento,resposta);
                     break;
+                case "3B431419-B8A0-4DE1-AD2B-62D49CCF0C17": //Débito Automático                    
+                    break;
+                case "360B8D9D-4794-4ABE-8449-E66C63998558": //TED                    
+                    break;
+                case "17E53221-C22C-4CCC-9335-F73D1871564C": 	//Transferência
+                    //validarDadosTransferencia(formaPagamento,resposta);
+                    break;
                 default:
                     resposta.status = 0;
                     resposta.mensagem.push("Forma de pagamento não reconhecida.");

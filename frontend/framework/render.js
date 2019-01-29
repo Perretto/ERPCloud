@@ -876,15 +876,14 @@ function sharpGridEditor(containerID) {
 
 function openLayout(button, tabGenID) {    
     var formID = $(button).attr("data-tabgenlayout");
-    ClearForm(formID, true);
+    //ClearForm(formID, true);
     var $tabNav = $(button).parents("form .panel.panel-nav");
     toogleColapseContainer($tabNav, true)
     $($tabNav).hide()
     $("#" + formID).show();
-
+    /*
     var form = $(button).attr("data-formid");
 
-    //ClearForm(form, true);
 
     var formTelaIDNavigation = $(button);
 
@@ -905,6 +904,7 @@ function openLayout(button, tabGenID) {
     }
     //$("[data-field='id_empresa']").val(returnCookie("EnterpriseID"));   
     $("#" + formID + " [name*=_PK]").val("");
+    */
 }
 
 
@@ -1887,6 +1887,7 @@ function atualizaAba2(formID, layoutID, tabGenID, forcingTemplate, layoutType, u
 }
 
 function OpenFormSearch(tabGenID) {
+    $("[id*='_nav_btnnovo']").html("<i class='fas fa-angle-up'></i>");
 
     $(".columns.columns-right.btn-group.pull-right").hide();
     //$("#" + id + "_alertaModalFormSearchShow").modal('show');

@@ -190,7 +190,7 @@ var bol = req.param('bol');
 var arrayData = [];
 
     var where = ""; 
-    var select = "SELECT IIF(nm_tiposervico IS NULL,NULL,'SISCOSERV') AS 'siscoserv',  newID() AS 'id', "; 
+    var select = "SELECT (IIF(movimentacao_servicos.id_produtos = '8A9F92B6-20DC-6BD3-4C4C-7E6A2875C954','SISCOSERV',NULL)) AS 'siscoserv',  newID() AS 'id', "; 
     select += " entidade.nm_cnpj AS 'cnpj', entidade.id AS 'entidadeid',"; 
     select += " entidade.nm_razaosocial AS 'razaosocial', "; 
     select += " FORMAT(SUM(movimentacao_servicos.vl_valor), 'c', 'pt-BR' )  AS 'dt_faturamento', "; 
@@ -275,7 +275,7 @@ var arrayData = [];
     }
 
     select = select + where; 
-    select = select + "  GROUP BY nm_tiposervico,  entidade.id, entidade.nm_cnpj, entidade.nm_razaosocial,  movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,  contas_receber_parcelas.nm_numero_boleto,  cliente_servicos.sn_notaunica, movimentacao_servicos.id_contas_receber, contas_receber_parcelas.nm_idprotocoloimpressao";
+    select = select + "  GROUP BY movimentacao_servicos.id_produtos,   entidade.id, entidade.nm_cnpj, entidade.nm_razaosocial,  movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,  contas_receber_parcelas.nm_numero_boleto,  cliente_servicos.sn_notaunica, movimentacao_servicos.id_contas_receber, contas_receber_parcelas.nm_idprotocoloimpressao";
     console.log("=============================================================");
     console.log(select)
     sql.close(); 
@@ -778,11 +778,12 @@ router.route('/carregaListaEquipe').get(function(req, res) {
     }); 
 });
 
-router.route('/gravarControleComissaoPagarDesconto/:descricao/:desconto/:idcomissaoapuracao/:id').get(function(req, res) { 
+router.route('/gravarControleComissaoPagarDesconto/:descricao/:desconto/:idcomissaoapuracao/:id/:idplanocontas').get(function(req, res) { 
     var id = req.param('id');   
     var descricao = req.param('descricao'); 
     var desconto = req.param('desconto'); 
     var idcomissaoapuracao = req.param('idcomissaoapuracao'); 
+    var idplanocontas = req.param('idplanocontas');
 
     var insertupdate = ""; 
 
@@ -791,11 +792,10 @@ router.route('/gravarControleComissaoPagarDesconto/:descricao/:desconto/:idcomis
     }
 
     if(id == "*"){
-        insertupdate = "INSERT INTO comissao_desconto (id, nm_descricao, id_contas_pagar, vl_desconto) ";
-        insertupdate += " VALUES(newID(), '" + descricao + "', '" + idcomissaoapuracao + "', '" + desconto + "')";
-    }else{
-        
-        insertupdate = "UPDATE comissao_desconto SET nm_descricao='" + descricao + "', vl_desconto=" + desconto + " WHERE id='" + id + "'";
+        insertupdate = "INSERT INTO comissao_desconto (id, nm_descricao, id_contas_pagar, vl_desconto, id_plano_contas_financeiro) ";
+        insertupdate += " VALUES(newID(), '" + descricao + "', '" + idcomissaoapuracao + "', '" + desconto + "', '" + idplanocontas + "')";
+    }else{        
+        insertupdate = "UPDATE comissao_desconto SET nm_descricao='" + descricao + "', vl_desconto=" + desconto + ", id_plano_contas_financeiro='" + idplanocontas + "' WHERE id='" + id + "'";
     }
 
     console.log(insertupdate);
@@ -851,7 +851,9 @@ router.route('/carregaDropdownSubservicosMovimentacao/:id').get(function(req, re
 router.route('/gerarComissao/:id').get(function(req, res) { 
     var id = req.param('id');   
 
-    var select = " SELECT  ";
+    var select = " SELECT  IIF((SELECT nr_dias_pagamento_comissao FROM vendedor WHERE id=comiss.id_vendedor) IS NOT NULL , ";
+    select += " movimentacao_servicos.dt_emissao + (SELECT nr_dias_pagamento_comissao FROM vendedor WHERE id=comiss.id_vendedor), ";
+    select += " movimentacao_servicos.dt_emissao) AS 'dt_emissao', ";
     select += " (SELECT TOP 1 id FROM comiss WHERE id_venda=movimentacao_servicos.id AND comiss.id_vendedor=movimentacao_servicos.id_operador) AS 'idop', ";
     select += " (SELECT TOP 1 id FROM comiss WHERE id_venda=movimentacao_servicos.id AND comiss.id_vendedor=movimentacao_servicos.id_indicador) AS 'idind', ";
     select += " movimentacao_servicos.id_operador AS 'idoperador', ";
@@ -909,7 +911,11 @@ router.route('/gerarComissao/:id').get(function(req, res) {
                 var insertupdate = ""; 
 
                 var today = new Date();
-                var dd = today.getDate();
+
+                if(recordset.recordset[0].dt_emissao){
+                    today = new Date(recordset.recordset[0].dt_emissao);
+                }
+                var dd = today.getDate() + 1;
                 var mm = today.getMonth() + 1;
 
                 var yyyy = today.getFullYear();
@@ -1025,7 +1031,7 @@ router.route('/gerarComissao/:id').get(function(req, res) {
 router.route('/carregaControleComissaoPagarDesconto/:id').get(function(req, res) {
     var id = req.param('id'); 
     var where = ""; 
-    var select = "SELECT id AS 'id', nm_descricao AS 'descricao' , vl_desconto AS 'desconto'"; 
+    var select = "SELECT id AS 'id', nm_descricao AS 'descricao' , vl_desconto AS 'desconto', (SELECT nm_descricao FROM plano_contas_financeiro WHERE id=comissao_desconto.id_plano_contas_financeiro) AS 'plano_contas'"; 
     select += " FROM comissao_desconto "; 
     select += " WHERE id_contas_pagar='" + id + "'";
 
@@ -1044,7 +1050,7 @@ router.route('/carregaControleComissaoPagarDesconto/:id').get(function(req, res)
 router.route('/editarControleComissaoPagarDesconto/:id').get(function(req, res) {
     var id = req.param('id'); 
     var where = ""; 
-    var select = "SELECT id AS 'id', nm_descricao AS 'descricao' , vl_desconto AS 'desconto'"; 
+    var select = "SELECT id AS 'id', nm_descricao AS 'descricao' , vl_desconto AS 'desconto', id_plano_contas_financeiro AS 'plano_contas'"; 
     select += " FROM comissao_desconto "; 
     select += " WHERE id='" + id + "'";
 
@@ -1382,36 +1388,38 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
             */
 
         //console.log(rest)
-        var select = "SELECT REPLACE(REPLACE(REPLACE(nm_cnpj, '-', ''), '/', ''), '.', '') AS 'nm_cnpj',";
+        var select = "SELECT REPLACE(REPLACE(REPLACE(entidade.nm_cnpj, '-', ''), '/', ''), '.', '') AS 'nm_cnpj',";
+        select += " REPLACE(REPLACE(REPLACE(cadastro_trading.nm_cnpj, '-', ''), '/', ''), '.', '') AS 'cnpjtranding', ";
         select += " cliente_servicos.vl_valor AS 'valor', sub.nm_tiposervico AS 'tipo', ";
         select += " cliente_servicos.id_dsg_moeda AS idmoeda ";
         select += " FROM entidade ";
         select += " INNER JOIN cliente_servicos ON cliente_servicos.id_entidade=entidade.id ";
         select += " INNER JOIN subservico sub ON sub.id=cliente_servicos.id_produtos ";
+        select += " LEFT JOIN operador_trading ON operador_trading.id_entidade=entidade.id   "; 
+		select += " LEFT JOIN cadastro_trading ON cadastro_trading.id=operador_trading.id_cadastro_trading ";
         select += " WHERE ";
+
         var where = "";
 
         for (let index = 0; index < rest.rows.length; index++) {
             const element = rest.rows[index];
-            if(index == 0){
-                where += " (entidade.nm_cnpj='" + element.nomeservico + "' OR ";
-                where += " nm_cnpj=(left ('" + element.nomeservico + "',2)+'.'+ ";
-                where += "                    right(left ('" + element.nomeservico + "',5),3)+'.'+ ";
-                where += "             right(left ('" + element.nomeservico + "',8),3)+'/'+ ";
-                where += "             right(left ('" + element.nomeservico + "',12),4)+'-'+ ";
-                where += "             right(left ('" + element.nomeservico + "',14),2)) AND sub.nm_tiposervico='" + element.cnpj + "')";
-            }else{
-                where += " OR (entidade.nm_cnpj='" + element.nomeservico + "' OR ";
-                where += " nm_cnpj=(left ('" + element.nomeservico + "',2)+'.'+ ";
-                where += "                    right(left ('" + element.nomeservico + "',5),3)+'.'+ ";
-                where += "             right(left ('" + element.nomeservico + "',8),3)+'/'+ ";
-                where += "             right(left ('" + element.nomeservico + "',12),4)+'-'+ ";
-                where += "             right(left ('" + element.nomeservico + "',14),2))  AND sub.nm_tiposervico='" + element.cnpj + "')";
-            }            
+            var cnpj = element.nomeservico;
+            var nomeservico = element.cnpj;
+
+            cnpj = cnpj.replace(".","").replace(".","").replace("/","").replace("-","");            
+            cnpj = cnpj.substr(0, 2) + "." + cnpj.substr(2, 3) + "." + cnpj.substr(5, 3)+ "/" + cnpj.substr(8, 4)+ "-" + cnpj.substr(12, 2);
+
+            if(index != 0){
+                where += " OR ";
+            }   
+
+            where += " (cadastro_trading.nm_cnpj='" + cnpj + "' AND sub.nm_tiposervico='" + nomeservico + "') OR  ";
+            where += " (entidade.nm_cnpj='" + cnpj + "' ";            
+            where += " AND sub.nm_tiposervico='" + nomeservico + "')";            
         }
 
         select = select + where;
-        //console.log(select);
+        console.log(select);
 
         sql.close(); 
         sql.connect(config, function (err) { 
@@ -1431,6 +1439,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                             var i = adicionaOuRemove(rest.rows[index].nomeservico,rest.rows[index].cnpj ,recordset.recordsets[0]);
                             if(i >= 0){
                                 rest.rows[index].existe = "1";
+                                rest.rows[index].nomeservico = recordset.recordsets[0][i].nm_cnpj; 
 
                                 if(recordset.recordsets[0][i].idmoeda == "8E42C4B2-AC2A-4102-AE1F-6CADEEAA5E3B"){
                                     rest.rows[index].valortotal = recordset.recordsets[0][i].valor; 
@@ -1472,11 +1481,18 @@ function hexToAscii(str){
 function adicionaOuRemove(id, tipo, obj) {
     let index = obj.findIndex(obj => obj.nm_cnpj == id && obj.tipo == tipo);
     if(index < 0) {
-        return index;
+        let index = obj.findIndex(obj => obj.cnpjtranding == id && obj.tipo == tipo);
+        if(index < 0) {
+            return index;
+        } else {
+            return index;
+        }
     } else {
         return index;
     }
 }
+
+
   
 function compare(a,b) {
     if (a.existe < b.existe)
@@ -1708,7 +1724,7 @@ router.route('/gerarContasPagar').post(function(req, res) {
 
             console.log(query);
 
-            err = "true"
+            //err = "true"
             if (err){
                 resposta = {
                     status: -2,
@@ -2855,7 +2871,7 @@ router.route('/gerarNFSe').post(function(req, res) {
         var deletar = "";
         var  select = "";
 
-        select += "SELECT empresa.nm_razaosocial AS RazaoSocialPrestador, empresa.sn_pessoafisica AS PessoaFisicaPrestador, empresa.nm_cpf AS CpfPrestador, "; 
+        select += "SELECT IIF(entidade.sn_bancoparceiro=1,'', entidade.nm_descricao_nota_fiscal) AS DescricaoNota, empresa.nm_razaosocial AS RazaoSocialPrestador, empresa.sn_pessoafisica AS PessoaFisicaPrestador, empresa.nm_cpf AS CpfPrestador, "; 
         select += "     empresa.nm_rg AS RgPrestador, empresa.nm_cnpj AS CpfCnpjPrestador, empresa.nm_inscricaomunicipal AS InscricaoMunicipalPrestador,  ";
         select += "     empresa.nm_inscricaoestadual AS IePrestador, empresa.nm_ddd AS DDDPrestador, empresa.nm_telefone AS TelefonePrestador, ";
 		select += "	 CddPrestador.nm_codigo AS CodigoCidadePrestador, CddPrestador.nm_descricao AS DescricaoCidadePrestador, entidade.nm_razaosocial AS RazaoSocialTomador,  ";
@@ -2893,7 +2909,7 @@ router.route('/gerarNFSe').post(function(req, res) {
 
 		select += "	 contas_receber_parcelas.nm_serie_rps AS SerieRpsSubstituido , movimentacao_servicos.id_contas_receber ";
 
-        select += " ,(SELECT status FROM nfse WHERE id=movimentacao_servicos.id_contas_receber) AS status "
+        select += " ,(SELECT  TOP 1 status FROM nfse WHERE id=movimentacao_servicos.id_contas_receber) AS status "
 
         select += "FROM movimentacao_servicos ";
         select += "INNER JOIN contas_receber_parcelas ON contas_receber_parcelas.id=movimentacao_servicos.id_contas_receber ";
@@ -2920,7 +2936,7 @@ router.route('/gerarNFSe').post(function(req, res) {
         select += "WHERE movimentacao_servicos.id_contas_receber=" + idcontasreceber + " ";
 
         select += "AND nm_numero_nfes IS NULL ";
-        select += "GROUP BY  ";
+        select += "GROUP BY entidade.sn_bancoparceiro, entidade.nm_descricao_nota_fiscal, ";
         select += "empresa.nm_razaosocial, empresa.sn_pessoafisica, empresa.nm_cpf, "; 
         select += "empresa.nm_rg, empresa.nm_cnpj, empresa.nm_inscricaomunicipal,  ";
         select += "empresa.nm_inscricaoestadual, empresa.nm_ddd, empresa.nm_telefone, ";
@@ -2956,7 +2972,7 @@ router.route('/gerarNFSe').post(function(req, res) {
         select += "movimentacao_servicos.id_subservicos, ";
         select += "contas_receber_parcelas.nm_serie_rps,  ";
         select += "subservico.nm_descricao, movimentacao_servicos.id_contas_receber ";
-        
+        console.log(select)
         sql.close(); 
         sql.connect(config, function (err) { 
             if (err) console.log(err); 
@@ -3202,6 +3218,10 @@ router.route('/gerarNFSe').post(function(req, res) {
 
                             var status = movimentacao.status
                             status = (!status) ? "" : status;
+                            
+                            var DescricaoNota = movimentacao.DescricaoNota
+                            DescricaoNota = (!DescricaoNota) ? "" : DescricaoNota;
+
 
                             var d = new Date();
                             var da = d.getUTCDate().toString();
@@ -3237,7 +3257,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                                 query += " DataInicio, ValorIssRetido, TemIssRetido, AliquotaISS, CodigoItemListaServico, ";
                                 query += " DiscriminacaoServico, QuantidadeServicos, ValorUnitarioServico, ";
                                 query += " ValorDesconto, ValorPis, ValorCofins, AliquotaPIS, AliquotaCOFINS, ";
-                                query += " IDProdutos_VendaProdutos, SerieRpsSubstituido, status, dataemissao) ";
+                                query += " IDProdutos_VendaProdutos, SerieRpsSubstituido, status, dataemissao, DescricaoNota) ";
     
                                 query += " VALUES( '" + id + "', '";
                                 query += RazaoSocialPrestador + "', '" + PessoaFisicaPrestador + "', '" + CpfPrestador + "', '";
@@ -3262,7 +3282,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                                 query +=  "', '" + QuantidadeServicos;
                                 query +=  "', '" + ValorUnitarioServico + "', '" + ValorDesconto + "', '" + ValorPis;
                                 query +=  "', '" + ValorCofins + "', '" + AliquotaPIS + "', '" + AliquotaCOFINS;
-                                query +=  "', '" + IDProdutos_VendaProdutos + "', '" + SerieRpsSubstituido + "', 'Pendente', '" + dataemissao + "'); ";
+                                query +=  "', '" + IDProdutos_VendaProdutos + "', '" + SerieRpsSubstituido + "', 'Pendente', '" + dataemissao + "', '" + DescricaoNota + "'); ";
                                 
                             }else{
                                 resposta.status = -4;
@@ -3461,7 +3481,7 @@ router.route('/getInfoNFSe').post(function(req, res) {
     select += " TemIssRetido, AliquotaISS, CodigoItemListaServico, ";
     select += " DiscriminacaoServico, QuantidadeServicos, ValorUnitarioServico, ";
     select += " ValorDesconto, ValorPis, ValorCofins, ";
-    select += " AliquotaPIS, AliquotaCOFINS, IDProdutos_VendaProdutos, SerieRpsSubstituido ";
+    select += " AliquotaPIS, AliquotaCOFINS, IDProdutos_VendaProdutos, SerieRpsSubstituido , DescricaoNota";
     select += " FROM nfse ";
     select += " WHERE ";
 
@@ -4436,3 +4456,39 @@ router.route('/gerarContasPagarRateio').post(function(req, res) {
     }
 
 });
+
+
+router.route('/alterarRPS/:id/:nf').get(function(req, res) {
+    
+    var nf = req.param('nf');
+    var id = req.param('id');
+    var update = "";
+
+    update = "UPDATE configuracao_nfe_servico SET nr_numerolote=(nr_numerolote + 1); ";
+    update += "UPDATE nfse SET status='Concluído' WHERE id='" + id + "'; ";
+    update += "UPDATE movimentacao_servicos SET nm_numero_nfes='" + nf + "', dt_faturamento=GETDATE() WHERE  id_contas_receber='" + id + "'; ";
+    
+    console.log(update)
+    sql.close(); 
+    sql.connect(config, function (err) { 
+        if (err) console.log(err); 
+    
+        try{                              
+            var request = new sql.Request();
+            request.query(update, function (err, recordset) {
+                if (err){
+                    //res.send(err);  
+                    res.send("");     
+                }
+                else{
+                    res.send("Valores atualizados com sucesso");         
+                }
+            })                       
+        }
+        catch(err){
+            //res.send(err);  
+            res.send("");                                
+        }
+    });   
+
+})
