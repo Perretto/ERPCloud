@@ -851,7 +851,7 @@ router.route('/carregaDropdownSubservicosMovimentacao/:id').get(function(req, re
 router.route('/gerarComissao/:id').get(function(req, res) { 
     var id = req.param('id');   
 
-    var select = " SELECT  IIF((SELECT nr_dias_pagamento_comissao FROM vendedor WHERE id=comiss.id_vendedor) IS NOT NULL , ";
+    var select = " SELECT  IIF((SELECT nr_diasvencimento FROM cliente_servicos  WHERE cliente_servicos.id_produtos=movimentacao_servicos.id_subservicos AND cliente_servicos.id_entidade=movimentacao_servicos.id_entidade) IS NOT NULL , ";
     select += " movimentacao_servicos.dt_emissao + (SELECT nr_dias_pagamento_comissao FROM vendedor WHERE id=comiss.id_vendedor), ";
     select += " movimentacao_servicos.dt_emissao) AS 'dt_emissao', ";
     select += " (SELECT TOP 1 id FROM comiss WHERE id_venda=movimentacao_servicos.id AND comiss.id_vendedor=movimentacao_servicos.id_operador) AS 'idop', ";
@@ -1558,7 +1558,7 @@ router.route('/carregarClienteServico/:idEntidade').get(function(req, res) {
     select += " IIF((SELECT sn_notaunica FROM cliente_servicos WHERE id_entidade='" + idEntidade + "'  ";
     select += " AND id_produtos=subservico.id) IS NULL,0,(SELECT sn_notaunica FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
     select += " AND id_produtos=subservico.id)) AS 'notaunica' ";
-
+    select += ", (SELECT nr_diasvencimento FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' AND id_produtos=subservico.id ) AS 'diasvencimento' ";
     select += " FROM subservico ORDER BY valor DESC";
 
     select += " SELECT produtos.id as 'id', produtos.nm_descricao as 'descricao', ";
@@ -1577,6 +1577,7 @@ router.route('/carregarClienteServico/:idEntidade').get(function(req, res) {
     select += " IIF((SELECT sn_notaunica FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
     select += " AND id_produtos=produtos.id) IS NULL,0,(SELECT sn_notaunica FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' ";
     select += " AND id_produtos=produtos.id)) AS 'notaunica'";
+    select += ", (SELECT nr_diasvencimento FROM cliente_servicos WHERE id_entidade='" + idEntidade + "' AND id_produtos=produtos.id ) AS 'diasvencimento' ";
     
     select += " FROM produtos WHERE id_tipoproduto='5F1FCE95-1AAC-43D8-BB0C-689ECEE69574' ORDER BY valor DESC; ";
 
@@ -1620,13 +1621,14 @@ router.route('/carregarClienteServico/:idEntidade').get(function(req, res) {
     }); 
 });
 
-router.route('/gravarClienteServico/:idprodutos/:valor/:idmoeda/:unicamoeda/:idEntidade').get(function(req, res) { 
+router.route('/gravarClienteServico/:idprodutos/:valor/:idmoeda/:unicamoeda/:idEntidade/:diasvenc').get(function(req, res) { 
      
     var idprodutos = req.param('idprodutos');
     var valor = req.param('valor');
     var idmoeda = req.param('idmoeda')
     var unicamoeda = req.param('unicamoeda');
     var idEntidade = req.param('idEntidade');
+    var diasvenc = req.param('diasvenc');
 
     var insertupdate = ""; 
 
@@ -1634,14 +1636,19 @@ router.route('/gravarClienteServico/:idprodutos/:valor/:idmoeda/:unicamoeda/:idE
         valor = valor.replace(".", "").replace(",", ".");
     }
 
+    if(diasvenc.indexOf(',') >= 0){
+        diasvenc = diasvenc.replace(".", "").replace(",", "");
+    }
+    
+
     if(unicamoeda != "1"){
         unicamoeda = "NULL"
     }
 
     insertupdate = "DELETE FROM cliente_servicos WHERE id_produtos='" + idprodutos + "' AND id_entidade='" + idEntidade + "';"
     
-    insertupdate += "INSERT INTO cliente_servicos (id, id_produtos, vl_valor, id_dsg_moeda, sn_notaunica, id_entidade) ";
-    insertupdate += " VALUES(newID(), '" + idprodutos + "', " + valor + ",'" + idmoeda + "'," + unicamoeda + ", '" + idEntidade + "');";
+    insertupdate += "INSERT INTO cliente_servicos (id, id_produtos, vl_valor, id_dsg_moeda, sn_notaunica, id_entidade, nr_diasvencimento) ";
+    insertupdate += " VALUES(newID(), '" + idprodutos + "', " + valor + ",'" + idmoeda + "'," + unicamoeda + ", '" + idEntidade + "', " + diasvenc + ");";
     
 
     console.log(insertupdate);
@@ -4187,17 +4194,23 @@ function enviarEmail(sender, mail, callback) {
     }
     });
 
+    var attachments = [];
+    if(mail.attachments){
+        attachments = mail.attachments;
+    }else{
+        attachments.push({   
+            filename: "relatorio.pdf",
+            path: mail.path
+        })
+    }
+
+
     var mailOptions = {
     from: mail.from,
     to: mail.to,
     subject: mail.subject,
     text: mail.text,  
-    attachments: [  
-        {   
-            filename: "relatorio.pdf",
-            path: mail.path
-        }   
-    ]   
+    attachments: attachments
     };
 
     transporter.sendMail(mailOptions, function(error, info){
@@ -4459,15 +4472,16 @@ router.route('/gerarContasPagarRateio').post(function(req, res) {
 });
 
 
-router.route('/alterarRPS/:id/:nf').get(function(req, res) {
+router.route('/alterarRPS/:id/:nf/:protocolo').get(function(req, res) {
     
     var nf = req.param('nf');
     var id = req.param('id');
+    var protocolo = req.param('protocolo');
     var update = "";
 
     update = "UPDATE configuracao_nfe_servico SET nr_numerolote=(nr_numerolote + 1); ";
     update += "UPDATE nfse SET status='Concluído' WHERE id='" + id + "'; ";
-    update += "UPDATE movimentacao_servicos SET nm_numero_nfes='" + nf + "', dt_faturamento=GETDATE() WHERE  id_contas_receber='" + id + "'; ";
+    update += "UPDATE movimentacao_servicos SET nm_numero_nfes='" + nf + "', dt_faturamento=GETDATE(), nm_numero_protocolo='" + protocolo + "' WHERE  id_contas_receber='" + id + "'; ";
     
     console.log(update)
     sql.close(); 
@@ -4491,5 +4505,221 @@ router.route('/alterarRPS/:id/:nf').get(function(req, res) {
             res.send("");                                
         }
     });   
+
+})
+
+
+router.route('/enviarEmailGeral/:id').get(function(req, res) {
+    
+    
+    var id = req.param('id');
+    var retorno = false;
+    //var parametros = req.body.parametros;
+    var  select = "";
+    var  where = "";
+    var  insert = "";
+
+    select += " SELECT contato.id_entidade AS 'entidade', contato.nm_email AS 'emaildestinatario',   ";
+    select += " cadastro_email.nm_servidor AS 'servidor',  ";
+    select += " cadastro_email.nm_emailenvio AS 'emailremetente' ,  ";
+    select += " cadastro_email.nm_senha AS 'senha' ,  ";
+    select += " cadastro_email.nm_assunto AS 'assunto' ,  ";
+    select += " cadastro_email.nm_texto AS 'texto',   ";
+    select += " contato.id_dsg_tipo_contato AS 'tipocontato', ";
+    select += " contas_receber_parcelas.nm_idprotocoloimpressao AS 'boleto', ";
+    select += " movimentacao_servicos.nm_numero_nfes AS 'numero_nfes', movimentacao_servicos.nm_numero_protocolo AS 'numero_protocolo' ";
+
+    select += " FROM nfse ";
+    select += " INNER JOIN contas_receber ON nfse.id=contas_receber.id_venda ";
+    select += " INNER JOIN contato ON contato.id_entidade=contas_receber.id_entidade ";
+    select += " INNER JOIN cadastro_email ON cadastro_email.id_dsg_tipo_contato=contato.id_dsg_tipo_contato  ";
+    select += " LEFT JOIN contas_receber_parcelas ON contas_receber_parcelas.id_contas_receber=contas_receber.id  ";
+    select += " LEFT JOIN movimentacao_servicos ON movimentacao_servicos.id_contas_receber=nfse.id ";
+
+    select += " WHERE ";
+    where += " (nfse.id = '" + id + "') ";
+    /*
+    for (let i = 0; i < parametros.values.length; i++) {
+        var value = parametros.values[i];
+
+        if(i > 0){
+            where += " OR ";
+        }
+
+        where += " (nfse.id = '" + value + "') ";
+    }
+    */
+
+
+    select += where;
+    console.log(select);
+
+    sql.close(); 
+    sql.connect(config, function (err) { 
+        if (err) console.log(err); 
+        var request = new sql.Request(); 
+        request.query(select, function (err, recordset){ 
+            if (err) console.log(err);
+
+            var retorno = recordset;
+            if(retorno){
+                if(retorno.recordset){
+                    for (let i = 0; i < retorno.recordset.length; i++) {
+                        var sender = {};
+                        var mail = {};
+
+                        sender.service = retorno.recordset[i].servidor ;
+                        sender.user = retorno.recordset[i].emailremetente ;
+                        sender.pass = retorno.recordset[i].senha ;
+
+                        mail.from = retorno.recordset[i].emailremetente ;
+                        mail.to = retorno.recordset[i].emaildestinatario;
+
+                        mail.subject = retorno.recordset[i].assunto ;
+                        mail.text = retorno.recordset[i].texto ;
+
+                        switch(retorno.recordset[i].tipocontato.toLowerCase()) {
+                            case "61b90b9a-13de-43c1-a742-7857de0231ea":   
+                                //Envia todos  
+                                        
+                                var path = "http://" + req.host + ":3002/api/r/detalhesservicosgeraisemail";
+                                path += "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
+                                path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
+                                path += "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,";
+                                path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,";
+                                path += "%22nfse%22:%7B%22value%22:%221667862D-9137-425B-8737-2F76731F16B1%22,";
+                                path += "%22type%22:%22caracter%22,%22text%22:%22%20-%2010.00%22%7D%7D";
+
+                                mail.attachments = [];
+
+                                var attachment = {
+                                    filename: 'relatorio.pdf',
+                                    path:path
+                                };
+                                mail.attachments.push(attachment);
+
+                                var arquivo = retorno.recordset[i].numero_protocolo + "_" + retorno.recordset[i].numero_nfes;
+                                arquivo = arquivo.replace(" ","")
+                                console.log(arquivo)
+                                attachment = {
+                                    filename: 'nfse.pdf',
+                                    path:"http://broker.empresariocloud.com.br/nfse/9f39bdcf-6b98-45de-a819-24b7f3ee2560/XmlDestinatario/" + arquivo + ".pdf"
+                                };
+                                mail.attachments.push(attachment);
+
+                                attachment = {
+                                    filename: 'nfse.xml',
+                                    path:"http://broker.empresariocloud.com.br/nfse/9f39bdcf-6b98-45de-a819-24b7f3ee2560/XmlDestinatario/" + arquivo + ".xml"
+                                };
+                                mail.attachments.push(attachment);
+
+                                attachment = {
+                                    filename: 'boleto.pdf',
+                                    path:"http://homologacao.cobrancabancaria.tecnospeed.com.br:8080/api/v1/boletos/impressao/lote/" + retorno.recordset[i].boleto
+                                };
+                                mail.attachments.push(attachment);
+
+                                break;
+                            case "6537b77b-2229-42fb-995d-0e4ead8af4bc":
+                                var path = "http://" + req.host + ":3002/api/r/detalhesservicosgeralemail";
+                                path += "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
+                                path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
+                                path += "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,";
+                                path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,";
+                                path += "%22nfse%22:%7B%22value%22:%221667862D-9137-425B-8737-2F76731F16B1%22,";
+                                path += "%22type%22:%22caracter%22,%22text%22:%22%20-%2010.00%22%7D%7D";
+
+                                mail.attachments = [];
+
+                                var attachment = {
+                                    filename: 'relatorio.pdf',
+                                    path:path
+                                };
+                                mail.attachments.push(attachment);
+                                break;
+                            case "746cb5ec-4f09-4470-9c8e-b47077c92cf9":
+                            /*
+                                //Envia Relatorio SiscoServ           
+                                mail.path = "http://" + req.host + ":3002/api/r/detalhesservicos";
+                                mail.path += "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
+                                mail.path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
+                                mail.path += "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Retrato%22%7D,";
+                                mail.path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22pdf%22%7D,";
+                                mail.path += "%22datainicial%22:%7B%22value%22:%22" + parametros.datade + "%22,%22type%22:%22caracter%22,%22text%22:%22" + parametros.datade + "%22%7D,";
+                                mail.path += "%22datafinal%22:%7B%22value%22:%22" + parametros.dataate + "%22,%22type%22:%22caracter%22,%22text%22:%22" + parametros.dataate + "%22%7D,";
+                                mail.path += "%22cliente%22:%7B%22value%22:%22" + retorno.recordset[i].entidade + "%22,%22type%22:%22caracter%22,%22text%22:%22" + retorno.recordset[i].entidade + "%22%7D%7D";
+                            */    
+                           
+                                var path = "http://" + req.host + ":3002/api/r/detalhesservicossiscoservemail";
+                                path += "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
+                                path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
+                                path += "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,";
+                                path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,";
+                                path += "%22nfse%22:%7B%22value%22:%221667862D-9137-425B-8737-2F76731F16B1%22,";
+                                path += "%22type%22:%22caracter%22,%22text%22:%22%20-%2010.00%22%7D%7D";
+
+                                mail.attachments = [];
+
+                                var attachment = {
+                                    filename: 'relatorio.pdf',
+                                    path:path
+                                };
+                                mail.attachments.push(attachment);
+                                break; 
+                            case "23849113-24f5-45ed-a959-3f953eb2d6cb":
+                                //Faturamento      
+                                var arquivo = retorno.recordset[i].numero_protocolo + "_" + retorno.recordset[i].numero_nfes;
+                                arquivo = arquivo.replace(" ","")
+                                mail.attachments = [];
+                                console.log(arquivo)
+                                attachment = {
+                                    filename: 'nfse.pdf',
+                                    path:"http://broker.empresariocloud.com.br/nfse/9f39bdcf-6b98-45de-a819-24b7f3ee2560/XmlDestinatario/" + arquivo + ".pdf"
+                                };
+                                mail.attachments.push(attachment);
+
+                                attachment = {
+                                    filename: 'nfse.xml',
+                                    path:"http://broker.empresariocloud.com.br/nfse/9f39bdcf-6b98-45de-a819-24b7f3ee2560/XmlDestinatario/" + arquivo + ".xml"
+                                };
+                                mail.attachments.push(attachment);
+
+                                attachment = {
+                                    filename: 'boleto.pdf',
+                                    path:"http://homologacao.cobrancabancaria.tecnospeed.com.br:8080/api/v1/boletos/impressao/lote/" + retorno.recordset[i].boleto
+                                };
+                                mail.attachments.push(attachment);
+                                break;           
+                            default:
+                                break;
+                        }
+
+
+
+
+                        //mail.path = 'http://localhost:3002/api/r/detalhesservicos/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,%22datainicial%22:%7B%22value%22:%222019-01-01%22,%22type%22:%22caracter%22,%22text%22:%2201-01-2019%22%7D,%22datafinal%22:%7B%22value%22:%222019-01-31%22,%22type%22:%22caracter%22,%22text%22:%2231-01-2019%22%7D,%22cliente%22:%7B%22value%22:%2257060C34-9B7B-423C-957C-45E09E970E6A%22,%22type%22:%22caracter%22,%22text%22:%22SIDEL%20DO%20BRASIL%20LTDA%22%7D%7D';
+                       
+                            enviarEmail(sender, mail, function(error, info){
+                                if (error) {
+                                    console.log(error.response);
+                                    var ret = {};
+                                    ret.status = false;
+                                    ret.message = error.response;
+                                    res.send(ret);
+                                } else {
+                                    console.log('Email sent: ' + info.response);
+                                    var ret = {};
+                                    ret.status = true;
+                                    ret.message = 'Email sent: ' + info.response;
+                                    res.send(ret);
+                                }
+                                
+                            })
+                    }
+                }
+            }
+            //res.send(retorno); 
+        }); 
+    }); 
 
 })
