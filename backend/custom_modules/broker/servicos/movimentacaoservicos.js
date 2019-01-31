@@ -1180,6 +1180,8 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         if(cliente != "*"){
                             query += " AND pessoa.cpfcnpj = '" + cliente +  "'";
                         }
+                        query += " AND pessoa.cpfcnpj <> '07799674000147'";
+
                     } 
                 } 
             } 
@@ -1212,6 +1214,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         if(cliente != "*"){
                             query += " AND pessoa.cpfcnpj = '" + cliente +  "'";
                         }  
+                        query += " AND pessoa.cpfcnpj <> '07799674000147'";
                     } 
                 } 
             } 
@@ -1246,7 +1249,8 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         
                         if(cliente != "*"){
                             query += " AND pessoa.cpfcnpj = '" + cliente +  "'";
-                        }       
+                        }    
+                        query += " AND pessoa.cpfcnpj <> '07799674000147'";   
                     } 
                 } 
             } 
@@ -1282,7 +1286,8 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         
                         if(cliente != "*"){
                             query += " AND pessoa.cpfcnpj = '" + cliente +  "'";
-                        }        
+                        }      
+                        query += " AND pessoa.cpfcnpj <> '07799674000147'";  
                     } 
                 } 
             } 
