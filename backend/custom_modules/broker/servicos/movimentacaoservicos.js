@@ -1165,7 +1165,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         query += " TO_CHAR(venda.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pex.nome AS nomepessoaextrangeira, pessoa.cpfcnpj AS nomeservico, ('RVS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
         query += " , REPLACE(REPLACE(loread(lo_open(venda.informacoescomplementares, 262144), 1000000)::varchar,'x',''),'\\','')::varchar AS info, vendaoperacao.suareferencia AS referencia , NULL AS obs ";
-        query += " , nbs.nome AS nbs, venda.idvenda AS idreferencia  ";
+        query += " , venda.idvenda AS idreferencia  ";
         query += " FROM venda ";
         query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda  ";
         query += " INNER JOIN pessoa pex ON pex.idpessoa = venda.idpessoaadquirente  ";
@@ -1188,6 +1188,10 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
             } 
         } 
     }
+
+    query += " GROUP BY venda.codigo, venda.codigo,venda.datacadastro, pessoa.nome, pex.nome, pessoa.cpfcnpj ,  ";
+    query += " venda.informacoescomplementares, vendaoperacao.suareferencia, venda.idvenda ";
+    
     if(servico == "*"){
         query += " UNION ALL ";
     }
@@ -1198,7 +1202,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         query += " TO_CHAR(aquisicao.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pex.nome AS nomepessoaextrangeira, pessoa.cpfcnpj AS nomeservico, ('RAS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
         query += " , REPLACE(REPLACE(loread(lo_open(aquisicao.informacoescomplementares, 262144), 1000000)::varchar,'x',''),'\\','')::varchar  AS info, aquisicaooperacao.suareferencia AS referencia , NULL AS obs ";
-        query += " , nbs.nome AS nbs, aquisicao.idaquisicao AS idreferencia ";
+        query += " ,  aquisicao.idaquisicao AS idreferencia ";
         query += " FROM aquisicao ";
         query += " INNER JOIN pessoa ON pessoa.idpessoa = aquisicao.idpessoaadquirente ";
         query += " INNER JOIN pessoa pex ON pex.idpessoa = aquisicao.idpessoavenda  ";
@@ -1222,6 +1226,9 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         }    
     }
 
+    query += " GROUP BY aquisicao.codigo,aquisicao.codigo  ,aquisicao.datacadastro ,pessoa.nome, pex.nome, pessoa.cpfcnpj,  ";
+    query += " aquisicao.informacoescomplementares, aquisicaooperacao.suareferencia,aquisicao.idaquisicao ";
+
     if(servico == "*"){
         query += " UNION ALL ";
     }
@@ -1232,7 +1239,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         query += " TO_CHAR(faturamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pex.nome AS nomepessoaextrangeira,  pessoa.cpfcnpj AS nomeservico, ('RF') AS cnpj, ('') AS valortotal, ('0') AS existe ";
         query += " , REPLACE(REPLACE(loread(lo_open(faturamento.observacoes, 262144), 1000000)::varchar,'x',''),'\\','')::varchar  AS info, NULL AS referencia , NULL AS obs ";
-        query += " , nbs.nome AS nbs, venda.idvenda AS idreferencia ";
+        query += " , venda.idvenda AS idreferencia ";
         query += " FROM faturamento ";
         query += " INNER JOIN venda ON venda.idvenda = faturamento.idvenda ";
         query += " INNER JOIN pessoa ON pessoa.idpessoa = venda.idpessoavenda ";
@@ -1258,6 +1265,10 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         } 
     }
 
+    query += " GROUP BY faturamento.codigo,faturamento.codigo,faturamento.datacadastro,  pessoa.nome, pex.nome,  pessoa.cpfcnpj, ";
+    query += " faturamento.observacoes,  venda.idvenda ";
+
+
     if(servico == "*"){
         query += " UNION ALL ";
     }
@@ -1269,7 +1280,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         query += " TO_CHAR(pagamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pex.nome AS nomepessoaextrangeira, pessoa.cpfcnpj AS nomeservico, ('RP') AS cnpj, ('') AS valortotal, ('0') AS existe ";
         query += " , REPLACE(REPLACE(loread(lo_open(pagamento.observacoes, 262144), 1000000)::varchar,'x',''),'\\','')::varchar  AS info, NULL AS referencia , NULL AS obs ";
-        query += " , nbs.nome AS nbs, aquisicao.idaquisicao AS idreferencia ";
+        query += " , aquisicao.idaquisicao AS idreferencia ";
 
         query += " FROM pagamento ";
         query += " INNER JOIN aquisicao ON aquisicao.idaquisicao = pagamento.idaquisicao ";
@@ -1296,32 +1307,14 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
     }
     
 
-    
-    
-    /*
-    if(cliente){ 
-        if(cliente != "*"){ 
-            if(!where){ 
-                where += " WHERE (op.id_equipe = '" + cliente + "') "; 
-            }else{ 
-                where += " AND (op.id_equipe = '" + cliente + "')  "; 
-            } 
-        }else{
-            if(!where){ 
-                where += " WHERE (op.id_equipe IS NULL) "; 
-            }else{ 
-                where += " AND (op.id_equipe  IS NULL)  "; 
-            } 
-        } 
-    } 
-    */
-
-   //query = query + where; 
-    //query += " WHERE venda.datacadastro >= '01/02/2018' AND venda.datacadastro <= '01/03/2018'";
-
+    query += " GROUP BY pagamento.codigo, pagamento.codigo,pagamento.datacadastro, pessoa.nome ,  ";
+    query += " pex.nome , pessoa.cpfcnpj, pagamento.observacoes, aquisicao.idaquisicao  ";
+                              
     query += " ORDER BY datacadastro ASC ";
     
+    console.log("---------------------------------------------------query")
     console.log(query)
+    console.log("---------------------------------------------------queryFIM")
     pool.query(query,  (err, rest) => {
         //console.log(err, rest)
         pool.end();
@@ -2440,7 +2433,8 @@ router.route('/gerarContasReceber').post(function(req, res) {
             query += " SELECT newID() AS 'id',  ";
             query += " movimentacao_servicos.id_entidade AS 'id_entidade',    ";
             query += " entidade.nm_razaosocial AS 'razaosocial',    ";
-            query += " SUM(movimentacao_servicos.vl_valor)  AS 'valortotal',  ";
+            //query += " SUM(movimentacao_servicos.vl_valor)  AS 'valortotal',  ";
+            query += " IIF(entidade.sn_issretido=1 AND entidade.vl_issretido > 0, SUM(movimentacao_servicos.vl_valor) - (SUM(movimentacao_servicos.vl_valor) * entidade.vl_issretido / 100), SUM(movimentacao_servicos.vl_valor)) AS 'valortotal',  ";
             query += " (SELECT TOP 1 id FROM parcelamento WHERE nr_numeroparcelas=1) AS 'id_parcelamento',  ";
                             
             query += " GETDATE() AS 'dt_emissao',  ";
@@ -2456,8 +2450,10 @@ router.route('/gerarContasReceber').post(function(req, res) {
             
             query += " GROUP BY entidade.nm_cnpj, entidade.nm_razaosocial,    ";
             query += " movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,   "; 
-            query += " movimentacao_servicos.nm_numero_boleto, movimentacao_servicos.id_entidade, cliente_servicos.sn_notaunica ";
+            query += " movimentacao_servicos.nm_numero_boleto, movimentacao_servicos.id_entidade, cliente_servicos.sn_notaunica,entidade.sn_issretido,entidade.vl_issretido ";
          
+            console.log("----------------------contas receber ------------------------");
+            console.log(query);
 
             if (err){
                 resposta = {
