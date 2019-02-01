@@ -729,7 +729,8 @@ router.route('/carregaControleComissaoPagar/:dataDe/:dataAte/:equipe').get(funct
                                 sqlstring += " INSERT INTO comissao_desconto (id, nm_descricao, id_contas_pagar, vl_desconto) ";
                                 sqlstring += " VALUES (NEWID(), 'Dedução referente a PIS, COFINS e ISS.', '" + retorno.recordset[i].id + "',  ";
                                 sqlstring += " IIF((SELECT TOP 1 vl_tributoservicos FROM empresa WHERE id='9F39BDCF-6B98-45DE-A819-24B7F3EE2560') IS NULL,0, ";
-                                sqlstring += " CAST('" + retorno.recordset[i].valor.replace(".","").replace(",",".").replace("R$ ","") + "' AS decimal) * (CAST((SELECT TOP 1 vl_tributoservicos FROM empresa WHERE id='9F39BDCF-6B98-45DE-A819-24B7F3EE2560') AS decimal) / 100))); ";
+                                sqlstring += " CAST('" + retorno.recordset[i].valor.replace(".","").replace(",",".").replace("R$ ","") + "' AS decimal) * ((SELECT TOP 1 vl_tributoservicos FROM empresa WHERE id='9F39BDCF-6B98-45DE-A819-24B7F3EE2560') / 100))); ";
+                                console.log(sqlstring)
                             }
                         }
                         
