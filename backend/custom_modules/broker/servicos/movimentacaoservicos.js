@@ -1419,12 +1419,13 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
         var select = "SELECT REPLACE(REPLACE(REPLACE(entidade.nm_cnpj, '-', ''), '/', ''), '.', '') AS 'nm_cnpj',";
         select += " REPLACE(REPLACE(REPLACE(cadastro_trading.nm_cnpj, '-', ''), '/', ''), '.', '') AS 'cnpjtranding', ";
         select += " cliente_servicos.vl_valor AS 'valor', sub.nm_tiposervico AS 'tipo', ";
-        select += " cliente_servicos.id_dsg_moeda AS idmoeda ";
+        select += " cliente_servicos.id_dsg_moeda AS idmoeda , cliente.id_vendedor AS 'idoperador' ";
         select += " FROM entidade ";
         select += " INNER JOIN cliente_servicos ON cliente_servicos.id_entidade=entidade.id ";
         select += " INNER JOIN subservico sub ON sub.id=cliente_servicos.id_produtos ";
         select += " LEFT JOIN operador_trading ON operador_trading.id_entidade=entidade.id   "; 
-		select += " LEFT JOIN cadastro_trading ON cadastro_trading.id=operador_trading.id_cadastro_trading ";
+        select += " LEFT JOIN cadastro_trading ON cadastro_trading.id=operador_trading.id_cadastro_trading ";
+        select += " LEFT JOIN cliente ON cliente.id=entidade.id ";
         select += " WHERE ";
 
         var where = "";
@@ -1466,15 +1467,18 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                             const element = rest.rows[index];
                             var i = adicionaOuRemove(rest.rows[index].nomeservico,rest.rows[index].cnpj ,recordset.recordsets[0]);
                             if(i >= 0){
-                                rest.rows[index].existe = "1";
-                                rest.rows[index].nomeservico = recordset.recordsets[0][i].nm_cnpj; 
-
-                                if(recordset.recordsets[0][i].idmoeda == "8E42C4B2-AC2A-4102-AE1F-6CADEEAA5E3B"){
-                                    rest.rows[index].valortotal = recordset.recordsets[0][i].valor; 
-                                }else{
-                                    valorcotacao = parseFloat(recordset.recordsets[0][i].valor) * parseFloat(cotacao);
-                                    rest.rows[index].valortotal = valorcotacao;
-                                }                                  
+                                if(recordset.recordsets[0][i].idoperador){
+                                    rest.rows[index].existe = "1";
+                                    rest.rows[index].nomeservico = recordset.recordsets[0][i].nm_cnpj; 
+    
+                                    if(recordset.recordsets[0][i].idmoeda == "8E42C4B2-AC2A-4102-AE1F-6CADEEAA5E3B"){
+                                        rest.rows[index].valortotal = recordset.recordsets[0][i].valor; 
+                                    }else{
+                                        valorcotacao = parseFloat(recordset.recordsets[0][i].valor) * parseFloat(cotacao);
+                                        rest.rows[index].valortotal = valorcotacao;
+                                    } 
+                                }
+                                                                 
                             }    
                             
                             rest.rows[index].obs = "";
