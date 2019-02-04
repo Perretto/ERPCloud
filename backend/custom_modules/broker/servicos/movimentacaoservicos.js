@@ -1181,8 +1181,15 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         if(cliente != "*"){
                             query += " AND pessoa.cpfcnpj = '" + cliente +  "'";
                         }
-                        query += " AND pessoa.cpfcnpj <> '07799674000147'";
-
+                        query += " AND (pessoa.cpfcnpj <> '07799674000147' ";
+                        query += " AND pessoa.cpfcnpj <> '65019655000238' ";
+                        query += " AND pessoa.cpfcnpj <> '65019655000319' ";
+                        query += " AND pessoa.cpfcnpj <> '45543915000181' ";
+                        query += " AND pessoa.cpfcnpj <> '65019655000157' ";
+                        query += " AND pessoa.cpfcnpj <> '45543915047307' ";
+                        query += " AND pessoa.cpfcnpj <> '01528473000129' ";
+                        query += " AND pessoa.cpfcnpj <> '16944141000100') ";
+                        
                     } 
                 } 
             } 
@@ -1219,7 +1226,14 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         if(cliente != "*"){
                             query += " AND pessoa.cpfcnpj = '" + cliente +  "'";
                         }  
-                        query += " AND pessoa.cpfcnpj <> '07799674000147'";
+                        query += " AND (pessoa.cpfcnpj <> '07799674000147' ";
+                        query += " AND pessoa.cpfcnpj <> '65019655000238' ";
+                        query += " AND pessoa.cpfcnpj <> '65019655000319' ";
+                        query += " AND pessoa.cpfcnpj <> '45543915000181' ";
+                        query += " AND pessoa.cpfcnpj <> '65019655000157' ";
+                        query += " AND pessoa.cpfcnpj <> '45543915047307' ";
+                        query += " AND pessoa.cpfcnpj <> '01528473000129' ";
+                        query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                     } 
                 } 
             } 
@@ -1258,7 +1272,14 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         if(cliente != "*"){
                             query += " AND pessoa.cpfcnpj = '" + cliente +  "'";
                         }    
-                        query += " AND pessoa.cpfcnpj <> '07799674000147'";   
+                        query += " AND (pessoa.cpfcnpj <> '07799674000147' ";
+                        query += " AND pessoa.cpfcnpj <> '65019655000238' ";
+                        query += " AND pessoa.cpfcnpj <> '65019655000319' ";
+                        query += " AND pessoa.cpfcnpj <> '45543915000181' ";
+                        query += " AND pessoa.cpfcnpj <> '65019655000157' ";
+                        query += " AND pessoa.cpfcnpj <> '45543915047307' ";
+                        query += " AND pessoa.cpfcnpj <> '01528473000129' ";
+                        query += " AND pessoa.cpfcnpj <> '16944141000100') ";  
                     } 
                 } 
             } 
@@ -1299,7 +1320,14 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         if(cliente != "*"){
                             query += " AND pessoa.cpfcnpj = '" + cliente +  "'";
                         }      
-                        query += " AND pessoa.cpfcnpj <> '07799674000147'";  
+                        query += " AND (pessoa.cpfcnpj <> '07799674000147' ";
+                        query += " AND pessoa.cpfcnpj <> '65019655000238' ";
+                        query += " AND pessoa.cpfcnpj <> '65019655000319' ";
+                        query += " AND pessoa.cpfcnpj <> '45543915000181' ";
+                        query += " AND pessoa.cpfcnpj <> '65019655000157' ";
+                        query += " AND pessoa.cpfcnpj <> '45543915047307' ";
+                        query += " AND pessoa.cpfcnpj <> '01528473000129' ";
+                        query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                     } 
                 } 
             } 
