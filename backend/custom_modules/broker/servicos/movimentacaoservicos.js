@@ -3892,14 +3892,14 @@ router.route('/importarSiscoserv').post(function(req, res) {
                             insert += " DELETE FROM movimentacao_servicos WHERE nm_numero_operacao='" + parametros.codigo[i] + "'; "; 
                             insert += " INSERT INTO movimentacao_servicos (id, dt_emissao, id_entidade, id_produtos, nm_documento, nm_obs,  ";
                             insert += " vl_valor, id_operador,id_indicador,id_subservicos,vl_cotacao,id_dsg_movimentacao_status, ";
-                            insert += " nm_numero_nfes,nm_numero_boleto,dt_faturamento,nm_numero_operacao,nm_status,id_contas_receber, nm_nomepessoaextrangeira, nm_nbs, id_referencia) ";
+                            insert += " nm_numero_nfes,nm_numero_boleto,dt_faturamento,nm_numero_operacao,nm_status,id_contas_receber, nm_nomepessoaextrangeira, id_referencia) ";
                             
                             insert += " VALUES (newID(), '" + parametros.data[i] + "', '" + identidade + "', ";
                             insert += "'" + idservico + "', IIF((SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) > 0 ,";
                             insert += "(SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) + 1,1 ";
                             insert += "), '" + parametros.obs[i] + "',";
                             insert += parametros.valor[i] + ", '" + idoperador + "'," + idindicador + ", '" + idsubservico + "', 0, NULL,";
-                            insert += " NULL, NULL, NULL, '" + parametros.codigo[i] + "', NULL, NULL, '" + parametros.nomepessoaextrangeira[i] + "', '" + parametros.nbs[i] + "', '" + parametros.idreferencia[i] + "'";
+                            insert += " NULL, NULL, NULL, '" + parametros.codigo[i] + "', NULL, NULL, '" + parametros.nomepessoaextrangeira[i] + "', '" + parametros.idreferencia[i] + "'";
                             insert += "); ";
                         }
                         
