@@ -2954,7 +2954,7 @@ router.route('/gerarNFSe').post(function(req, res) {
         var deletar = "";
         var  select = "";
 
-        select += " SELECT configuracao_nfe_servico.vl_aliq_irrf AS 'AliquotaIRRF', ";
+        select += " SELECT  FORMAT(contas_receber_parcelas.dt_data_vencimento, 'd', 'pt-BR' ) AS 'DataVencimento', FORMAT(contas_receber_parcelas.vl_valor, 'c', 'pt-BR' ) AS 'ValorContasReceber', configuracao_nfe_servico.vl_aliq_irrf AS 'AliquotaIRRF', ";
 
         select += " CONVERT(DECIMAL(14,2), IIF(entidade.sn_pccretido=1 AND ( ";
         select += " (SELECT SUM(vl_valor)  ";
@@ -3024,7 +3024,7 @@ router.route('/gerarNFSe').post(function(req, res) {
         select += " AND nm_numero_nfes IS NULL  ";
 
 
-        select += " GROUP BY contas_receber_parcelas.vl_valortotal, entidade.vl_issretido, entidade.id, configuracao_nfe_servico.vl_aliq_irrf, configuracao_nfe_servico.vl_limite_retencao, entidade.sn_pccretido,configuracao_nfe_servico.vl_aliq_pis_cofins_csll, entidade.sn_issretido, entidade.sn_bancoparceiro, entidade.nm_descricao_nota_fiscal, empresa.nm_razaosocial, empresa.sn_pessoafisica, empresa.nm_cpf, empresa.nm_rg, empresa.nm_cnpj, empresa.nm_inscricaomunicipal,  empresa.nm_inscricaoestadual, empresa.nm_ddd, empresa.nm_telefone, CddPrestador.nm_codigo, CddPrestador.nm_descricao, entidade.nm_razaosocial,  entidade.sn_pessoafisica, entidade.nm_cpf, entidade.nm_rg,  entidade.nm_cnpj, entidade.nm_inscricaomunicipal, entidade.nm_inscricaoestadual,  contato.nm_ddd, contato.nm_Telefone, contato.nm_email,  dsg_pais.nm_descricao,  dsg_tipo_logradouro.nm_apelido, endereco.nm_logradouro,  endereco.nm_numero,  endereco.nm_complemento,  endereco.nm_bairro,  endereco.nm_cep,  dsg_ibge_cidade.nm_codigo,  dsg_ibge_cidade.nm_descricao,  dsg_ibge_uf.nm_descricao,  dsg_natureza_tributacao.nm_apelido,  dsg_codigo_tributario_servico.nm_apelido, ";
+        select += " GROUP BY contas_receber_parcelas.vl_valor, contas_receber_parcelas.dt_data_vencimento, contas_receber_parcelas.vl_valortotal, entidade.vl_issretido, entidade.id, configuracao_nfe_servico.vl_aliq_irrf, configuracao_nfe_servico.vl_limite_retencao, entidade.sn_pccretido,configuracao_nfe_servico.vl_aliq_pis_cofins_csll, entidade.sn_issretido, entidade.sn_bancoparceiro, entidade.nm_descricao_nota_fiscal, empresa.nm_razaosocial, empresa.sn_pessoafisica, empresa.nm_cpf, empresa.nm_rg, empresa.nm_cnpj, empresa.nm_inscricaomunicipal,  empresa.nm_inscricaoestadual, empresa.nm_ddd, empresa.nm_telefone, CddPrestador.nm_codigo, CddPrestador.nm_descricao, entidade.nm_razaosocial,  entidade.sn_pessoafisica, entidade.nm_cpf, entidade.nm_rg,  entidade.nm_cnpj, entidade.nm_inscricaomunicipal, entidade.nm_inscricaoestadual,  contato.nm_ddd, contato.nm_Telefone, contato.nm_email,  dsg_pais.nm_descricao,  dsg_tipo_logradouro.nm_apelido, endereco.nm_logradouro,  endereco.nm_numero,  endereco.nm_complemento,  endereco.nm_bairro,  endereco.nm_cep,  dsg_ibge_cidade.nm_codigo,  dsg_ibge_cidade.nm_descricao,  dsg_ibge_uf.nm_descricao,  dsg_natureza_tributacao.nm_apelido,  dsg_codigo_tributario_servico.nm_apelido, ";
         select += " dsg_rps.nm_apelido,  dsg_cnae.nm_apelido,  contas_receber_parcelas.nm_documento,  contas_receber_parcelas.nm_numero_rps,  contas_receber_parcelas.nm_numero_nfse, contas_receber_parcelas.nm_protocolo_nfse,  contas_receber_parcelas.vl_valor,  contas_receber.dt_emissao,  produtos_detalhes.vl_aliquotaiss,  produtos_detalhes.nm_codigoservico,  produtos.nm_descricao, movimentacao_servicos.id_subservicos, contas_receber_parcelas.nm_serie_rps, ";
         select += " subservico.nm_descricao, movimentacao_servicos.id_contas_receber ";
 
@@ -3335,6 +3335,12 @@ router.route('/gerarNFSe').post(function(req, res) {
                                 DiscriminacaoServicoSub = DiscriminacaoServico;
                             }
 
+                            var ValorContasReceber = movimentacao.ValorContasReceber
+                            ValorContasReceber = (!ValorContasReceber) ? "0.00" : ValorContasReceber;
+
+                            var DataVencimento = movimentacao.DataVencimento
+                            DataVencimento = (!DataVencimento) ? "0.00" : DataVencimento;
+
                             var QuantidadeServicos = movimentacao.QuantidadeServicos
                             QuantidadeServicos = (!QuantidadeServicos) ? "0.00" : QuantidadeServicos;
 
@@ -3432,7 +3438,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                                 query += " DataInicio, ValorIssRetido, TemIssRetido, AliquotaISS, CodigoItemListaServico, ";
                                 query += " DiscriminacaoServico, QuantidadeServicos, ValorUnitarioServico, ";
                                 query += " ValorDesconto, ValorPis, ValorCofins, AliquotaPIS, AliquotaCOFINS, ";
-                                query += " IDProdutos_VendaProdutos, SerieRpsSubstituido, status, dataemissao, DescricaoNota, ValorIr, AliquotaIR, AliquotaCSLL, ValorCsll) ";
+                                query += " IDProdutos_VendaProdutos, SerieRpsSubstituido, status, dataemissao, DescricaoNota, ValorIr, AliquotaIR, AliquotaCSLL, ValorCsll, ValorContasReceber , DataVencimento) ";
     
                                 query += " VALUES( '" + id + "', '";
                                 query += RazaoSocialPrestador + "', '" + PessoaFisicaPrestador + "', '" + CpfPrestador + "', '";
@@ -3457,7 +3463,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                                 query +=  "', '" + QuantidadeServicos;
                                 query +=  "', '" + ValorUnitarioServico + "', '" + ValorDesconto + "', '" + ValorPis;
                                 query +=  "', '" + ValorCofins + "', '" + AliquotaPIS + "', '" + AliquotaCOFINS;
-                                query +=  "', '" + IDProdutos_VendaProdutos + "', '" + SerieRpsSubstituido + "', 'Pendente', '" + dataemissao + "', '" + DescricaoNota + "', '" + ValorIRRF + "', '" + AliquotaIRRF + "', '" + AliquotaCSLL + "', '" + ValorCSLL + "'); ";
+                                query +=  "', '" + IDProdutos_VendaProdutos + "', '" + SerieRpsSubstituido + "', 'Pendente', '" + dataemissao + "', '" + DescricaoNota + "', '" + ValorIRRF + "', '" + AliquotaIRRF + "', '" + AliquotaCSLL + "', '" + ValorCSLL + "', '" + ValorContasReceber + "', '" + DataVencimento + "'); ";
                                 
                             }else{
                                 resposta.status = -4;
@@ -3656,7 +3662,7 @@ router.route('/getInfoNFSe').post(function(req, res) {
     select += " TemIssRetido, AliquotaISS, CodigoItemListaServico, ";
     select += " DiscriminacaoServico, QuantidadeServicos, ValorUnitarioServico, ";
     select += " ValorDesconto, ValorPis, ValorCofins, ";
-    select += " AliquotaPIS, AliquotaCOFINS, IDProdutos_VendaProdutos, SerieRpsSubstituido , DescricaoNota, ValorIr, AliquotaIR, AliquotaCSLL, ValorCsll";
+    select += " AliquotaPIS, AliquotaCOFINS, IDProdutos_VendaProdutos, SerieRpsSubstituido , DescricaoNota, ValorIr, AliquotaIR, AliquotaCSLL, ValorCsll, ValorContasReceber, DataVencimento ";
     select += " FROM nfse ";
     select += " WHERE ";
 
