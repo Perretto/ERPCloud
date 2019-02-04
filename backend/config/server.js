@@ -8,13 +8,13 @@ const queryParser = require('express-query-int')
 
 server.use(bodyParser.urlencoded({ 
     extended: true ,
-    parameterLimit: 10000,
-    limit: 1024 * 1024 * 10
+    parameterLimit: 100000,
+    limit: 1024 * 1024 * 100
 }))
 server.use(bodyParser.json({
     extended: false,
-    parameterLimit: 10000,
-    limit: 1024 * 1024 * 10
+    parameterLimit: 100000,
+    limit: 1024 * 1024 * 100
 }))
 server.use(allowCors)
 server.use(queryParser())
