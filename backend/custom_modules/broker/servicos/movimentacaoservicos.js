@@ -1188,6 +1188,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '65019655000157' ";
                         query += " AND pessoa.cpfcnpj <> '45543915047307' ";
                         query += " AND pessoa.cpfcnpj <> '01528473000129' ";
+                        query += " AND pessoa.cpfcnpj <> '60659166000146' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                         
                     } 
@@ -1233,6 +1234,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '65019655000157' ";
                         query += " AND pessoa.cpfcnpj <> '45543915047307' ";
                         query += " AND pessoa.cpfcnpj <> '01528473000129' ";
+                        query += " AND pessoa.cpfcnpj <> '60659166000146' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                     } 
                 } 
@@ -1279,6 +1281,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '65019655000157' ";
                         query += " AND pessoa.cpfcnpj <> '45543915047307' ";
                         query += " AND pessoa.cpfcnpj <> '01528473000129' ";
+                        query += " AND pessoa.cpfcnpj <> '60659166000146' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";  
                     } 
                 } 
@@ -1327,6 +1330,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '65019655000157' ";
                         query += " AND pessoa.cpfcnpj <> '45543915047307' ";
                         query += " AND pessoa.cpfcnpj <> '01528473000129' ";
+                        query += " AND pessoa.cpfcnpj <> '60659166000146' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                     } 
                 } 
@@ -2954,7 +2958,20 @@ router.route('/gerarNFSe').post(function(req, res) {
         var deletar = "";
         var  select = "";
 
-        select += " SELECT  FORMAT(contas_receber_parcelas.dt_data_vencimento, 'd', 'pt-BR' ) AS 'DataVencimento', FORMAT(contas_receber_parcelas.vl_valor, 'c', 'pt-BR' ) AS 'ValorContasReceber', configuracao_nfe_servico.vl_aliq_irrf AS 'AliquotaIRRF', ";
+        select += " SELECT entidade.sn_issretido AS 'issretido', entidade.vl_issretido  AS 'aliqissretido', entidade.sn_pccretido AS 'sn_pccretido',  ";
+
+        select += " ((SELECT SUM(contas_receber_parcelas.vl_valortotal)    ";
+        select += " FROM contas_receber_parcelas INNER JOIN contas_receber ON contas_receber.id=contas_receber_parcelas.id_contas_receber    ";
+        select += " INNER JOIN contas_receber_baixas ON contas_receber_baixas.id_contas_receber_parcela=contas_receber_parcelas.id ";
+        select += " WHERE id_entidade=entidade.id    ";
+        select += " AND dt_emissao >=  CONVERT(datetime,CONVERT(varchar,MONTH(GETDATE())) + '/' + '01/' +  CONVERT(varchar,YEAR(GETDATE())))     ";
+        select += " AND dt_emissao <= EOMONTH(GETDATE()))) AS 'creditoatual',  ";
+         
+        select += " (SELECT configuracao_nfe_servico.vl_limite_retencao FROM configuracao_nfe_servico) AS 'limiteretencao',   ";
+        select += " (SELECT configuracao_nfe_servico.vl_aliq_pis_cofins_csll FROM configuracao_nfe_servico) AS 'aliqpcc',   ";
+        select += " (SELECT configuracao_nfe_servico.vl_aliq_irrf FROM configuracao_nfe_servico) AS 'aliqir',  ";
+
+        select += "   FORMAT(contas_receber_parcelas.dt_data_vencimento, 'd', 'pt-BR' ) AS 'DataVencimento', FORMAT(contas_receber_parcelas.vl_valor, 'c', 'pt-BR' ) AS 'ValorContasReceber', configuracao_nfe_servico.vl_aliq_irrf AS 'AliquotaIRRF', ";
 
         select += " CONVERT(DECIMAL(14,2), IIF(entidade.sn_pccretido=1 AND ( ";
         select += " (SELECT SUM(vl_valor)  ";
@@ -2984,24 +3001,20 @@ router.route('/gerarNFSe').post(function(req, res) {
         select += "    (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_irrf / 100)), '0.00'))  AS ValorIRRF,  ";
 
 
-
-        select += " IIF(entidade.sn_pccretido=1 AND (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100) > 10 ";
-        select += " ,CONVERT(DECIMAL(14,2), (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100)), '0.00') AS ValorPis,      ";
+        select += " ('0.00') AS ValorPis,      ";
 
 
-        select += " IIF(entidade.sn_pccretido=1 AND (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100) > 10 ";
-        select += " ,CONVERT(DECIMAL(14,2), (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100)), '0.00') AS ValorCofins,   ";
+        select += "('0.00') AS ValorCofins,   ";
 
 
-        select += " IIF(entidade.sn_pccretido=1 AND (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100) > 10 ";
-        select += " ,CONVERT(DECIMAL(14,2), (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100)), '0.00') AS ValorCSLL, ";
+        select += "('0.00') AS ValorCSLL, ";
 
 
-        select += " IIF(entidade.sn_pccretido=1 AND (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100) > 10,configuracao_nfe_servico.vl_aliq_pis_cofins_csll, '0.00') AS AliquotaPIS,      ";
+        select += " IIF(entidade.sn_pccretido=1 AND (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100) >= 10,configuracao_nfe_servico.vl_aliq_pis_cofins_csll, '0.00') AS AliquotaPIS,      ";
 
-        select += " IIF(entidade.sn_pccretido=1 AND (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100) > 10,configuracao_nfe_servico.vl_aliq_pis_cofins_csll, '0.00')  AS AliquotaCOFINS,  ";
+        select += " IIF(entidade.sn_pccretido=1 AND (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100) >= 10,configuracao_nfe_servico.vl_aliq_pis_cofins_csll, '0.00')  AS AliquotaCOFINS,  ";
 
-        select += " IIF(entidade.sn_pccretido=1 AND (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100) > 10,configuracao_nfe_servico.vl_aliq_pis_cofins_csll, '0.00')  AS AliquotaCSLL,   ";      
+        select += " IIF(entidade.sn_pccretido=1 AND (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100) >= 10,configuracao_nfe_servico.vl_aliq_pis_cofins_csll, '0.00')  AS AliquotaCSLL,   ";      
 
         select += " IIF(entidade.sn_bancoparceiro=1,entidade.nm_descricao_nota_fiscal, '') AS DescricaoNota, empresa.nm_razaosocial AS RazaoSocialPrestador, empresa.sn_pessoafisica AS PessoaFisicaPrestador, empresa.nm_cpf AS CpfPrestador,      empresa.nm_rg AS RgPrestador, empresa.nm_cnpj AS CpfCnpjPrestador, empresa.nm_inscricaomunicipal AS InscricaoMunicipalPrestador,       empresa.nm_inscricaoestadual AS IePrestador, empresa.nm_ddd AS DDDPrestador, empresa.nm_telefone AS TelefonePrestador,      CddPrestador.nm_codigo AS CodigoCidadePrestador, CddPrestador.nm_descricao AS DescricaoCidadePrestador, entidade.nm_razaosocial AS RazaoSocialTomador,       entidade.sn_pessoafisica AS PessoaFisicaTomador, entidade.nm_cpf AS CpfTomador, entidade.nm_rg AS RgTomador,       entidade.nm_cnpj AS CnpjTomador, entidade.nm_inscricaomunicipal AS InscricaoMunicipalTomador, entidade.nm_inscricaoestadual AS InscricaoEstadualTomador,       contato.nm_ddd AS DDDTomador, contato.nm_Telefone AS TelefoneTomador, contato.nm_email AS EmailTomador, ";
         select += " dsg_pais.nm_descricao AS PaisTomador, dsg_tipo_logradouro.nm_apelido AS TipoLogradouroTomador, endereco.nm_logradouro AS EnderecoTomador,       endereco.nm_numero AS NumeroTomador, endereco.nm_complemento AS ComplementoTomador, endereco.nm_bairro AS BairroTomador,       endereco.nm_cep AS CepTomador, dsg_ibge_cidade.nm_codigo AS CodigoCidadeTomador, dsg_ibge_cidade.nm_descricao AS DescricaoCidadeTomador,       dsg_ibge_uf.nm_descricao ";
@@ -3028,110 +3041,6 @@ router.route('/gerarNFSe').post(function(req, res) {
         select += " dsg_rps.nm_apelido,  dsg_cnae.nm_apelido,  contas_receber_parcelas.nm_documento,  contas_receber_parcelas.nm_numero_rps,  contas_receber_parcelas.nm_numero_nfse, contas_receber_parcelas.nm_protocolo_nfse,  contas_receber_parcelas.vl_valor,  contas_receber.dt_emissao,  produtos_detalhes.vl_aliquotaiss,  produtos_detalhes.nm_codigoservico,  produtos.nm_descricao, movimentacao_servicos.id_subservicos, contas_receber_parcelas.nm_serie_rps, ";
         select += " subservico.nm_descricao, movimentacao_servicos.id_contas_receber ";
 
-/*
-        select += "SELECT IIF(entidade.sn_bancoparceiro=1,entidade.nm_descricao_nota_fiscal, '') AS DescricaoNota, empresa.nm_razaosocial AS RazaoSocialPrestador, empresa.sn_pessoafisica AS PessoaFisicaPrestador, empresa.nm_cpf AS CpfPrestador, "; 
-        select += "     empresa.nm_rg AS RgPrestador, empresa.nm_cnpj AS CpfCnpjPrestador, empresa.nm_inscricaomunicipal AS InscricaoMunicipalPrestador,  ";
-        select += "     empresa.nm_inscricaoestadual AS IePrestador, empresa.nm_ddd AS DDDPrestador, empresa.nm_telefone AS TelefonePrestador, ";
-		select += "	 CddPrestador.nm_codigo AS CodigoCidadePrestador, CddPrestador.nm_descricao AS DescricaoCidadePrestador, entidade.nm_razaosocial AS RazaoSocialTomador,  ";
-        select += "     entidade.sn_pessoafisica AS PessoaFisicaTomador, entidade.nm_cpf AS CpfTomador, entidade.nm_rg AS RgTomador,  ";
-        select += "     entidade.nm_cnpj AS CnpjTomador, entidade.nm_inscricaomunicipal AS InscricaoMunicipalTomador, entidade.nm_inscricaoestadual AS InscricaoEstadualTomador,  ";
-        select += "     contato.nm_ddd AS DDDTomador, contato.nm_Telefone AS TelefoneTomador, contato.nm_email AS EmailTomador,  ";
-        select += "     dsg_pais.nm_descricao AS PaisTomador, dsg_tipo_logradouro.nm_apelido AS TipoLogradouroTomador, endereco.nm_logradouro AS EnderecoTomador,  ";
-        select += "     endereco.nm_numero AS NumeroTomador, endereco.nm_complemento AS ComplementoTomador, endereco.nm_bairro AS BairroTomador,  ";
-        select += "     endereco.nm_cep AS CepTomador, dsg_ibge_cidade.nm_codigo AS CodigoCidadeTomador, dsg_ibge_cidade.nm_descricao AS DescricaoCidadeTomador,  ";
-        select += "     dsg_ibge_uf.nm_descricao AS UfTomador, dsg_natureza_tributacao.nm_apelido AS NaturezaTributacao, dsg_codigo_tributario_servico.nm_apelido AS RegimeEspecialTributacao,  ";
-        select += "     dsg_rps.nm_apelido AS TipoTributacao, dsg_cnae.nm_apelido AS CodigoCnae, contas_receber_parcelas.nm_documento AS NumeroRpsNew,  ";
-        select += "     contas_receber_parcelas.nm_numero_rps AS NumeroRpsEnviado, contas_receber_parcelas.nm_numero_nfse AS NumeroNfseSubstituida, contas_receber_parcelas.nm_protocolo_nfse AS ProtocoloNfse, "; 
-             
-		select += "	 '' AS JustificativaDeducao,  ";
-		select += "	 '0.00' As ValorTotalDeducao,  ";
-		select += "	 '0.00' AS ValorTotalDesconto,  ";
-        select += "     contas_receber_parcelas.vl_valor AS ValorTotalServicos,  ";
-		select += "	 '0.00' AS ValorTotalBaseCalculo,  ";
-		select += "	 '0.00' AS ValorIss,  ";
-        select += "     NULL AS TipoTrib_OLD,  ";
-		select += "	 contas_receber.dt_emissao AS DataInicio,  ";
-		select += "	  IIF(entidade.sn_issretido = 1, CONVERT(DECIMAL(14,2), ROUND((contas_receber_parcelas.vl_valor * entidade.vl_issretido / 100), 2, 1)) ,'0.00') AS ValorIssRetido,  ";
-
-        select += "     IIF(entidade.sn_issretido = 1, '1','2') AS TemIssRetido, produtos_detalhes.vl_aliquotaiss AS AliquotaISS, produtos_detalhes.nm_codigoservico AS CodigoItemListaServico,  ";
-        select += "     produtos.nm_descricao AS DiscriminacaoServico,  ";
-        select += "     subservico.nm_descricao AS DiscriminacaoServico2, ";
-		select += "	 COUNT(movimentacao_servicos.id_subservicos) AS QuantidadeServicos,  ";
-		select += "	 SUM(movimentacao_servicos.vl_valor) AS ValorUnitarioServico,  ";
-        select += "     '0.00' AS ValorDesconto,  ";
-		select += "	 '0.00' AS ValorPis,  ";
-		select += "	 '0.00' AS ValorCofins,  ";
-        select += "     '0.00' AS AliquotaPIS,  ";
-		select += "	 '0.00' AS AliquotaCOFINS,  ";
-		select += "	 movimentacao_servicos.id_subservicos AS IDProdutos_VendaProdutos, "; 
-
-		select += "	 contas_receber_parcelas.nm_serie_rps AS SerieRpsSubstituido , movimentacao_servicos.id_contas_receber ";
-
-        select += " ,(SELECT  TOP 1 status FROM nfse WHERE id=movimentacao_servicos.id_contas_receber) AS status "
-
-        select += "FROM movimentacao_servicos ";
-        select += "INNER JOIN contas_receber_parcelas ON contas_receber_parcelas.id=movimentacao_servicos.id_contas_receber ";
-        select += "INNER JOIN contas_receber ON contas_receber.id=contas_receber_parcelas.id_contas_receber ";
-        select += "INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade ";
-        select += "INNER JOIN empresa ON empresa.id='9F39BDCF-6B98-45DE-A819-24B7F3EE2560' ";
-        select += "LEFT OUTER JOIN dsg_ibge_cidade AS CddPrestador ON empresa.id_dsg_ibge_cidade = CddPrestador.id  ";
-        select += "LEFT OUTER JOIN dsg_cnae ON dsg_cnae.id = empresa.id_dsg_cnae  ";
-        select += "LEFT OUTER JOIN dsg_natureza_tributacao ON dsg_natureza_tributacao.id = empresa.id_dsg_natureza_tributacao  ";
-        select += "LEFT OUTER JOIN dsg_codigo_tributario_servico ON empresa.id_dsg_codigo_tributario_servico = dsg_codigo_tributario_servico.id  ";
-
-        select += "LEFT JOIN produtos ON movimentacao_servicos.id_produtos = produtos.id  ";
-        select += "LEFT JOIN subservico ON movimentacao_servicos.id_subservicos = subservico.id ";
-        select += "LEFT JOIN produtos_detalhes ON produtos.id = produtos_detalhes.id_produtos  ";
-        select += "LEFT OUTER JOIN dsg_rps ON '70350CC4-B12F-47D7-88F1-7532A1C20F31' = dsg_rps.id  ";
-
-        select += "LEFT OUTER JOIN contato ON contato.id_entidade = entidade.id  ";
-        select += "LEFT OUTER JOIN endereco ON endereco.id_entidade = entidade.id  ";
-        select += "LEFT OUTER JOIN dsg_ibge_uf ON endereco.id_dsg_ibge_uf = dsg_ibge_uf.id  ";
-        select += "LEFT OUTER JOIN dsg_pais ON dsg_pais.id = endereco.id_dsg_pais  ";
-        select += "LEFT OUTER JOIN dsg_ibge_cidade ON endereco.id_dsg_ibge_cidade = dsg_ibge_cidade.id  ";
-        select += "LEFT OUTER JOIN dsg_tipo_logradouro ON endereco.id_dsg_tipo_logradouro = dsg_tipo_logradouro.id  ";
-        
-        select += "WHERE movimentacao_servicos.id_contas_receber=" + idcontasreceber + " ";
-
-        select += "AND nm_numero_nfes IS NULL ";
-        select += "GROUP BY entidade.vl_issretido, entidade.sn_issretido, entidade.sn_bancoparceiro, entidade.nm_descricao_nota_fiscal, ";
-        select += "empresa.nm_razaosocial, empresa.sn_pessoafisica, empresa.nm_cpf, "; 
-        select += "empresa.nm_rg, empresa.nm_cnpj, empresa.nm_inscricaomunicipal,  ";
-        select += "empresa.nm_inscricaoestadual, empresa.nm_ddd, empresa.nm_telefone, ";
-        select += "CddPrestador.nm_codigo, CddPrestador.nm_descricao, entidade.nm_razaosocial,  ";
-        select += "entidade.sn_pessoafisica, entidade.nm_cpf, entidade.nm_rg,  ";
-        select += "entidade.nm_cnpj, entidade.nm_inscricaomunicipal, entidade.nm_inscricaoestadual,  ";
-        select += "contato.nm_ddd, contato.nm_Telefone, contato.nm_email,  ";
-        select += "dsg_pais.nm_descricao,  ";
-        select += "dsg_tipo_logradouro.nm_apelido, endereco.nm_logradouro,  ";
-        select += "endereco.nm_numero,  ";
-        select += "endereco.nm_complemento,  ";
-        select += "endereco.nm_bairro,  ";
-        select += "endereco.nm_cep,  ";
-        select += "dsg_ibge_cidade.nm_codigo,  ";
-        select += "dsg_ibge_cidade.nm_descricao,  ";
-        select += "dsg_ibge_uf.nm_descricao,  ";
-        select += "dsg_natureza_tributacao.nm_apelido,  ";
-        select += "dsg_codigo_tributario_servico.nm_apelido,  ";
-        select += "dsg_rps.nm_apelido,  ";
-        select += "dsg_cnae.nm_apelido,  ";
-        select += "contas_receber_parcelas.nm_documento,  ";
-        select += "contas_receber_parcelas.nm_numero_rps,  ";
-        select += "contas_receber_parcelas.nm_numero_nfse, ";
-        select += "contas_receber_parcelas.nm_protocolo_nfse,  ";
-             
-        select += "contas_receber_parcelas.vl_valor,  ";
-        select += "contas_receber.dt_emissao,  ";
-
-        
-        select += "produtos_detalhes.vl_aliquotaiss,  ";
-        select += "produtos_detalhes.nm_codigoservico,  ";
-        select += "produtos.nm_descricao, ";
-        select += "movimentacao_servicos.id_subservicos, ";
-        select += "contas_receber_parcelas.nm_serie_rps,  ";
-        select += "subservico.nm_descricao, movimentacao_servicos.id_contas_receber ";
-        */
-       
        console.log("============NOTA============================")
         console.log(select)
        console.log("============NOTAFIM============================")
@@ -3147,6 +3056,40 @@ router.route('/gerarNFSe').post(function(req, res) {
                     transacao.begin(err =>{
                         for (let h = 0; h < recordset.recordsets[0].length; h++) {
                             var movimentacao = recordset.recordsets[0][h];
+
+                            
+                            //var issretido = parseFloat(movimentacao.aliqissretido);
+                            var pcc = parseFloat(movimentacao.aliqpcc);
+                            var ir = parseFloat(movimentacao.aliqir);
+                            var tot = parseFloat(movimentacao.ValorPis);
+                            var totir = parseFloat("0.00");
+                            var limite = parseFloat(movimentacao.limiteretencao);
+                            var credatual = parseFloat(movimentacao.creditoatual);
+                            
+                            /*
+                            if(movimentacao.issretido){
+                                tot = tot - (parseFloat(movimentacao.valortotal) * issretido / 100);
+                            }
+                            */
+                            if(!credatual){
+                                credatual = 0;
+                            }
+
+                            if(movimentacao.sn_pccretido && (parseFloat(movimentacao.ValorTotalServicos) * pcc / 100) >= 10 ){
+                                if(credatual + parseFloat(movimentacao.ValorTotalServicos) >= limite){
+                                    if(credatual < limite){
+                                        totir = ((credatual + parseFloat(movimentacao.ValorTotalServicos)) * ir / 100)
+                                    }else{
+                                        totir = (parseFloat(movimentacao.ValorTotalServicos) * ir / 100);   
+                                    }
+                                }
+
+                                tot = (parseFloat(movimentacao.ValorTotalServicos) * pcc / 100); 
+                                                                                
+                            }
+
+                            movimentacao.ValorPis = parseFloat(tot.toFixed(2));
+                            movimentacao.ValorIRRF = parseFloat(totir.toFixed(2));
 
                             var id = movimentacao.id_contas_receber
                             var RazaoSocialPrestador = movimentacao.RazaoSocialPrestador
@@ -4355,18 +4298,16 @@ router.route('/enviarEmailLote').post(function(req, res) {
 
 function enviarEmail(sender, mail, callback) { 
 
-    var transporter = nodemailer.createTransport({
-    pool: true,
-    maxConnections: 1000,
-    maxMessages: 1000,
-    rateDelta: 5000,
-    service: sender.service,
-    auth: {
-        user: sender.user,
-        pass: sender.pass
-    }
+    let transporter = nodemailer.createTransport({
+        host: sender.service,
+        port: 587,
+        auth: {
+            user: sender.user,
+            pass: sender.pass
+        },
+        tls: { ciphers: 'SSLv3' }
     });
-
+    
     var attachments = [];
     if(mail.attachments){
         attachments = mail.attachments;
@@ -4377,27 +4318,18 @@ function enviarEmail(sender, mail, callback) {
         })
     }
 
-
-    var mailOptions = {
-    from: mail.from,
-    to: mail.to,
-    subject: mail.subject,
-    text: mail.text,  
-    attachments: attachments
+    
+    let mailOptions = {
+        from: 'user-alias <' + sender.user + '>', // sender address
+        to: mail.to, // list of receivers
+        subject: mail.subject, // Subject line
+        html: mail.text, // plain text body,  
+        attachments: attachments
     };
 
     transporter.sendMail(mailOptions, function(error, info){
         transporter.close();
         callback(error, info);
-        /*
-        if (error) {
-            console.log(error);
-            res.send(error);
-        } else {
-            console.log('Email sent: ' + info.response);
-            res.send('Email sent: ' + info.response);
-        }
-        */
     });
 }
 
@@ -4709,20 +4641,14 @@ router.route('/enviarEmailGeral/:id').get(function(req, res) {
     select += " LEFT JOIN contas_receber_parcelas ON contas_receber_parcelas.id_contas_receber=contas_receber.id  ";
     select += " LEFT JOIN movimentacao_servicos ON movimentacao_servicos.id_contas_receber=nfse.id ";
 
-    select += " WHERE ";
-    where += " (nfse.id = '" + id + "') ";
-    /*
-    for (let i = 0; i < parametros.values.length; i++) {
-        var value = parametros.values[i];
-
-        if(i > 0){
-            where += " OR ";
-        }
-
-        where += " (nfse.id = '" + value + "') ";
-    }
-    */
-
+    where += " WHERE  (nfse.id = '" + id + "' AND (contato.id_dsg_tipo_contato='61b90b9a-13de-43c1-a742-7857de0231ea' ";
+    where += " OR contato.id_dsg_tipo_contato='23849113-24f5-45ed-a959-3f953eb2d6cb')) ";
+    
+    where += " GROUP BY contato.id_entidade, contato.nm_email,    ";
+    where += " cadastro_email.nm_servidor,   cadastro_email.nm_emailenvio ,   "; 
+    where += " cadastro_email.nm_senha ,   cadastro_email.nm_assunto,   cadastro_email.nm_texto,     ";
+    where += " contato.id_dsg_tipo_contato,  contas_receber_parcelas.nm_idprotocoloimpressao,   ";
+    where += " movimentacao_servicos.nm_numero_nfes, movimentacao_servicos.nm_numero_protocolo ";
 
     select += where;
     console.log(select);
@@ -4786,59 +4712,16 @@ router.route('/enviarEmailGeral/:id').get(function(req, res) {
                                 };
                                 mail.attachments.push(attachment);
 
-                                attachment = {
-                                    filename: 'boleto.pdf',
-                                    path:"http://homologacao.cobrancabancaria.tecnospeed.com.br:8080/api/v1/boletos/impressao/lote/" + retorno.recordset[i].boleto
-                                };
-                                mail.attachments.push(attachment);
+                                if(retorno.recordset[i].boleto){
+                                    attachment = {
+                                        filename: 'boleto.pdf',
+                                        path:"http://homologacao.cobrancabancaria.tecnospeed.com.br:8080/api/v1/boletos/impressao/lote/" + retorno.recordset[i].boleto
+                                    };
+                                    mail.attachments.push(attachment);
+                                }
+                                
 
                                 break;
-                            case "6537b77b-2229-42fb-995d-0e4ead8af4bc":
-                                var path = "http://" + req.host + ":3002/api/r/detalhesservicosgeralemail";
-                                path += "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
-                                path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
-                                path += "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,";
-                                path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,";
-                                path += "%22nfse%22:%7B%22value%22:%221667862D-9137-425B-8737-2F76731F16B1%22,";
-                                path += "%22type%22:%22caracter%22,%22text%22:%22%20-%2010.00%22%7D%7D";
-
-                                mail.attachments = [];
-
-                                var attachment = {
-                                    filename: 'relatorio.pdf',
-                                    path:path
-                                };
-                                mail.attachments.push(attachment);
-                                break;
-                            case "746cb5ec-4f09-4470-9c8e-b47077c92cf9":
-                            /*
-                                //Envia Relatorio SiscoServ           
-                                mail.path = "http://" + req.host + ":3002/api/r/detalhesservicos";
-                                mail.path += "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
-                                mail.path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
-                                mail.path += "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Retrato%22%7D,";
-                                mail.path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22pdf%22%7D,";
-                                mail.path += "%22datainicial%22:%7B%22value%22:%22" + parametros.datade + "%22,%22type%22:%22caracter%22,%22text%22:%22" + parametros.datade + "%22%7D,";
-                                mail.path += "%22datafinal%22:%7B%22value%22:%22" + parametros.dataate + "%22,%22type%22:%22caracter%22,%22text%22:%22" + parametros.dataate + "%22%7D,";
-                                mail.path += "%22cliente%22:%7B%22value%22:%22" + retorno.recordset[i].entidade + "%22,%22type%22:%22caracter%22,%22text%22:%22" + retorno.recordset[i].entidade + "%22%7D%7D";
-                            */    
-                           
-                                var path = "http://" + req.host + ":3002/api/r/detalhesservicossiscoservemail";
-                                path += "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
-                                path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
-                                path += "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,";
-                                path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,";
-                                path += "%22nfse%22:%7B%22value%22:%221667862D-9137-425B-8737-2F76731F16B1%22,";
-                                path += "%22type%22:%22caracter%22,%22text%22:%22%20-%2010.00%22%7D%7D";
-
-                                mail.attachments = [];
-
-                                var attachment = {
-                                    filename: 'relatorio.pdf',
-                                    path:path
-                                };
-                                mail.attachments.push(attachment);
-                                break; 
                             case "23849113-24f5-45ed-a959-3f953eb2d6cb":
                                 //Faturamento      
                                 var arquivo = retorno.recordset[i].numero_protocolo + "_" + retorno.recordset[i].numero_nfes;
@@ -4857,11 +4740,13 @@ router.route('/enviarEmailGeral/:id').get(function(req, res) {
                                 };
                                 mail.attachments.push(attachment);
 
-                                attachment = {
-                                    filename: 'boleto.pdf',
-                                    path:"http://homologacao.cobrancabancaria.tecnospeed.com.br:8080/api/v1/boletos/impressao/lote/" + retorno.recordset[i].boleto
-                                };
-                                mail.attachments.push(attachment);
+                                if(retorno.recordset[i].boleto){
+                                    attachment = {
+                                        filename: 'boleto.pdf',
+                                        path:"http://homologacao.cobrancabancaria.tecnospeed.com.br:8080/api/v1/boletos/impressao/lote/" + retorno.recordset[i].boleto
+                                    };
+                                    mail.attachments.push(attachment);
+                                }
                                 break;           
                             default:
                                 break;
@@ -4874,10 +4759,10 @@ router.route('/enviarEmailGeral/:id').get(function(req, res) {
                        
                             enviarEmail(sender, mail, function(error, info){
                                 if (error) {
-                                    console.log(error.response);
+                                    console.log(error.message);
                                     var ret = {};
                                     ret.status = false;
-                                    ret.message = error.response;
+                                    ret.message = error.message;
                                     res.send(ret);
                                 } else {
                                     console.log('Email sent: ' + info.response);
