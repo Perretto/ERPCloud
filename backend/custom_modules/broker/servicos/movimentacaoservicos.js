@@ -2487,8 +2487,12 @@ router.route('/gerarContasReceber').post(function(req, res) {
             query += " (SELECT configuracao_nfe_servico.vl_aliq_irrf FROM configuracao_nfe_servico) AS 'aliqir', ";
             
             
-            query += " (SELECT TOP 1 id FROM parcelamento WHERE nr_numeroparcelas=1) AS 'id_parcelamento',  ";
-                            
+            //query += " (SELECT TOP 1 id FROM parcelamento WHERE nr_numeroparcelas=1) AS 'id_parcelamento',  ";
+              
+            query += " IIF((SELECT TOP 1  cliente.id_parcelamento FROM cliente WHERE cliente.id=entidade.id) IS NULL, ";
+            query += " (SELECT TOP 1 id FROM parcelamento WHERE nr_numeroparcelas=1 AND sn_padrao=1),(SELECT TOP 1  cliente.id_parcelamento FROM cliente WHERE cliente.id=entidade.id)) AS 'id_parcelamento',   "; 
+  
+ 
             query += " GETDATE() AS 'dt_emissao',  ";
             query += " IIF((SELECT TOP 1 nm_documento FROM contas_receber ORDER BY nm_documento DESC) IS NULL,0,  ";
             query += " (SELECT TOP 1 nm_documento FROM contas_receber ORDER BY nm_documento DESC)) AS 'nr_pedido', ";
