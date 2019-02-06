@@ -2557,6 +2557,10 @@ router.route('/gerarContasReceber').post(function(req, res) {
                                                 tot = tot - (parseFloat(movimentacao.valortotal) * issretido / 100);
                                             }
 
+                                            if(!credatual){
+                                                credatual = 0;
+                                            }
+
                                             if(movimentacao.sn_pccretido && (parseFloat(movimentacao.valortotal) * pcc / 100) >= 10 ){
                                                 if(credatual + parseFloat(movimentacao.valortotal) >= limite){
                                                     if(credatual < limite){
