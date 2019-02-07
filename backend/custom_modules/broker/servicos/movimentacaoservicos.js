@@ -2945,6 +2945,14 @@ router.route('/gerarNFSe').post(function(req, res) {
     try {
         parametros = req.body.parametros;
         filtros = parametros.paramArray;
+
+        if(parametros.competencia){
+            var arraycompetencia = parametros.competencia.split("/");
+            if(arraycompetencia.length == 3){
+                parametros.competencia = arraycompetencia[2] + "-" + arraycompetencia[1] + "-" + arraycompetencia[0];
+            }
+        }
+
         var idcontasreceber = "";    
         var idcontasreceber2 = "";    
         
@@ -3024,7 +3032,9 @@ router.route('/gerarNFSe').post(function(req, res) {
 
         select += " IIF(entidade.sn_pccretido=1 AND (SUM(movimentacao_servicos.vl_valor) * configuracao_nfe_servico.vl_aliq_pis_cofins_csll / 100) >= 10,configuracao_nfe_servico.vl_aliq_pis_cofins_csll, '0.00')  AS AliquotaCSLL,   ";      
 
-        select += " IIF(entidade.sn_bancoparceiro=1,entidade.nm_descricao_nota_fiscal, '') AS DescricaoNota, empresa.nm_razaosocial AS RazaoSocialPrestador, empresa.sn_pessoafisica AS PessoaFisicaPrestador, empresa.nm_cpf AS CpfPrestador,      empresa.nm_rg AS RgPrestador, empresa.nm_cnpj AS CpfCnpjPrestador, empresa.nm_inscricaomunicipal AS InscricaoMunicipalPrestador,       empresa.nm_inscricaoestadual AS IePrestador, empresa.nm_ddd AS DDDPrestador, empresa.nm_telefone AS TelefonePrestador,      CddPrestador.nm_codigo AS CodigoCidadePrestador, CddPrestador.nm_descricao AS DescricaoCidadePrestador, entidade.nm_razaosocial AS RazaoSocialTomador,       entidade.sn_pessoafisica AS PessoaFisicaTomador, entidade.nm_cpf AS CpfTomador, entidade.nm_rg AS RgTomador,       entidade.nm_cnpj AS CnpjTomador, entidade.nm_inscricaomunicipal AS InscricaoMunicipalTomador, entidade.nm_inscricaoestadual AS InscricaoEstadualTomador,       contato.nm_ddd AS DDDTomador, contato.nm_Telefone AS TelefoneTomador, contato.nm_email AS EmailTomador, ";
+        select += " IIF(entidade.sn_bancoparceiro=1,entidade.nm_descricao_nota_fiscal, '') AS DescricaoNota, empresa.nm_razaosocial AS RazaoSocialPrestador, empresa.sn_pessoafisica AS PessoaFisicaPrestador, empresa.nm_cpf AS CpfPrestador,      empresa.nm_rg AS RgPrestador, empresa.nm_cnpj AS CpfCnpjPrestador, empresa.nm_inscricaomunicipal AS InscricaoMunicipalPrestador,       empresa.nm_inscricaoestadual AS IePrestador, empresa.nm_ddd AS DDDPrestador, empresa.nm_telefone AS TelefonePrestador,      CddPrestador.nm_codigo AS CodigoCidadePrestador, CddPrestador.nm_descricao AS DescricaoCidadePrestador, entidade.nm_razaosocial AS RazaoSocialTomador,       entidade.sn_pessoafisica AS PessoaFisicaTomador, entidade.nm_cpf AS CpfTomador, entidade.nm_rg AS RgTomador,       entidade.nm_cnpj AS CnpjTomador, entidade.nm_inscricaomunicipal AS InscricaoMunicipalTomador, entidade.nm_inscricaoestadual AS InscricaoEstadualTomador,       contato.nm_ddd AS DDDTomador, contato.nm_Telefone AS TelefoneTomador, ";
+        //select += " contato.nm_email AS EmailTomador, ";
+        select += " (SELECT TOP 1 contato.nm_email FROM contato WHERE contato.id_entidade=entidade.id AND sn_contatopreferencial=1) AS EmailTomador, ";
         select += " dsg_pais.nm_descricao AS PaisTomador, dsg_tipo_logradouro.nm_apelido AS TipoLogradouroTomador, endereco.nm_logradouro AS EnderecoTomador,       endereco.nm_numero AS NumeroTomador, endereco.nm_complemento AS ComplementoTomador, endereco.nm_bairro AS BairroTomador,       endereco.nm_cep AS CepTomador, dsg_ibge_cidade.nm_codigo AS CodigoCidadeTomador, dsg_ibge_cidade.nm_descricao AS DescricaoCidadeTomador,       dsg_ibge_uf.nm_descricao ";
         select += " AS UfTomador, dsg_natureza_tributacao.nm_apelido AS NaturezaTributacao, dsg_codigo_tributario_servico.nm_apelido AS RegimeEspecialTributacao, ";
         select += " dsg_rps.nm_apelido AS TipoTributacao, dsg_cnae.nm_apelido AS CodigoCnae, contas_receber_parcelas.nm_documento AS NumeroRpsNew,       contas_receber_parcelas.nm_numero_rps AS NumeroRpsEnviado, contas_receber_parcelas.nm_numero_nfse AS NumeroNfseSubstituida, contas_receber_parcelas.nm_protocolo_nfse AS ProtocoloNfse,          '' AS JustificativaDeducao,     '0.00' As ValorTotalDeducao,    '0.00' AS ValorTotalDesconto,       contas_receber_parcelas.vl_valortotal AS ValorTotalServicos,        '0.00' AS ValorTotalBaseCalculo,        '0.00' AS ValorIss,       NULL AS TipoTrib_OLD,         contas_receber.dt_emissao AS DataInicio,            IIF(entidade.sn_issretido = 1, CONVERT(DECIMAL(14,2), ROUND((contas_receber_parcelas.vl_valor * entidade.vl_issretido / 100), 2, 1)) ,'0.00') AS ValorIssRetido,       IIF(entidade.sn_issretido = 1, '1','2') AS TemIssRetido, produtos_detalhes.vl_aliquotaiss AS AliquotaISS, produtos_detalhes.nm_codigoservico AS CodigoItemListaServico,       produtos.nm_descricao AS DiscriminacaoServico, ";
@@ -3045,7 +3055,7 @@ router.route('/gerarNFSe').post(function(req, res) {
         select += " AND nm_numero_nfes IS NULL  ";
 
 
-        select += " GROUP BY contas_receber_parcelas.vl_valor, contas_receber_parcelas.dt_data_vencimento, contas_receber_parcelas.vl_valortotal, entidade.vl_issretido, entidade.id, configuracao_nfe_servico.vl_aliq_irrf, configuracao_nfe_servico.vl_limite_retencao, entidade.sn_pccretido,configuracao_nfe_servico.vl_aliq_pis_cofins_csll, entidade.sn_issretido, entidade.sn_bancoparceiro, entidade.nm_descricao_nota_fiscal, empresa.nm_razaosocial, empresa.sn_pessoafisica, empresa.nm_cpf, empresa.nm_rg, empresa.nm_cnpj, empresa.nm_inscricaomunicipal,  empresa.nm_inscricaoestadual, empresa.nm_ddd, empresa.nm_telefone, CddPrestador.nm_codigo, CddPrestador.nm_descricao, entidade.nm_razaosocial,  entidade.sn_pessoafisica, entidade.nm_cpf, entidade.nm_rg,  entidade.nm_cnpj, entidade.nm_inscricaomunicipal, entidade.nm_inscricaoestadual,  contato.nm_ddd, contato.nm_Telefone, contato.nm_email,  dsg_pais.nm_descricao,  dsg_tipo_logradouro.nm_apelido, endereco.nm_logradouro,  endereco.nm_numero,  endereco.nm_complemento,  endereco.nm_bairro,  endereco.nm_cep,  dsg_ibge_cidade.nm_codigo,  dsg_ibge_cidade.nm_descricao,  dsg_ibge_uf.nm_descricao,  dsg_natureza_tributacao.nm_apelido,  dsg_codigo_tributario_servico.nm_apelido, ";
+        select += " GROUP BY contas_receber_parcelas.vl_valor, contas_receber_parcelas.dt_data_vencimento, contas_receber_parcelas.vl_valortotal, entidade.vl_issretido, entidade.id, configuracao_nfe_servico.vl_aliq_irrf, configuracao_nfe_servico.vl_limite_retencao, entidade.sn_pccretido,configuracao_nfe_servico.vl_aliq_pis_cofins_csll, entidade.sn_issretido, entidade.sn_bancoparceiro, entidade.nm_descricao_nota_fiscal, empresa.nm_razaosocial, empresa.sn_pessoafisica, empresa.nm_cpf, empresa.nm_rg, empresa.nm_cnpj, empresa.nm_inscricaomunicipal,  empresa.nm_inscricaoestadual, empresa.nm_ddd, empresa.nm_telefone, CddPrestador.nm_codigo, CddPrestador.nm_descricao, entidade.nm_razaosocial,  entidade.sn_pessoafisica, entidade.nm_cpf, entidade.nm_rg,  entidade.nm_cnpj, entidade.nm_inscricaomunicipal, entidade.nm_inscricaoestadual,  contato.nm_ddd, contato.nm_Telefone,   dsg_pais.nm_descricao,  dsg_tipo_logradouro.nm_apelido, endereco.nm_logradouro,  endereco.nm_numero,  endereco.nm_complemento,  endereco.nm_bairro,  endereco.nm_cep,  dsg_ibge_cidade.nm_codigo,  dsg_ibge_cidade.nm_descricao,  dsg_ibge_uf.nm_descricao,  dsg_natureza_tributacao.nm_apelido,  dsg_codigo_tributario_servico.nm_apelido, ";
         select += " dsg_rps.nm_apelido,  dsg_cnae.nm_apelido,  contas_receber_parcelas.nm_documento,  contas_receber_parcelas.nm_numero_rps,  contas_receber_parcelas.nm_numero_nfse, contas_receber_parcelas.nm_protocolo_nfse,  contas_receber_parcelas.vl_valor,  contas_receber.dt_emissao,  produtos_detalhes.vl_aliquotaiss,  produtos_detalhes.nm_codigoservico,  produtos.nm_descricao, movimentacao_servicos.id_subservicos, contas_receber_parcelas.nm_serie_rps, ";
         select += " subservico.nm_descricao, movimentacao_servicos.id_contas_receber ";
 
@@ -3389,7 +3399,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                                 query += " DataInicio, ValorIssRetido, TemIssRetido, AliquotaISS, CodigoItemListaServico, ";
                                 query += " DiscriminacaoServico, QuantidadeServicos, ValorUnitarioServico, ";
                                 query += " ValorDesconto, ValorPis, ValorCofins, AliquotaPIS, AliquotaCOFINS, ";
-                                query += " IDProdutos_VendaProdutos, SerieRpsSubstituido, status, dataemissao, DescricaoNota, ValorIr, AliquotaIR, AliquotaCSLL, ValorCsll, ValorContasReceber , DataVencimento) ";
+                                query += " IDProdutos_VendaProdutos, SerieRpsSubstituido, status, dataemissao, DescricaoNota, ValorIr, AliquotaIR, AliquotaCSLL, ValorCsll, ValorContasReceber , DataVencimento, Competencia) ";
     
                                 query += " VALUES( '" + id + "', '";
                                 query += RazaoSocialPrestador + "', '" + PessoaFisicaPrestador + "', '" + CpfPrestador + "', '";
@@ -3414,7 +3424,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                                 query +=  "', '" + QuantidadeServicos;
                                 query +=  "', '" + ValorUnitarioServico + "', '" + ValorDesconto + "', '" + ValorPis;
                                 query +=  "', '" + ValorCofins + "', '" + AliquotaPIS + "', '" + AliquotaCOFINS;
-                                query +=  "', '" + IDProdutos_VendaProdutos + "', '" + SerieRpsSubstituido + "', 'Pendente', '" + dataemissao + "', '" + DescricaoNota + "', '" + ValorIRRF + "', '" + AliquotaIRRF + "', '" + AliquotaCSLL + "', '" + ValorCSLL + "', '" + ValorContasReceber + "', '" + DataVencimento + "'); ";
+                                query +=  "', '" + IDProdutos_VendaProdutos + "', '" + SerieRpsSubstituido + "', 'Pendente', '" + dataemissao + "', '" + DescricaoNota + "', '" + ValorIRRF + "', '" + AliquotaIRRF + "', '" + AliquotaCSLL + "', '" + ValorCSLL + "', '" + ValorContasReceber + "', '" + DataVencimento + "', '" + parametros.competencia + "'); ";
                                 
                             }else{
                                 resposta.status = -4;
@@ -3613,7 +3623,7 @@ router.route('/getInfoNFSe').post(function(req, res) {
     select += " TemIssRetido, AliquotaISS, CodigoItemListaServico, ";
     select += " DiscriminacaoServico, QuantidadeServicos, ValorUnitarioServico, ";
     select += " ValorDesconto, ValorPis, ValorCofins, ";
-    select += " AliquotaPIS, AliquotaCOFINS, IDProdutos_VendaProdutos, SerieRpsSubstituido , DescricaoNota, ValorIr, AliquotaIR, AliquotaCSLL, ValorCsll, ValorContasReceber, DataVencimento ";
+    select += " AliquotaPIS, AliquotaCOFINS, IDProdutos_VendaProdutos, SerieRpsSubstituido , DescricaoNota, ValorIr, AliquotaIR, AliquotaCSLL, ValorCsll, ValorContasReceber, DataVencimento, Competencia ";
     select += " FROM nfse ";
     select += " WHERE ";
 
