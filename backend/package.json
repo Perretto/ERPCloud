@@ -29,7 +29,6 @@
     "nodemon": "^1.12.1",
     "pdfkit": "^0.8.3",
     "pm2": "^2.4.6",
-    "puppeteer": "^1.12.2",
     "tedious": "^2.0.0"
   },
   "devDependencies": {
