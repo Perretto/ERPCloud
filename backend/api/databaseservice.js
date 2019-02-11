@@ -314,7 +314,14 @@ function compareObj(a,b) {
                         html = createFooter(element, html);
                         html = createGraphic(element, html, "pie");
                         */
+                       
                         switch (saidaRelatorio){
+                            case "excel":
+                                convertxls(html.topo +  html.detail + html.footer + html.base, function(namefile){                            
+                                    res.download("../frontend/reports/render/" + namefile + ".xlsx");
+                                });
+                                
+                                break;
                             case "pdf":
                                 if(!headersize){
                                     headersize = "20";
@@ -518,6 +525,7 @@ function createModalParam(element,userid,rota,callback){
     html += "<select id=\"" + id + "\" class=\"form-control\" value=\"" + vlrAnterior + "\">";
     html += "<option value=\"html\"" + (vlrAnterior == "html"?"selected":"") + ">html</option>";
     html += "<option value=\"pdf\"" + (vlrAnterior == "pdf"?"selected":"") + ">Pdf</option>";
+    html += "<option value=\"excel\"" + (vlrAnterior == "excel"?"selected":"") + ">Excel</option>";
     html += "</select>";
     html += "</div>";
     html += "</div>";
@@ -634,7 +642,7 @@ function createModalParam(element,userid,rota,callback){
     html += "function geraRelatorio(){ ";
     html += "var parametros = \"\"; ";
     html += jsonParametros;    
-    html += "window.open('" + rota+ "/api/r/" + element.idReport + "/' + JSON.stringify(parametros)); "
+    html += "window.open('" + rota+ "/api/r/" + element.idReport + "/' + JSON.stringify(parametros)); ";
     html += "$('.close').click(); ";
     html += "}";
     html += "</script>";
@@ -3488,7 +3496,6 @@ router.route('/menucustom/:idusuario').get(function(req, res) {
 
 });
 
-
 router.route('/createCustomJS').get(function(req, res) {
     console.log("createCustomJS");
     var fs = require('fs');   
@@ -3634,9 +3641,7 @@ router.route('/createCustomJS').get(function(req, res) {
                                 });
                             } else{
                                 res.send("OK");
-                            }
-
-                            
+                            }                            
                         });
                     });
                 });
@@ -3644,9 +3649,33 @@ router.route('/createCustomJS').get(function(req, res) {
         }  
         });
     });
-
     
 })
 
+async function  convertxls(html, callback){
+    const fs = require('fs')
+    //fs.unlinkSync('../frontend/reports/render');
+    var path = '../frontend/reports/render/'
+        fs.readdir(path, function(err, items) {     
+            for (var i=0; i<items.length; i++) {
+                fs.unlinkSync(path + items[i] );
+            }
+        });
+ 
+    const conversionFactory = require('html-to-xlsx')
+    const puppeteer = require('puppeteer')
+    const chromeEval = require('chrome-page-eval')({ puppeteer })
+    const conversion = conversionFactory({
+      extract: chromeEval
+    })
+     
+    const stream = await  conversion(html)
+    var name = general.guid();
+    var ws = fs.createWriteStream(path + name + '.xlsx');
+    stream.pipe(ws);
+    ws.on('finish', function() {
+        callback(name);
+    });    
+}
 
 module.exports = database
