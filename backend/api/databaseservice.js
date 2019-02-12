@@ -3442,15 +3442,19 @@ router.route('/menucustom/:idusuario').get(function(req, res) {
                                         var menu = $("li a[href]"); //$("li[id]");
 
                                         for (let j = 0; j < menu.length; j++) {
+
+                                            if(j == 47){
+                                                console.log(j)
+                                            }
                                             var inicio = $(menu[j]).attr("href").indexOf("','") + 3;
                                             var total = $(menu[j]).attr("href").length;
                                             var fim = total - inicio;
                                             var id = $(menu[j]).attr("href").substring(inicio, fim);
-                                            id = id.substring(0, $(menu[j]).attr("href").indexOf("','") + 2);
+                                            //id = id.substring(0, $(menu[j]).attr("href").indexOf("','") + 2);
                                             id = id.replace("'", "");
 
                                             if(id.length > 36){
-                                                id = id.substring(0,36);
+                                                //id = id.substring(0,36);
                                             }
 
                                             if(id != "#" && id){
@@ -3459,12 +3463,13 @@ router.route('/menucustom/:idusuario').get(function(req, res) {
                                                 for (let i = 0; i < recordset.recordset.length; i++) {
                                                     var itemBD = recordset.recordset[i].baseObjectID.toLowerCase();
     
-                                                    if(itemBD==itemHTML){
+                                                    //if(itemBD==itemHTML){
+                                                    if(itemHTML.indexOf(itemBD) > -1){
                                                         itemmenu = i;
                                                         break;
                                                     }
                                                 } 
-                                                if(itemHTML == "d82d11c8-ea16-47c7-be04-10423467f04e"){
+                                                if(itemHTML.indexOf("26c14d39-886a-42a0-ba23-2ffcf0f801a3") > -1){
                                                     console.log(itemHTML)
                                                     console.log(itemmenu)
                                                 }
