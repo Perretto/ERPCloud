@@ -8,6 +8,8 @@ const prefixoModulo = "ContasPagar_";
 
 server.use('/ntlct_modules/financeiro/contaspagar', router);
 
+exports.cancelarConta = cancelarConta;
+
 var serverWindows = "";
 var configEnvironment = {};
 var EnterpriseID = "";
@@ -31,8 +33,8 @@ router.route('/*').get(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "broker";  //"homologa"; //"foodtown";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        dados = "intelecta10";  //"homologa"; //"foodtown";
+        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -88,8 +90,8 @@ router.route('/*').post(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "broker";  //"homologa"; //"foodtown";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        dados = "intelecta10";  //"homologa"; //"foodtown";
+        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -257,9 +259,9 @@ router.route('/listarcontas').post(function(req, res) {
         query += "select ";
         query += "ent.id identidade,ent.nm_razaosocial razaosocial,";
         query += "cp.id idtitulo,cp.nm_documento titulo,cp.vl_valor valortitulo,cp.dt_emissao emissao,cp.id_compra idcompra,cp.id_notafiscal idnota,cp.sn_dre dre,";
-        query += "cp.nm_competencia,cp.id_plano_contas_financeiro idcontafinanceira,";
+        query += "cp.nm_competencia,cp.id_plano_contas_financeiro idcontafinanceira,cp.dt_cancelamento cancelamentoDocumento,";
         query += "cpp.id idparcela,cpp.nm_documento docparcela,cpp.nr_parcela parcela,cpp.dt_data_vencimento vencimento,cpp.vl_valor valorparcela,cpp.id_banco idbanco,";
-        query += "cpp.id_plano_contas_financeiro idcontafinanceiraparc,cpp.id_forma_pagamento idformaparc,cpp.sn_fluxocaixa fluxocaixa,";
+        query += "cpp.id_plano_contas_financeiro idcontafinanceiraparc,cpp.id_forma_pagamento idformaparc,cpp.sn_fluxocaixa fluxocaixa,cpp.dt_cancelamento cancelamentoParcela,";
         query += "baixas.id idbaixa,baixas.dt_data databaixa,baixas.vl_valor valorbaixa,";
         query += "formas.id_banco idbancorec,formas.id_formapagamento idformarec,formas.nm_documento documentorec,formas.vl_valor valorrec,formas.nm_conta contacli,";
         query += "formas.nm_agencia agenciacli,";
@@ -315,11 +317,13 @@ router.route('/listarcontas').post(function(req, res) {
                                 titulo : element[i].titulo,
                                 valorTitulo: element[i].valortitulo,
                                 emissaoTitulo : element[i].emissao,
+								cancelamentoTitulo : (element[i].cancelamentoDocumento ? element[i].cancelamentoDocumento : ""),
                                 idParcela : (element[i].idparcela == null ? "" : element[i].idparcela),
                                 parcela : element[i].parcela,
                                 docParcela : element[i].docparcela,
                                 valorParcela : element[i].valorparcela,
                                 vencimentoParcela : element[i].vencimento,
+								cancelamentoParcela : (element[i].cancelamentoParcela ? element[i].cancelamentoParcela : ""),
                                 idPedido : (element[i].idcompra == null ? "" : element[i].idcompra),
                                 nrPedido : element[i].nrpedido,
                                 idNotaFiscal : (element[i].idnota == null ? "" : element[i].idnota),
@@ -410,9 +414,9 @@ router.route('/dadostitulo').post(function(req, res) {
         query += "select ";
         query += "cp.id idtitulo,cp.id_entidade identidade,cp.id_compra idcompra,cp.id_notafiscal idnotafiscal,cp.id_parcelamento idparcelamento,";
         query += "cp.id_plano_contas_financeiro idcontafinanceira,cp.nm_documento titulo,cp.nm_competencia competencia,cp.dt_emissao emissao,";
-        query += "cp.vl_valor valortitulo,cp.sn_dre dre,cp.nm_observacao observacao,";
+        query += "cp.vl_valor valortitulo,cp.sn_dre dre,cp.nm_observacao observacao,cp.dt_cancelamento cancelamentoDocumento,";
         query += "cpp.id idparcela,cpp.nm_documento documentoparc,cpp.id_banco idbanco,cpp.id_forma_pagamento idformapagamentoparc,cpp.id_plano_contas_financeiro idcontafinanceiraparc,";
-        query += "cpp.nr_parcela parcela,cpp.dt_data_vencimento vencimento,cpp.vl_valor valorparcela,cpp.id_dsg_status_titulo idstatus,cpp.sn_fluxocaixa fluxocaixa,";
+        query += "cpp.nr_parcela parcela,cpp.dt_data_vencimento vencimento,cpp.vl_valor valorparcela,cpp.id_dsg_status_titulo idstatus,cpp.sn_fluxocaixa fluxocaixa,cpp.dt_cancelamento cancelamentoParcela,";
         query += "ent.nm_razaosocial razaosocial,";        
         query += "(select compra.nr_pedido from compra where compra.id = cp.id_compra and compra.id_empresa = @idempresa) pedido,";
         query += "(select nm_numeronotafiscal from notafiscal where notafiscal.id = cp.id_notafiscal and notafiscal.id_empresa = @idempresa) notafiscal,";        
@@ -478,6 +482,7 @@ router.route('/dadostitulo').post(function(req, res) {
                                     titulo : element[i].titulo,
                                     valor: element[i].valortitulo,
                                     emissao : element[i].emissao,
+									cancelamentoTitulo : (element[i].cancelamentoDocumento ? element[i].cancelamentoDocumento : ""),
                                     competencia : element[i].competencia,
                                     idPedido : (element[i].idcompra == null ? "" : element[i].idcompra),
                                     pedido : (element[i].pedido == null ? "" : element[i].pedido),
@@ -501,6 +506,7 @@ router.route('/dadostitulo').post(function(req, res) {
                                         documento : element[i].documentoparc,
                                         parcela : element[i].parcela,
                                         vencimento : element[i].vencimento,
+										cancelamentoParcela : (element[i].cancelamentoParcela ? element[i].cancelamentoParcela : ""),
                                         valor : element[i].valorparcela,
                                         idStatus : (element[i].idstatus == null ? "" : element[i].idstatus),
                                         fluxoCaixa : (element[i].fluxocaixa ? 1 : 0),
@@ -2061,3 +2067,113 @@ router.route('/criarparcelas').post(function(req, res) {
         res.json(resposta);
     }
 })
+
+/*-------------------------------------------------------------------------------
+Realiza o cancelamento de um documento (todas as parcelas).
+---------------------------------------------------------------------------------
+*/
+function cancelarConta(parametros,conexao,callbackf){
+	var query = "";
+	var resposta = null;
+	var request = null;
+	var transacao = null;
+	var dataCancelamento = null
+	var prefixoFuncao = "cancelamentocontaF: "
+	
+	try{
+		dataCancelamento = new Date().toISOString()
+	
+		query += "update contas_pagar set dt_cancelamento = '" + dataCancelamento + "'"
+		query += " where id_compra = '" + parametros.idCompra + "'";
+		query += " and id_empresa = '" + parametros.idEmpresa + "'; ";
+		
+		query += "update contas_pagar_parcelas set dt_cancelamento = '" + dataCancelamento + "'";
+		query += " where id_contas_pagar in (select id from contas_pagar where id_compra = '" + parametros.idCompra + "')";
+		query += " and id_empresa = '" + parametros.idEmpresa + "'; ";
+		
+		if(conexao.transacao){
+			request = conexao.transacao.request();
+			request.query(query, function (err, recordset) {
+				if (err){
+					resposta = {
+						status: -2,
+						mensagem: [prefixoModulo + prefixoFuncao + err],
+					}
+					callbackf(resposta);
+				}
+				else{
+					resposta = {
+						status: 1,
+						mensagem: ["ok"],
+					}
+					callbackf(resposta);
+				}
+			})
+		}
+		else{
+			conexao = new sql.ConnectionPool(configEx,function (err) {
+				if (err){
+					resposta = {
+						status: -2,
+						mensagem: [prefixoModulo + prefixoFuncao + err],
+					}
+					callbackf(resposta);
+				}
+				else{
+					try{
+						transacao = new sql.Transaction(conexao);
+						transacao.begin(err =>{
+							try{
+								var request = transacao.request();
+								request.query(query, function (err, recordset) {
+									if (err){
+										resposta = {
+											status: -4,
+											mensagem: [prefixoModulo + prefixoFuncao + err],
+										}
+										transacao.rollback();
+										conexao.close();
+										callbackf(resposta);
+									}
+									else{
+										resposta = {
+											status: 1,
+											mensagem: ["ok"],
+										}
+										transacao.commit();
+										conexao.close();
+										callbackf(resposta);
+									}
+								})
+							}
+							catch(err){
+								resposta = {
+									status: -5,
+									mensagem: [prefixoModulo + prefixoFuncao + err],
+								}
+								transacao.rollback();
+								conexao.close();
+								callbackf(resposta);
+							}
+						})
+					}
+					catch(err){
+						resposta = {
+							status: -3,
+							mensagem: [prefixoModulo + prefixoFuncao + err]
+						}
+						conexao.close();
+						callbackf(resposta);
+					}
+				}
+			})
+		}
+	}
+	catch(err){
+		resposta = {
+			status: -1,
+			mensagem: [prefixoModulo + prefixoFuncao + err]
+		}
+		callbackf(resposta);
+	}
+}

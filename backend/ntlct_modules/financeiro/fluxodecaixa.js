@@ -316,7 +316,7 @@ function fluxoSintetico(parametros,callbackf){
                             if (!(subQuery == ""))
                                 subQuery += " union all ";
                             /* 
-                             * contas a recebe */
+                             * contas a receber */
                             subQuery += "select 'A' tipomov,";
                             subQuery += "cr.id_banco idbanco, cr.dt_data_vencimento datamov,";
                             subQuery += "lower(concat('Recebimento título/parcela ', cr.nm_documento, '/', cr.nr_parcela, ' (', ent.nm_razaosocial, ')')) descricao,";
@@ -349,6 +349,7 @@ function fluxoSintetico(parametros,callbackf){
                             subQuery += "0 entrada, -cp.vl_valor saida";
                             subQuery += " from contas_pagar cpc,contas_pagar_parcelas cp,entidade ent";
                             subQuery += " where cp.id_empresa = @idempresa";
+							subQuery += " and (cp.dt_cancelamento is null or cp.dt_cancelamento = '')";
                             subQuery += " and (select sum(baixa.vl_valor) from contas_pagar_baixas baixa where baixa.id_contas_pagar_parcela = cp.id) is null";
 
                             if (parametros.dataInicial)
@@ -594,6 +595,7 @@ function fluxoAnalitico(parametros,callbackf){
                             query += "0 entrada, -cp.vl_valor saida";
                             query += " from contas_pagar cpc,contas_pagar_parcelas cp,entidade ent";
                             query += " where cp.id_empresa = @idEmpresa";
+							query += " and (cp.dt_cancelamento is null or cp.dt_cancelamento = '')";
                             query += " and (select sum(baixa.vl_valor) from contas_pagar_baixas baixa where baixa.id_contas_pagar_parcela = cp.id) is null";
 
                             if (parametros.dataInicial)
