@@ -26,4 +26,5 @@ module.exports = function(server) {
     const buscacodsequencial = require('../ntlct_modules/produtos/buscacodsequencial')
     const ComposicaoItens = require('../ntlct_modules/produtos/composicaoitens')
     const vendas = require('../ntlct_modules/venda/telavendas')
+	const pedidocompra = require('../ntlct_modules/compra/pedidocompra.js')
 }
