@@ -836,6 +836,10 @@ function deleteRowGrid(button, containerID ,valueID, layoutID){
                             fillgrid(containerID, id, layoutID)
                         }
                         //editGridLine("", metadataContainerID, id)
+						
+						if(containerID.toLowerCase() == "828810bd-5e6f-4dd9-a66c-b7e9be94fdd8"){
+							onLoadTotaisCompraJS();
+						}
 
                     }else{
                         notification({
@@ -878,9 +882,7 @@ function gridedit(id, source, force){
         
    // }
     tabela = $("#" + id + " th[style!='display:none']");
-    
-
-
+	
     if(!$(tabela).hasClass("jsgrid-header-cell") || force){
         if(tabela){
             if(tabela.length > 0){ 
@@ -1182,9 +1184,9 @@ function sharpGridPager(containerID) {
         currentPage = parseInt(pageactive)
         currentPage = currentPage - 1;
     }
-    var numPerPage = 100;
+    var numPerPage = 20;
     var numPage = $("#" + containerID + "_table").attr("data-numberpage");
-    numPage = "100";
+    numPage = "20";
     if (numPage) {
         numPerPage = numPage;
     }

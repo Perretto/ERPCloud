@@ -876,14 +876,15 @@ function sharpGridEditor(containerID) {
 
 function openLayout(button, tabGenID) {    
     var formID = $(button).attr("data-tabgenlayout");
-    //ClearForm(formID, true);
+    ClearForm(formID, true);
     var $tabNav = $(button).parents("form .panel.panel-nav");
     toogleColapseContainer($tabNav, true)
     $($tabNav).hide()
     $("#" + formID).show();
-    /*
+
     var form = $(button).attr("data-formid");
 
+    //ClearForm(form, true);
 
     var formTelaIDNavigation = $(button);
 
@@ -904,7 +905,6 @@ function openLayout(button, tabGenID) {
     }
     //$("[data-field='id_empresa']").val(returnCookie("EnterpriseID"));   
     $("#" + formID + " [name*=_PK]").val("");
-    */
 }
 
 
@@ -939,29 +939,30 @@ function openLayout(button, tabGenID) {
                                 }
                                 if (keyfield) {
                                     if(key.indexOf("dt_") >= 0){
-                                        var date = new Date(element[key]);
-                                        var dia = (date.getDate() + 1);
-                                        var mes = (date.getMonth() + 1);
-                                        var ano =  date.getFullYear();
+										if(element[key]){
+											//var date = new Date(element[key]);
+											var date = new Date(element[key].substring(0,4),parseInt(element[key].substring(5,7)) - 1,element[key].substring(8,10));
+											var dia = (date.getDate());
+											var mes = (date.getMonth() + 1);
+											var ano =  date.getFullYear();
 
-                                        if(dia.toString().length == 1){
-                                            dia = "0" + dia;
-                                        }
+											if(dia.toString().length == 1){
+												dia = "0" + dia;
+											}
 
-                                        if(mes.toString().length == 1){
-                                            mes = "0" + mes;
-                                        }
+											if(mes.toString().length == 1){
+												mes = "0" + mes;
+											}
 
-                                        element[key] = dia + '/' + mes + '/' + ano;
-                                        //element[key] = element[key].substr(0,element[key].indexOf('T'))
-                                    }
+											element[key] = dia + '/' + mes + '/' + ano;
+											//element[key] = element[key].substr(0,element[key].indexOf('T'))
+										}
+									}
 
                                     if(keyfield.toLowerCase() == "id"){
                                         if (!element.Id) {
                                             element.Id = element[key].replace(" ","");
-                                            row = {
-                                                "0":"<a type='button' title='editar' id='Edit' name='Edit' class='btn btn-primary btn btn-xs btn-warning 6420a34d-9c8b-fcc5-b8f3-930d33ee8ea7_edit' onclick='filleditnavigation(\"" + element.Id + "\",\"" + layoutID + "\", \"\" ,\"" + tabGenID + "\" )' data-tabgenlayout='6420a34d-9c8b-fcc5-b8f3-930d33ee8ea7_nav'><i class='fa fa-pencil'></i></a>"
-                                            } 
+                                            row["0"] = "<a type='button' title='editar' id='Edit' name='Edit' class='btn btn-primary btn btn-xs btn-warning 6420a34d-9c8b-fcc5-b8f3-930d33ee8ea7_edit' onclick='filleditnavigation(\"" + element.Id + "\",\"" + layoutID + "\", \"\" ,\"" + tabGenID + "\" )' data-tabgenlayout='6420a34d-9c8b-fcc5-b8f3-930d33ee8ea7_nav'><i class='fa fa-pencil'></i></a>"
                                         }                                        
                                     }else{
                                         
@@ -1029,9 +1030,8 @@ function openLayout(button, tabGenID) {
 
     
 function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID, fillgrid, containerID) {
-    
-    loaderImage("table_" + tabGenID, true);
-    $.ajax({url: returnCookie("urlPlataform") + "/api/findid2/" + filtro + "/" + LayoutID,async: true, success: function(result){
+
+    $.ajax({url: returnCookie("urlPlataform") + "/api/findid2/" + filtro + "/" + LayoutID, success: function(result){
         var EnterpriseID = returnCookie("EnterpriseID");
 
         var formTelaIDNavigation = $("#table_" + tabGenID + "_btnnovo");
@@ -1093,7 +1093,6 @@ function filleditnavigation(filtro, LayoutID, Fill1PropertyID, tabGenID, fillgri
                     CalculaTotaisVenda();
                 }
                 
-                loaderImage("table_" + tabGenID, false);
 
                 //        var onload = $("[tabgenid='" + formID + "']");
                 //        if (onload) {
@@ -1374,7 +1373,6 @@ function fillScreen(data, template, layoutID, fillgrid, tabGenID){
                     var controlType = [];
                     var aIditem = [];
 
-                    
                     for (var i = 0; i < tabela.length; i++) {
                         var fielddata; 
                         var stable = $(tabela[i]).attr("data-table");
@@ -1505,7 +1503,7 @@ function fillScreen(data, template, layoutID, fillgrid, tabGenID){
                                 }
                                 
 
-                                fielddata =  {nativedatatype: nativedatatype,  derivedfrom: derivedFrom, datafield: sfield, datatable: stable, controlType: controlT, iditem: iditem, selectid: selectid, name: valor, title: text, type: type,
+                                fielddata =  {nativedatatype: nativedatatype,  derivedfrom: derivedFrom, datafield: sfield, datatable: stable, iditem: iditem, selectid: selectid, name: valor, title: text, type: type,
                                 items: items,
                                 valueField: "Id",
                                 textField: "Name", width: 150  };  
@@ -1887,7 +1885,6 @@ function atualizaAba2(formID, layoutID, tabGenID, forcingTemplate, layoutType, u
 }
 
 function OpenFormSearch(tabGenID) {
-    $("[id*='_nav_btnnovo']").html("<i class='fas fa-angle-up'></i>");
 
     $(".columns.columns-right.btn-group.pull-right").hide();
     //$("#" + id + "_alertaModalFormSearchShow").modal('show');
@@ -2200,6 +2197,3 @@ function openReport(name){
 
     $('#alertaModalShow').modal();
 }
-
-
-
