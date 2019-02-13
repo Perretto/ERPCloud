@@ -291,8 +291,9 @@ var arrayData = [];
 });
 //% servicos/movimentacaoservicos/carregaListaServicos 
 
-router.route('/carregaListaComissao/:idEntidade/:dataDe/:dataAte/:equipe/:servico/:status/:mes').get(function(req, res) {
+router.route('/carregaListaComissao/:idEntidade/:dataDe/:dataAte/:equipe/:servico/:status/:mes/:idCliente').get(function(req, res) {
     var idEntidade = req.param('idEntidade');
+    var idCliente = req.param('idCliente');
     var dataDe = req.param('dataDe');
     var dataAte = req.param('dataAte');
     var equipe = req.param('equipe');
@@ -319,6 +320,17 @@ router.route('/carregaListaComissao/:idEntidade/:dataDe/:dataAte/:equipe/:servic
             where += " WHERE (op.id='" + idEntidade + "' OR ind.id='" + idEntidade + "') "; 
         } 
     } 
+
+    if(idCliente){
+        if(idCliente != "*"){ 
+            if(!where){ 
+                where += " WHERE (movimentacao_servicos.id_entidade='" + idCliente + "') "; 
+            }else{ 
+                where += " AND (movimentacao_servicos.id_entidade='" + idCliente + "') "; 
+            } 
+        }
+    }
+        
     
     if(dataDe){ 
         if(dataDe != "*"){ 
