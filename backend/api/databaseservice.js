@@ -3661,10 +3661,14 @@ async function  convertxls(html, callback){
     const fs = require('fs')
     //fs.unlinkSync('../frontend/reports/render');
     var path = '../frontend/reports/render/'
-        fs.readdir(path, function(err, items) {     
-            for (var i=0; i<items.length; i++) {
-                fs.unlinkSync(path + items[i] );
-            }
+        fs.readdir(path, function(err, items) {  
+            if(items){
+                if(items.length){
+                    for (var i=0; i<items.length; i++) {
+                        fs.unlinkSync(path + items[i] );
+                    }
+                } 
+            }               
         });
  
     const conversionFactory = require('html-to-xlsx')
