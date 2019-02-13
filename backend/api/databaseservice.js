@@ -317,8 +317,12 @@ function compareObj(a,b) {
                        
                         switch (saidaRelatorio){
                             case "excel":
-                                convertxls(html.topo +  html.detail + html.footer + html.base, function(namefile){                            
-                                    res.download("../frontend/reports/render/" + namefile + ".xlsx");
+                                convertxls(req.host, html.topo +  html.detail + html.footer + html.base, function(namefile){                            
+                                    if(req.host.indexOf("localhost") > -1){
+                                        res.download("../frontend/reports/render/" + namefile + ".xlsx");
+                                    }else{
+                                        res.download("./frontend/reports/render/" + namefile + ".xlsx");
+                                    }                                    
                                 });
                                 
                                 break;
@@ -3657,10 +3661,16 @@ router.route('/createCustomJS').get(function(req, res) {
     
 })
 
-async function  convertxls(html, callback){
+async function  convertxls(url, html, callback){
     const fs = require('fs')
     //fs.unlinkSync('../frontend/reports/render');
-    var path = '../frontend/reports/render/'
+    var path = '';
+    if(url.indexOf("localhost") > -1){
+        path = '../frontend/reports/render/'
+    }else{
+        path = './frontend/reports/render/'
+    }
+    
         fs.readdir(path, function(err, items) {  
             if(items){
                 if(items.length){
