@@ -1734,6 +1734,7 @@ router.route('/gerarContasPagar').post(function(req, res) {
     var parcela = null;
     var titulo = null;
     var Atitulo = [];
+    var AExcluir = [];
 
     try{
         parametros = req.body.parametros;
@@ -1802,139 +1803,157 @@ router.route('/gerarContasPagar').post(function(req, res) {
                     else{
                         var movimentacao = recordset.recordsets[0][0];
 
-                        gerarparcelas(config,EnterpriseID,movimentacao.id_parcelamento,movimentacao.valortotal,new Date(movimentacao.dt_emissao),(function(respostaParcelas){
-                            
-                            try{
-                                if(respostaParcelas.status > 0){
-                                    for (let h = 0; h < recordset.recordsets[0].length; h++) {
-                                        movimentacao = recordset.recordsets[0][h];
-                                        total = 0;
-                                        parcela = null;
-                                        titulo = {
-                                            idEmpresa: EnterpriseID,
-                                            idUsuario: idUsuario,
-                                            idTitulo: "",
-                                            idEntidade: movimentacao.id_entidade,
-                                            idPedido: movimentacao.id,
-                                            //idNotaFiscal: compra.id_notafiscal,
-                                            nrTitulo: parseInt(movimentacao.nr_pedido) + (h + 1),
-                                            emissao: new Date(movimentacao.dt_emissao).toISOString(),
-                                            competencia: "",
-                                            valor: movimentacao.valortotal,
-                                            idContaFinanceira: "",
-                                            idParcelamento: movimentacao.id_parcelamento,
-                                            observacao: "",
-                                            dre: 0,
-                                            idOrigem: movimentacao.id,
-                                            parcelas: []
-                                        };
-                            
-                                        for(i = 0; i < respostaParcelas.parcelas.length; i++){
-                                            nrParcela++;
-                                            parcela = {
-                                                idParcela: "",
-                                                documento: parseInt(movimentacao.nr_pedido) + (h + 1),
-                                                parcela: respostaParcelas.parcelas[i].parcela,
-                                                vencimento: new Date(respostaParcelas.parcelas[i].vencimento).toISOString(),
-                                                valor: movimentacao.valortotal,
-                                                idBanco: "",
-                                                idFormaPagamento: movimentacao.id_formapagamento,
-                                                idContaFinanceira: "",
-                                                fluxoCaixa: "1"
-                                            };
-                                            total += parseFloat(movimentacao.valortotal);
-                                            titulo.parcelas.push(parcela);
-                                        }                        
-                                        
-                                        titulo.valor = total;
-                                        Atitulo.push(titulo);
-                                    }
-
-                                    //if(total > 0){  
-                                        
-                                        funAtualizarConta(Atitulo,(function(repostacallback){
-                                            j += 1;
-                                            arrayResposta.push(repostacallback);  
-                                            
-                                            query = "SELECT  comiss.id AS 'id', ";
-                                            query += " comiss.nm_status AS 'status' ";
-                                            query += " FROM movimentacao_servicos   "; 
-                                            query += " INNER JOIN comiss ON comiss.id_venda=movimentacao_servicos.id   ";
-                                            query += " INNER JOIN entidade op ON op.id=comiss.id_vendedor   ";
-                                            query += " INNER JOIN comissao_apuracao ca ON ca.id_entidade=op.id  ";
-                                            query += " WHERE " + where + " AND comiss.nm_status='Em Pagamento' ";
-                                            sql.close()
-                                            sql.connect(config).then(function() {
-                                            var request = new sql.Request();
-                                            request.query(query, function (err, recordset) {
-                                                if (err){
-                                                    resposta = {
-                                                        status: -3,
-                                                        mensagem: ["" + err],
-                                                        titulo: null
-                                                    }
-                                                    res.json(resposta);
-                                                }
-                                                else{
-                                                    var comissaoFinal = [];
-                                                    comissaoFinal = recordset.recordsets[0];
-                                                    var queryComiss = "";
-                                                    for(s = 0; s < comissaoFinal.length; s++){
-                                                        queryComiss += "UPDATE comiss SET nm_status='Concluído' WHERE id='" + comissaoFinal[s].id + "'; ";
-                                                    }
-
-                                                    where = "";
-                                                    for (let k = 0; k < arrayMovimentacao.length; k++) {
-                                                        if(k == 0){
-                                                            where += " comissao_apuracao.id='" + arrayMovimentacao[k] + "' ";
-                                                        }else{
-                                                            where += " OR comissao_apuracao.id='" + arrayMovimentacao[k] + "' ";
-                                                        }                                                        
-                                                    }
-
-                                                    queryComiss += " UPDATE comissao_apuracao SET nm_status='Concluído' WHERE " + where + " AND nm_status IS NULL; ";
-                                                    console.log(queryComiss);
-
-                                                    sql.close()
-                                                    sql.connect(config).then(function() {
-                                                        var request = new sql.Request();
-                                                        request.query(queryComiss).then(function(recordset) {
-                                                            res.json(arrayResposta); 
-                                                        }).catch(function(err) { 
-                                                            console.log(err)                   
-                                                            res.send(false)
-                                                        });
-                                                    });
-
-                                                    
-                                                    }
-                                                })
-                                            })
-                                        }));
-                                                                            
-                                        
-                                    /*}else{
-                                        resposta = {
-                                            status: 0,
-                                            mensagem: ["Não foram geradas parcelas para esta movimentação"],
-                                            titulo: null
-                                        }
-                                        res.json(reposta);
-                                    } */                                   
-                                }else{                                    
-                                    sql.close();
-                                    res.json(respostaParcelas);
+                        if(movimentacao.valortotal == 0){
+                            for (let p = 0; p < recordset.recordsets[0].length; p++) {
+                                if(recordset.recordsets[0][p].valortotal > 0){
+                                    movimentacao = recordset.recordsets[0][p];
+                                    break;
                                 }
                             }
-                            catch(erro){
-                                resposta.status = -4;
-                                resposta.mensagem = [];
-                                resposta.mensagem.push("criarparcelas: " + erro);
-                                resposta.parcelas = [];
-                                sql.close();
-                                res.json(resposta);
-                            }
-                        }));
+                        }
+                        
+                        
+                            gerarparcelas(config,EnterpriseID,movimentacao.id_parcelamento,movimentacao.valortotal,new Date(movimentacao.dt_emissao),(function(respostaParcelas){
+                                
+                                try{
+                                    if(respostaParcelas.status > 0){
+                                        for (let h = 0; h < recordset.recordsets[0].length; h++) {
+                                            movimentacao = recordset.recordsets[0][h];
+                                            if(movimentacao.valortotal > 0){
+                                                total = 0;
+                                                parcela = null;
+                                                titulo = {
+                                                    idEmpresa: EnterpriseID,
+                                                    idUsuario: idUsuario,
+                                                    idTitulo: "",
+                                                    idEntidade: movimentacao.id_entidade,
+                                                    idPedido: movimentacao.id,
+                                                    //idNotaFiscal: compra.id_notafiscal,
+                                                    nrTitulo: parseInt(movimentacao.nr_pedido) + (h + 1),
+                                                    emissao: new Date(movimentacao.dt_emissao).toISOString(),
+                                                    competencia: "",
+                                                    valor: movimentacao.valortotal,
+                                                    idContaFinanceira: "",
+                                                    idParcelamento: movimentacao.id_parcelamento,
+                                                    observacao: "",
+                                                    dre: 0,
+                                                    idOrigem: movimentacao.id,
+                                                    parcelas: []
+                                                };
+                                    
+                                                for(i = 0; i < respostaParcelas.parcelas.length; i++){
+                                                    nrParcela++;
+                                                    parcela = {
+                                                        idParcela: "",
+                                                        documento: parseInt(movimentacao.nr_pedido) + (h + 1),
+                                                        parcela: respostaParcelas.parcelas[i].parcela,
+                                                        vencimento: new Date(respostaParcelas.parcelas[i].vencimento).toISOString(),
+                                                        valor: movimentacao.valortotal,
+                                                        idBanco: "",
+                                                        idFormaPagamento: movimentacao.id_formapagamento,
+                                                        idContaFinanceira: "",
+                                                        fluxoCaixa: "1"
+                                                    };
+                                                    total += parseFloat(movimentacao.valortotal);
+                                                    titulo.parcelas.push(parcela);
+                                                }                        
+                                                
+                                                titulo.valor = total;
+                                                Atitulo.push(titulo);
+                                            }else{
+                                                AExcluir.push(movimentacao.id);
+                                            }
+                                            
+                                        }
+
+                                        //if(total > 0){  
+                                            
+                                            funAtualizarConta(Atitulo,(function(repostacallback){
+                                                j += 1;
+                                                arrayResposta.push(repostacallback);  
+                                                
+                                                query = "SELECT  comiss.id AS 'id', ";
+                                                query += " comiss.nm_status AS 'status', comiss.vl_comissao AS 'valor' ";
+                                                query += " FROM movimentacao_servicos   "; 
+                                                query += " INNER JOIN comiss ON comiss.id_venda=movimentacao_servicos.id   ";
+                                                query += " INNER JOIN entidade op ON op.id=comiss.id_vendedor   ";
+                                                query += " INNER JOIN comissao_apuracao ca ON ca.id_entidade=op.id  ";
+                                                query += " WHERE " + where + " AND comiss.nm_status='Em Pagamento' AND comiss.vl_comissao > 0  ";
+                                                sql.close()
+                                                sql.connect(config).then(function() {
+                                                var request = new sql.Request();
+                                                request.query(query, function (err, recordset) {
+                                                    if (err){
+                                                        resposta = {
+                                                            status: -3,
+                                                            mensagem: ["" + err],
+                                                            titulo: null
+                                                        }
+                                                        res.json(resposta);
+                                                    }
+                                                    else{
+                                                        var comissaoFinal = [];
+                                                        comissaoFinal = recordset.recordsets[0];
+                                                        var queryComiss = "";
+                                                        for(s = 0; s < comissaoFinal.length; s++){
+                                                            queryComiss += "UPDATE comiss SET nm_status='Concluído' WHERE id='" + comissaoFinal[s].id + "'; ";
+                                                        }
+
+                                                        where = "";
+                                                        for (let k = 0; k < arrayMovimentacao.length; k++) {
+                                                            if(AExcluir.indexOf(arrayMovimentacao[k]) == -1){
+                                                                if(k == 0){
+                                                                    where += " comissao_apuracao.id='" + arrayMovimentacao[k] + "' ";
+                                                                }else{
+                                                                    where += " OR comissao_apuracao.id='" + arrayMovimentacao[k] + "' ";
+                                                                } 
+                                                            }
+                                                                                                                   
+                                                        }
+
+                                                        queryComiss += " UPDATE comissao_apuracao SET nm_status='Concluído' WHERE " + where + " AND nm_status IS NULL; ";
+                                                        console.log(queryComiss);
+
+                                                        sql.close()
+                                                        sql.connect(config).then(function() {
+                                                            var request = new sql.Request();
+                                                            request.query(queryComiss).then(function(recordset) {
+                                                                res.json(arrayResposta); 
+                                                            }).catch(function(err) { 
+                                                                console.log(err)                   
+                                                                res.send(false)
+                                                            });
+                                                        });
+
+                                                        
+                                                        }
+                                                    })
+                                                })
+                                            }));
+                                                                                
+                                            
+                                        /*}else{
+                                            resposta = {
+                                                status: 0,
+                                                mensagem: ["Não foram geradas parcelas para esta movimentação"],
+                                                titulo: null
+                                            }
+                                            res.json(reposta);
+                                        } */                                   
+                                    }else{                                    
+                                        //sql.close();
+                                        //res.json(respostaParcelas);
+                                    }
+                                }
+                                catch(erro){
+                                    resposta.status = -4;
+                                    resposta.mensagem = [];
+                                    resposta.mensagem.push("criarparcelas: " + erro);
+                                    resposta.parcelas = [];
+                                    sql.close();
+                                    res.json(resposta);
+                                }                            
+                        }));                                                
                     }
                 })
             }            
@@ -2563,7 +2582,7 @@ router.route('/gerarContasReceber').post(function(req, res) {
                                             var ir = parseFloat(movimentacao.aliqir);
                                             var tot = parseFloat(movimentacao.valortotal);
                                             var limite = parseFloat(movimentacao.limiteretencao);
-                                            var credatual = parseFloat(movimentacao.creditoatual);
+                                            var credatual = 0; //parseFloat(movimentacao.creditoatual);
 
                                             if(movimentacao.issretido){
                                                 tot = tot - (parseFloat(movimentacao.valortotal) * issretido / 100);
@@ -3094,7 +3113,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                             var tot = parseFloat(movimentacao.ValorPis);
                             var totir = parseFloat("0.00");
                             var limite = parseFloat(movimentacao.limiteretencao);
-                            var credatual = parseFloat(movimentacao.creditoatual);
+                            var credatual = 0; //parseFloat(movimentacao.creditoatual);
                             
                             /*
                             if(movimentacao.issretido){
@@ -3934,7 +3953,11 @@ function gerarComissaoBloco(arrayID) {
     select += " (SELECT TOP 1 nm_status FROM comiss WHERE id_venda=movimentacao_servicos.id AND id_operador=movimentacao_servicos.id_indicador) AS 'statusind', ";
     select += " (SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=movimentacao_servicos.id_operador AND vendedor_servicos.id_produtos=movimentacao_servicos.id_subservicos) AS 'comissaopercop', ";
     select += " (SELECT TOP 1 vl_comissaooperador FROM vendedor_servicos WHERE vendedor_servicos.id_vendedor=movimentacao_servicos.id_indicador AND vendedor_servicos.id_produtos=movimentacao_servicos.id_subservicos) AS 'comissaopercind'  ";
-    select += " , movimentacao_servicos.vl_valor AS 'valormov' ";
+    select += " , movimentacao_servicos.vl_valor AS 'valormov', ";
+
+    select += " IIF((SELECT nr_diasvencimento FROM cliente_servicos  WHERE cliente_servicos.id_produtos=movimentacao_servicos.id_subservicos AND cliente_servicos.id_entidade=movimentacao_servicos.id_entidade) IS NOT NULL , ";
+    select += " movimentacao_servicos.dt_emissao + (SELECT nr_dias_pagamento_comissao FROM vendedor WHERE id=comiss.id_vendedor), ";
+    select += " movimentacao_servicos.dt_emissao) AS 'dt_emissao' ";
  
     select += " FROM movimentacao_servicos ";
     select += " LEFT JOIN comiss ON comiss.id_venda=movimentacao_servicos.id ";
@@ -4005,7 +4028,8 @@ function gerarComissaoBloco(arrayID) {
                         if(mm<10){
                             mm='0'+mm;
                         } 
-                        var dt_emissao = mm + '/' + dd + '/' + yyyy;   
+                        //var dt_emissao = mm + '/' + dd + '/' + yyyy;   
+                        var dt_emissao = recordset.recordset[i].dt_emissao;
                         var valorcomiss = 0;
 
                         console.log("idcomissop=" + idcomissop);
