@@ -4740,7 +4740,7 @@ router.route('/enviarEmailGeral/:id').get(function(req, res) {
                                 path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
                                 path += "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,";
                                 path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,";
-                                path += "%22nfse%22:%7B%22value%22:%22'" + id + "'%22,";
+                                path += "%22nfse%22:%7B%22value%22:%22" + id + "%22,";
                                 path += "%22type%22:%22caracter%22,%22text%22:%22%20-%2010.00%22%7D%7D";
 
                                 mail.attachments = [];
