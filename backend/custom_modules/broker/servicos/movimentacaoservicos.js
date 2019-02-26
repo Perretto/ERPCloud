@@ -1249,6 +1249,8 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '45543915047307' ";
                         query += " AND pessoa.cpfcnpj <> '01528473000129' ";
                         query += " AND pessoa.cpfcnpj <> '60659166000146' ";
+                        query += " AND pessoa.cpfcnpj <> '07983494000110' ";
+                        query += " AND pessoa.cpfcnpj <> '60933017000123' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                     } 
                 } 
@@ -1296,6 +1298,8 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '45543915047307' ";
                         query += " AND pessoa.cpfcnpj <> '01528473000129' ";
                         query += " AND pessoa.cpfcnpj <> '60659166000146' ";
+                        query += " AND pessoa.cpfcnpj <> '07983494000110' ";
+                        query += " AND pessoa.cpfcnpj <> '60933017000123' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";  
                     } 
                 } 
@@ -1345,6 +1349,8 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '45543915047307' ";
                         query += " AND pessoa.cpfcnpj <> '01528473000129' ";
                         query += " AND pessoa.cpfcnpj <> '60659166000146' ";
+                        query += " AND pessoa.cpfcnpj <> '07983494000110' ";
+                        query += " AND pessoa.cpfcnpj <> '60933017000123' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                     } 
                 } 
