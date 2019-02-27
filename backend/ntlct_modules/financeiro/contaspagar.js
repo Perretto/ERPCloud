@@ -860,77 +860,41 @@ function funAtualizarConta(parametros,callbackf) {
                 query += "'" + parametros.competencia  + "',";
                 query += parametros.valor.toString().trim() + ",";
                 query += "'" + parametros.observacao + "'";
-                query += ")";
-
-                queryItens += "insert into contas_pagar_parcelas (id,id_empresa,id_contas_pagar,id_Banco,id_forma_pagamento,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor)";
-                queryItens += " values ";
-                for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
-                    if(parcela > 0)
-                        queryItens += ",";
-                    
-                    parametros.parcelas[parcela].idParcela = general.guid();
-                    queryItens += "(";
-                    queryItens += "'" + parametros.parcelas[parcela].idParcela + "',";
-                    queryItens += "'" + EnterpriseID + "',";
-                    queryItens += "'" + parametros.idTitulo + "',";
-                    queryItens += (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
-                    queryItens += (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
-                    queryItens += (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
-                    queryItens += "'" + parametros.parcelas[parcela].parcela + "',";
-                    queryItens += "'" + parametros.parcelas[parcela].documento + "',";
-                    queryItens +=  parametros.parcelas[parcela].fluxoCaixa + ",";
-                    queryItens += "'" + parametros.parcelas[parcela].vencimento + "',";
-                    queryItens += parametros.parcelas[parcela].valor.toString().trim()
-                    queryItens += ")";
-                }
+                query += ")";                
             }
             else{
-                queryItens = "";
-                query += "update contas_pagar set " 
+                queryItens = "delete contas_pagar_parcelas where id_empresa = '" + EnterpriseID + "' and id_contas_pagar = '" + parametros.idTitulo + "'; "
+				
+                query += "update contas_pagar set "
+				query += "id_parcelamento = '" + parametros.idParcelamento + "',";
                 query += "id_plano_contas_financeiro = " + (!parametros.idContaFinanceira ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
                 query += "nm_competencia = '" + parametros.competencia + "',"
                 query += "nm_observacao = '" + parametros.observacao + "'";
                 query += "where id = '" + parametros.idTitulo + "'";
                 query += " and id_empresa = '" + EnterpriseID + "'"; 
+			}
+			
+			queryItens += "insert into contas_pagar_parcelas (id,id_empresa,id_contas_pagar,id_Banco,id_forma_pagamento,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor)";
+			queryItens += " values ";
+			for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
+				if(parcela > 0)
+					queryItens += ",";
 				
-				for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
-					if(parametros.parcelas[parcela].alterada){
-						if(parcela > 0)
-							queryItens += "; ";
-						
-						if(parametros.parcelas[parcela].idParcela == ""){
-							parametros.parcelas[parcela].idParcela = general.guid();
-							queryItens += "insert into contas_pagar_parcelas (id,id_empresa,id_contas_pagar,id_Banco,id_forma_pagamento,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor)";
-							queryItens += " values ";
-							queryItens += "(";
-							queryItens += "'" + parametros.parcelas[parcela].idParcela + "',";
-							queryItens += "'" + EnterpriseID + "',";
-							queryItens += "'" + parametros.idTitulo + "',";
-							queryItens += (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
-							queryItens += (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
-							queryItens += (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
-							queryItens += "'" + parametros.parcelas[parcela].parcela + "',";
-							queryItens += "'" + parametros.parcelas[parcela].documento + "',";
-							queryItens +=  parametros.parcelas[parcela].fluxoCaixa + ",";
-							queryItens += "'" + parametros.parcelas[parcela].vencimento + "',";
-							queryItens += parametros.parcelas[parcela].valor.toString().trim()
-							queryItens += "); ";
-						}
-						else{
-							queryItens += "update contas_pagar_parcelas set ";
-							queryItens += "id_banco = " + (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
-							queryItens += "id_forma_pagamento = " + (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
-							queryItens += "id_plano_contas_financeiro = " + (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
-							queryItens += "nm_documento = '" + parametros.parcelas[parcela].documento + "',";
-							queryItens += "sn_fluxocaixa = " + parametros.parcelas[parcela].fluxoCaixa + ",";
-							queryItens += "dt_data_vencimento = '" + parametros.parcelas[parcela].vencimento + "',";
-							queryItens += "vl_valor = " + parametros.parcelas[parcela].valor.toString().trim();
-							queryItens += " where id_empresa = '" + EnterpriseID + "'";
-							queryItens += " and id = '" + parametros.parcelas[parcela].idParcela + "'; ";
-						}
-					}
-                }
-            }
+				parametros.parcelas[parcela].idParcela = general.guid();
+				queryItens += "(";
+				queryItens += "'" + parametros.parcelas[parcela].idParcela + "',";
+				queryItens += "'" + EnterpriseID + "',";
+				queryItens += "'" + parametros.idTitulo + "',";
+				queryItens += (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
+				queryItens += (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
+				queryItens += (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
+				queryItens += "'" + parametros.parcelas[parcela].parcela + "',";
+				queryItens += "'" + parametros.parcelas[parcela].documento + "',";
+				queryItens +=  parametros.parcelas[parcela].fluxoCaixa + ",";
+				queryItens += "'" + parametros.parcelas[parcela].vencimento + "',";
+				queryItens += parametros.parcelas[parcela].valor.toString().trim()
+				queryItens += ")";
+			}
             
             sql.close();
             sql.connect(config, function (err) {    
