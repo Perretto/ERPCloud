@@ -90,8 +90,8 @@ router.route('/*').post(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "broker";  //"homologa"; //"foodtown";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        dados = "intelecta10";  //"homologa"; //"foodtown";
+        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -774,6 +774,7 @@ function funAtualizarConta(parametros,callbackf) {
     var query = "";
     var queryItens = "";
     var parcela = 0;
+	var totalParcelas = 0;
     var resposta = null;
 
     resposta = {
@@ -830,7 +831,16 @@ function funAtualizarConta(parametros,callbackf) {
                     resposta.status = 0;
                     resposta.mensagem.push("A parcela " + (parcela + 1).toString().trim() + " não possui valor.");
                 }
+				else{
+					totalParcelas += parseFloat(parametros.parcelas[parcela].valor);
+				}
             }
+			if(resposta.status == 1){
+				if(parseFloat(parametros.valor) != totalParcelas){
+					resposta.status = 0;
+					resposta.mensagem.push("A soma dos valores das parcelas difere do total do documento.")
+				}
+			}
         }
 
         if(resposta.status == 1){
@@ -881,7 +891,45 @@ function funAtualizarConta(parametros,callbackf) {
                 query += "nm_competencia = '" + parametros.competencia + "',"
                 query += "nm_observacao = '" + parametros.observacao + "'";
                 query += "where id = '" + parametros.idTitulo + "'";
-                query += " and id_empresa = '" + EnterpriseID + "'";
+                query += " and id_empresa = '" + EnterpriseID + "'"; 
+				
+				for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
+					if(parametros.parcelas[parcela].alterada){
+						if(parcela > 0)
+							queryItens += "; ";
+						
+						if(parametros.parcelas[parcela].idParcela == ""){
+							parametros.parcelas[parcela].idParcela = general.guid();
+							queryItens += "insert into contas_pagar_parcelas (id,id_empresa,id_contas_pagar,id_Banco,id_forma_pagamento,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor)";
+							queryItens += " values ";
+							queryItens += "(";
+							queryItens += "'" + parametros.parcelas[parcela].idParcela + "',";
+							queryItens += "'" + EnterpriseID + "',";
+							queryItens += "'" + parametros.idTitulo + "',";
+							queryItens += (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
+							queryItens += (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
+							queryItens += (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
+							queryItens += "'" + parametros.parcelas[parcela].parcela + "',";
+							queryItens += "'" + parametros.parcelas[parcela].documento + "',";
+							queryItens +=  parametros.parcelas[parcela].fluxoCaixa + ",";
+							queryItens += "'" + parametros.parcelas[parcela].vencimento + "',";
+							queryItens += parametros.parcelas[parcela].valor.toString().trim()
+							queryItens += "); ";
+						}
+						else{
+							queryItens += "update contas_pagar_parcelas set ";
+							queryItens += "id_banco = " + (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
+							queryItens += "id_forma_pagamento = " + (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
+							queryItens += "id_plano_contas_financeiro = " + (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
+							queryItens += "nm_documento = '" + parametros.parcelas[parcela].documento + "',";
+							queryItens += "sn_fluxocaixa = " + parametros.parcelas[parcela].fluxoCaixa + ",";
+							queryItens += "dt_data_vencimento = '" + parametros.parcelas[parcela].vencimento + "',";
+							queryItens += "vl_valor = " + parametros.parcelas[parcela].valor.toString().trim();
+							queryItens += " where id_empresa = '" + EnterpriseID + "'";
+							queryItens += " and id = '" + parametros.parcelas[parcela].idParcela + "'; ";
+						}
+					}
+                }
             }
             
             sql.close();
@@ -1918,11 +1966,12 @@ Atualiza uma parcela em particular
 --------------------------------------------------------------------------------
 */
 router.route('/atualizarparcela').post(function(req, res) {
-    var query = "";
+	var queryDoc = "";
     var queryItens = "";
     var parcela = 0;
     var resposta = null;
     var parametros = null;
+	var conexao = null;
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
@@ -1932,65 +1981,195 @@ router.route('/atualizarparcela').post(function(req, res) {
     resposta = {
         status: 0,
         mensagem: [],
-        parcela: null
+        parcela: null,
+		alteracoes: []
     }
 
     try{
         parametros = req.body.parametros;
-
-        query += "update contas_pagar_parcelas set "
-        query += "id_banco = " + (parametros.idBanco == "" ? "null" : "'" + parametros.idBanco + "'") + ",";
-        query += "id_forma_pagamento = " + (parametros.idFormaPagamento == "" ? "null" : "'" + parametros.idFormaPagamento + "'") + ",";
-        query += "id_plano_contas_financeiro = " + (parametros.idContaFinanceira == "" ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
-        query += "nr_parcela = '" + parametros.parcela + "',";
-        query += "dt_data_vencimento = '" + parametros.vencimento + "',";
-        query += "vl_valor = " + parametros.valor + ",";
-        query += "nm_documento = '" + parametros.documento + "',";
-        query += "sn_fluxocaixa = " + parametros.fluxoCaixa;
-        query += " where id = '" + parametros.idParcela + "'"
-        query += " and id_empresa = '" + EnterpriseID + "'";
-
-        sql.close();
-        sql.connect(config, function (err) {    
-            if (err){
+		
+		queryDoc += "select cp.dt_emissao emissaodocumento,cp.vl_valor valordocumento,",
+		queryDoc += "cpp.id idparcela,cpp.dt_data_vencimento vencimentoparcela,cpp.vl_valor valorparcela,";
+		queryDoc += " baixas.vl_valor valorbaixa"
+		queryDoc += " from contas_pagar cp,contas_pagar_parcelas cpp";
+		queryDoc += " left join contas_pagar_baixas baixas on baixas.id_contas_pagar_parcela = cpp.id"
+		queryDoc += " where";
+		queryDoc += " cp.id_empresa = '" + EnterpriseID + "'";
+		queryDoc += " and cp.id = '" + parametros.idTitulo + "'";
+		queryDoc += " and cpp.id_empresa = '" + EnterpriseID + "'";
+		queryDoc += " and cpp.id_contas_pagar = '" + parametros.idTitulo + "'";
+		queryDoc += " order by cpp.dt_data_vencimento";
+	
+		conexao = new sql.ConnectionPool(config,function (err) {
+			if (err){
                 resposta.status = -2;
                 resposta.mensagem = [];
                 resposta.mensagem.push("" + err);
                 parcela = null;
                 res.json(resposta);
-            }
+			}
             else{
                 try{
-                    var transacao = new sql.Transaction();
-                    transacao.begin(err =>{
-                        var request = new sql.Request(transacao);
-                        request.query(query, function (err, recordset) {
-                            if (err){
-                                resposta.status = -3;
-                                resposta.mensagem = [];
-                                resposta.mensagem.push("" + err);
-                                parcela = null;
-                                transacao.rollback();
-                                res.json(resposta);
-                            }
-                            else{
-                                resposta.status = 1;
-                                resposta.mensagem = ["ok"];
-                                resposta.parcela =  parametros;
-                                transacao.commit();
-                                res.json(resposta);                                    
-                                }
-                        })
-                    })
+					var request = conexao.request();
+
+					request.query(queryDoc,function(err,recordset){
+						var dataAux = null;
+						var data = null;
+						var emissao = null;
+						var vencimento = null;
+						var parcelasEmAberto = [];
+						var totalParcelasEmAberto = 0;
+						var totalParcelas = 0;
+						var parcela = 0;
+						var diferenca = 0;
+						var cota = 0;
+						var sinal = 0;
+						var query = "";
+						
+						if (err){
+							resposta.status = -5;
+							resposta.mensagem = ["" + err];
+							parcela = null;
+							conexao.close();
+							res.json(resposta);
+						}
+						else{
+							try{
+								resposta.status = 1;
+								data = recordset.recordsets[0][0].emissaodocumento.toISOString().split("T");
+								dataAux = new Date(data);
+								emissao = dataAux.getTime();
+								dataAux = new Date(parametros.vencimento);
+								vencimento = dataAux.getTime();
+								if(emissao > vencimento){
+									resposta.status = 0;
+									resposta.mensagem = ["A data de vencimento da parcela é anterior à data de emissão do documento."];
+									parcela = null;
+									conexao.close();
+									res.json(resposta);
+								}
+								else{
+									query += "update contas_pagar_parcelas set "
+									query += "id_banco = " + (parametros.idBanco == "" ? "null" : "'" + parametros.idBanco + "'") + ",";
+									query += "id_forma_pagamento = " + (parametros.idFormaPagamento == "" ? "null" : "'" + parametros.idFormaPagamento + "'") + ",";
+									query += "id_plano_contas_financeiro = " + (parametros.idContaFinanceira == "" ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
+									query += "nr_parcela = '" + parametros.parcela + "',";
+									query += "dt_data_vencimento = '" + parametros.vencimento + "',";
+									query += "vl_valor = " + parametros.valor + ",";
+									query += "nm_documento = '" + parametros.documento + "',";
+									query += "sn_fluxocaixa = " + parametros.fluxoCaixa;
+									query += " where id = '" + parametros.idParcela + "'"
+									query += " and id_empresa = '" + EnterpriseID + "'; ";
+									
+									for(parcela = 0; parcela < recordset.recordsets[0].length; parcela++){
+										if(!recordset.recordsets[0][parcela].valorbaixa){
+											totalParcelasEmAberto += recordset.recordsets[0][parcela].valorparcela;
+											if(recordset.recordsets[0][parcela].idparcela.toLowerCase() != parametros.idParcela.toLowerCase()){
+												parcelasEmAberto.push(recordset.recordsets[0][parcela]);
+												totalParcelas +=  parseFloat(recordset.recordsets[0][parcela].valorparcela);
+											}
+											else
+												totalParcelas += parseFloat(parametros.valor);
+										}
+									}
+									if(parametros.valor >= totalParcelasEmAberto){
+										resposta.status = 0;
+										resposta.mensagem = ["O valor da parcela é maior ou igual ao saldo do documento."];
+										resposta.parcela =  null;
+										conexao.close();
+										res.json(resposta);
+									}
+									else{
+										diferenca = totalParcelasEmAberto - totalParcelas;
+										if(diferenca != 0){
+											if(parcelasEmAberto.length == 0){
+												resposta.status = 0;
+												if(totalParcelasEmAberto > recordset.recordsets[0][0].valordocumento)
+													resposta.mensagem = ["O valor total das parcelas é superior ao do documento."];
+												else
+													resposta.mensagem = ["O valor total das parcelas é inferior ao do documento."];
+												resposta.parcela =  null;
+												conexao.close();
+												res.json(resposta);
+											}
+											else{
+												sinal = 1
+												if(diferenca < 0){
+													sinal = -1;
+													diferenca = Math.abs(diferenca);
+												}
+												cota = Math.trunc(((diferenca * 100) / parcelasEmAberto.length));
+												cota /= 100;
+												while(diferenca > 0){
+													parcela = 0;
+													while(parcela < parcelasEmAberto.length && diferenca > 0){
+														parcelasEmAberto[parcela]["valorparcela"] += (cota * sinal);
+														parcela++
+														diferenca -= cota;
+														if(cota > diferenca)
+															cota = diferenca;
+													}
+												}
+												for(parcela = 0; parcela < parcelasEmAberto.length; parcela++){
+													query += "update contas_pagar_parcelas set vl_valor = " + parcelasEmAberto[parcela]["valorparcela"];
+													query += " where id = '" + parcelasEmAberto[parcela]["idparcela"] + "'";
+													query += " and id_empresa = '" + EnterpriseID + "'; ";
+													resposta.alteracoes.push({"idParcela" : parcelasEmAberto[parcela]["idparcela"],"valorParcela" : parcelasEmAberto[parcela]["valorparcela"]});
+												}
+												resposta.status = 1;
+											}
+										}
+										else{
+											resposta.status = 1;
+										}
+									}
+								}
+								
+								if(resposta.status == 1){
+									transacao = conexao.transaction(); //sql.Transaction(conexao);
+									transacao.begin(err =>{
+										var request = transacao.request(); //conexao.request(transacao);
+										request.query(query, function (err, recordset) {
+											if (err){
+												resposta.status = -3;
+												resposta.mensagem = ["" + err];
+												parcela = null;
+												alteracoes = [];
+												transacao.rollback();
+												conexao.close();
+												res.json(resposta);
+											}
+											else{
+												resposta.status = 1;
+												resposta.mensagem = ["ok"];
+												resposta.parcela =  parametros;
+												transacao.commit();
+												conexao.close();
+												res.json(resposta);
+											}
+										})
+									})
+								}
+							}
+							catch(err){
+								resposta.status = -6;
+								resposta.mensagem = ["" + err];
+								parcela = null;
+								alteracoes = [];
+								conexao.close();
+								res.json(resposta);
+							}
+						}
+					})
                 }
                 catch(err){
                     resposta.status = -4;
                     resposta.mensagem = [];
-                    resposta.mensagem.push("" + erro);
+                    resposta.mensagem.push("" + err);
                     parcela = null;
-  
-  
-                    res.json(resposta);                    
+					alteracoes = [];
+					conexao.close();
+                    res.json(resposta);
                 }
             }
         });
@@ -1999,7 +2178,8 @@ router.route('/atualizarparcela').post(function(req, res) {
         resposta.status = -1;
         resposta.mensagem = [];
         resposta.mensagem.push("" + erro);
-        titulo = null;
+		parcela = null;
+		alteracoes = [];
         res.json(resposta);
     }
 })

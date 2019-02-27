@@ -63,25 +63,32 @@ function redistribuicaoValores(parametros){
 	var itemModificado = -1;
 	
 	try{
+		resposta = {
+			status: 1,
+			mensagem: [],
+			itensNovos: null
+		}
 		itemModificado = parametros.itens.findIndex(function(value,index,array){return value["id"] == parametros.idItemModificado});
 		valorAlterado = parseFloat(parametros.itens[itemModificado].valor);
 		valorBase = parseFloat(parametros.valorBase);
 		if(valorAlterado >= valorBase){
-			resposta = {
-				status: 0,
-				mensagem: [],
-				itensNovos: null
-			}
+			resposta.status = 0;
 			if(valorAlterado > valorBase){
-				resposta.mensagem.push("O valor informado é superior ao saldo total.");
+				resposta.mensagem.push("O valor informado é superior ao saldo.");
 			}
 			else{
 				if(parametros.itens.length > 1){
-					resposta.mensagem.push("O valor informado é igual ao saldo total e não pode ser divido entre as parcelas.");
+					resposta.mensagem.push("O valor informado é igual ao saldo, não permitindo o reajuste das outras parcelas.");
 				}
 			}
 		}
 		else{
+			if(parametros.itens.length <= 1){
+				resposta.status = 0;
+				resposta.mensagem.push("O valor informado é menor que saldo total e não há parcelas para reajustar os valores.");
+			}
+		}
+		if(resposta.status == 1){
 			for(i = 0; i < parametros.itens.length; i++){
 				totalItens += parseFloat(parametros.itens[i].valor);
 			}
