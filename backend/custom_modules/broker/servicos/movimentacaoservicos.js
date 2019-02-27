@@ -1697,13 +1697,17 @@ router.route('/gravarClienteServico/:idprodutos/:valor/:idmoeda/:unicamoeda/:idE
     
 
     if(unicamoeda != "1"){
-        unicamoeda = "NULL"
+        unicamoeda = "NULL";
+    }
+    
+    if(idmoeda != "NULL"){
+        idmoeda = "'" + idmoeda + "'";
     }
 
     insertupdate = "DELETE FROM cliente_servicos WHERE id_produtos='" + idprodutos + "' AND id_entidade='" + idEntidade + "';"
     
     insertupdate += "INSERT INTO cliente_servicos (id, id_produtos, vl_valor, id_dsg_moeda, sn_notaunica, id_entidade, nr_diasvencimento) ";
-    insertupdate += " VALUES(newID(), '" + idprodutos + "', " + valor + ",'" + idmoeda + "'," + unicamoeda + ", '" + idEntidade + "', " + diasvenc + ");";
+    insertupdate += " VALUES(newID(), '" + idprodutos + "', " + valor + "," + idmoeda + "," + unicamoeda + ", '" + idEntidade + "', " + diasvenc + ");";
     
 
     console.log(insertupdate);
