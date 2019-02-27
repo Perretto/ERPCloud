@@ -1547,8 +1547,6 @@ function adicionaOuRemove(id, tipo, obj) {
         return index;
     }
 }
-
-
   
 function compare(a,b) {
     if (a.existe < b.existe)
@@ -3095,7 +3093,7 @@ router.route('/gerarNFSe').post(function(req, res) {
         select += " LEFT OUTER JOIN dsg_pais ON dsg_pais.id = endereco.id_dsg_pais  LEFT OUTER JOIN dsg_ibge_cidade ON endereco.id_dsg_ibge_cidade = dsg_ibge_cidade.id  LEFT OUTER JOIN dsg_tipo_logradouro ON ";
         select += " endereco.id_dsg_tipo_logradouro = dsg_tipo_logradouro.id   ";
         select += "WHERE movimentacao_servicos.id_contas_receber=" + idcontasreceber + " ";
-        select += " AND nm_numero_nfes IS NULL  ";
+        //select += " AND nm_numero_nfes IS NULL  ";
 
 
         select += " GROUP BY contas_receber_parcelas.vl_valor, contas_receber_parcelas.dt_data_vencimento, contas_receber_parcelas.vl_valortotal, entidade.vl_issretido, entidade.id, configuracao_nfe_servico.vl_aliq_irrf, configuracao_nfe_servico.vl_limite_retencao, entidade.sn_pccretido,configuracao_nfe_servico.vl_aliq_pis_cofins_csll, entidade.sn_issretido, entidade.sn_bancoparceiro, entidade.nm_descricao_nota_fiscal, empresa.nm_razaosocial, empresa.sn_pessoafisica, empresa.nm_cpf, empresa.nm_rg, empresa.nm_cnpj, empresa.nm_inscricaomunicipal,  empresa.nm_inscricaoestadual, empresa.nm_ddd, empresa.nm_telefone, CddPrestador.nm_codigo, CddPrestador.nm_descricao, entidade.nm_razaosocial,  entidade.sn_pessoafisica, entidade.nm_cpf, entidade.nm_rg,  entidade.nm_cnpj, entidade.nm_inscricaomunicipal, entidade.nm_inscricaoestadual,  contato.nm_ddd, contato.nm_Telefone,   dsg_pais.nm_descricao,  dsg_tipo_logradouro.nm_apelido, endereco.nm_logradouro,  endereco.nm_numero,  endereco.nm_complemento,  endereco.nm_bairro,  endereco.nm_cep,  dsg_ibge_cidade.nm_codigo,  dsg_ibge_cidade.nm_descricao,  dsg_ibge_uf.nm_descricao,  dsg_natureza_tributacao.nm_apelido,  dsg_codigo_tributario_servico.nm_apelido, ";
@@ -3424,7 +3422,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                             
                             var dataemissao = da + "/" + m + "/" + y;
 
-                            if(status == "Pendente" || !status){
+                            //if(status == "Pendente" || !status){
 
                                 deletar += " DELETE FROM nfse WHERE id='" + id + "' AND status='Pendente';  ";
 
@@ -3468,7 +3466,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                                 query +=  "', '" + ValorUnitarioServico + "', '" + ValorDesconto + "', '" + ValorPis;
                                 query +=  "', '" + ValorCofins + "', '" + AliquotaPIS + "', '" + AliquotaCOFINS;
                                 query +=  "', '" + IDProdutos_VendaProdutos + "', '" + SerieRpsSubstituido + "', 'Pendente', '" + dataemissao + "', '" + DescricaoNota + "', '" + ValorIRRF + "', '" + AliquotaIRRF + "', '" + AliquotaCSLL + "', '" + ValorCSLL + "', '" + ValorContasReceber + "', '" + DataVencimento + "', '" + parametros.competencia + "'); ";
-                                
+                             /*   
                             }else{
                                 resposta.status = -4;
                                 resposta.mensagem = [];
@@ -3476,7 +3474,7 @@ router.route('/gerarNFSe').post(function(req, res) {
                                 resposta.titulo = null;
                                 aResposta.push(resposta);
                             }
-
+*/
                         }
 
                         if(aResposta){
