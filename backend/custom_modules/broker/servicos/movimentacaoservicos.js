@@ -1203,6 +1203,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '60659166000146' ";
                         query += " AND pessoa.cpfcnpj <> '07983494000110' ";
                         query += " AND pessoa.cpfcnpj <> '60933017000123' ";
+                        query += " AND pessoa.cpfcnpj <> '49467293000291' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                         
                     } 
@@ -1251,6 +1252,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '60659166000146' ";
                         query += " AND pessoa.cpfcnpj <> '07983494000110' ";
                         query += " AND pessoa.cpfcnpj <> '60933017000123' ";
+                        query += " AND pessoa.cpfcnpj <> '49467293000291' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                     } 
                 } 
@@ -1300,6 +1302,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '60659166000146' ";
                         query += " AND pessoa.cpfcnpj <> '07983494000110' ";
                         query += " AND pessoa.cpfcnpj <> '60933017000123' ";
+                        query += " AND pessoa.cpfcnpj <> '49467293000291' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";  
                     } 
                 } 
@@ -1351,6 +1354,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '60659166000146' ";
                         query += " AND pessoa.cpfcnpj <> '07983494000110' ";
                         query += " AND pessoa.cpfcnpj <> '60933017000123' ";
+                        query += " AND pessoa.cpfcnpj <> '49467293000291' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                     } 
                 } 
@@ -4640,7 +4644,6 @@ router.route('/gerarContasPagarRateio').post(function(req, res) {
 
 });
 
-
 router.route('/alterarRPS/:id/:nf/:protocolo').get(function(req, res) {
     
     var nf = req.param('nf');
@@ -4676,7 +4679,6 @@ router.route('/alterarRPS/:id/:nf/:protocolo').get(function(req, res) {
     });   
 
 })
-
 
 router.route('/enviarEmailGeral/:id').get(function(req, res) {
     
