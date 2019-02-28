@@ -3432,7 +3432,8 @@ router.route('/gerarNFSe').post(function(req, res) {
 
                             //if(status == "Pendente" || !status){
 
-                                deletar += " DELETE FROM nfse WHERE id='" + id + "' AND status='Pendente';  ";
+                                //deletar += " DELETE FROM nfse WHERE id='" + id + "' AND status='Pendente';  ";
+                                deletar += " DELETE FROM nfse WHERE id='" + id + "' ;  ";
 
                                 query += " INSERT INTO nfse (id, RazaoSocialPrestador, PessoaFisicaPrestador, CpfPrestador, ";
                                 query += " RgPrestador, CpfCnpjPrestador, InscricaoMunicipalPrestador, IePrestador, ";
