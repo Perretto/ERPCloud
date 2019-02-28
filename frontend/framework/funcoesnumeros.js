@@ -74,7 +74,6 @@ function redistribuicaoValores(parametros){
 		valorAlterado = parseFloat(parametros.itens[itemModificado].valor);
 		valorBase = parseFloat(parametros.valorBase);
 		if(valorAlterado >= valorBase){
-			resposta.status = 0;
 			if(valorAlterado > valorBase){
 				resposta.mensagem.push("O valor informado é superior ao saldo.");
 			}
