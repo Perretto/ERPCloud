@@ -3641,7 +3641,7 @@ router.route('/getInfoNFSe').post(function(req, res) {
 
     select += "SELECT TOP 1 nm_certificado AS 'certificadoDigital', nm_senhacertificadodigital AS 'senhaCertificado',  ";
     select += " sn_ambienteproducao AS 'ambienteGeracaoNFse', id_dsg_tipo_certificado AS 'idTipoCertificado', ";
-    select += " nm_serie AS 'serie', nr_numerolote AS 'numeroLote', sn_enviaremail AS 'enviarEmail',  ";
+    select += " nm_serie AS 'serie', nr_numerolote + 1 AS 'numeroLote', sn_enviaremail AS 'enviarEmail',  ";
     select += " nm_assuntoemailnfe AS 'assuntoEmailNFe', nm_texto_email AS 'textoEmail', nm_emailcopia AS 'emailCopia', ";
     select += " '' AS 'logoTipo', nm_descricaonota AS 'descricaoNota' FROM configuracao_nfe_servico ";
     select += "WHERE id_empresa = '" + enterpriseID + "'; ";
