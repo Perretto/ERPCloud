@@ -122,4 +122,105 @@ function bindAutocomplete(controlID, nameLayout, LayoutID, TitleMenu, PropertyID
         });
     
     }
+	
+	function bindAutocomp(controlID, nameLayout, LayoutID, TitleMenu, containerID, id, PropertyID, Fill1PropertyID, tabGenID) {    
+        var EnterpriseID = returnCookie("EnterpriseID");
+        var UserID = returnCookie("UserID");
+    
+        $(".autocomplete").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var filter = "/" + request.term + "/" + PropertyID + "/" + Fill1PropertyID + "/" + tabGenID;
+                //loaderImage(controlID + "_formgroup .control-group", true);
+                $.ajax({
+                    url: getGlobalParameters("urlPlataform") + "/api/RenderAutoComp" + filter,
+                    dataType: 'json',
+                    success: function (data) {
+						if(data){
+							if(data.status == 1){
+								response(data.dados);
+							}
+							else{
+								loaderImage(controlID + "_formgroup", false);    
+							}
+						}
+						loaderImage(controlID + "_formgroup .control-group", false);
+                    },
+                    error: function () {
+                        loaderImage(controlID + "_formgroup", false);    
+                    }
+                })    
+            },
+            select: function (event, ui) {
+                loaderImage(containerID + "_panel", true);
+                var id = $(this).attr("id");
+                var elementoInput = null;
+                var inputsGrid = null;
+
+                id = id.replace("_autocomplete", "");
+
+                var chaveid = "";
+                if (ui.item.id.length > 0) {
+                    chaveid = ui.item.id;
+                    //document.getElementsById(id) = ui.item.id[0];
+                    $("#" + id).val(ui.item.id[0]);
+                    $("#" + id).attr('name', ui.item.id[0]);
+                }
+    
+    
+                if (ui.item.id == "MSG_ERR") {
+    
+                    loaderImage(containerID + "_panel", false);
+                    if (LayoutID != "" && nameLayout != "" && TitleMenu != "") {
+    
+                        CreateAba(nameLayout, LayoutID, TitleMenu);
+    
+                        id = "#" + id.replace("#", "");
+                        document.getElementById(id) = "";
+                    }
+                    //var tipo;
+                    //var mensagem;
+                    //tipo = "ALERTAMODAL";
+                    //mensagem = "teste de alerta!!";
+                    //Alerta(tipo, mensagem);
+                } else {
+                    var item = $("#" + id);
+                    if (item.attr("localAutoComplete") == "false") {
+
+                        var tabgen = $("[data-formid*='" + LayoutID + "'][id*='_btnnovo']").attr("id");
+                        tabgen = tabgen.replace("table_","").replace("_btnnovo",""); 
+
+                        if($("[id='" + id + "_key']").attr("onclick")){
+                            LayoutID = $("[id='" + id + "_key']").attr("onclick");
+                            LayoutID =  LayoutID.replace("javascript:OpenAba('" + nameLayout + "','","");
+                            LayoutID =  LayoutID.substr(0, LayoutID.indexOf("'"));
+                        }
+                        
+                        var fillgrid = true;
+                        if($("[id='" + id + "']").attr("data-serializable") == "true"){
+                            fillgrid = false;
+                        }
+
+
+                        filleditnavigation(chaveid,LayoutID, "" ,tabgen, fillgrid, containerID)
+
+                        //$.ajax({
+                        //    url: getGlobalParameters("urlPlataforma") + "/api/database/DataSearch",
+                        //    data: { Filtro: ui.item.id, FormID: LayoutID, ReferenceID: Fill1PropertyID, EnterpriseID: EnterpriseID },
+                        //    dataType: 'json',
+                        //    success: function (data) {
+                        //        //FillForm(data, FormID, tabGenID);
+                        //        loaderImage(containerID + "_panel", false);
+                        //    }
+                        //});
+                    }
+                    else {
+                                loaderImage(containerID + "_panel", false);
+                    }
+                }
+                loaderImage(containerID + "_panel", false);
+				$("#" + id).val(ui.item.id).trigger("change");
+            }
+        });
+    }
     
