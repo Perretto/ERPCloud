@@ -2591,7 +2591,6 @@ router.route('/gerarContasReceber').post(function(req, res) {
                                     if(respostaParcelas.status > 0){
                                         for (let h = 0; h < recordset.recordsets[0].length; h++) {
                                             movimentacao = recordset.recordsets[0][h];
-                                            movimentacaoFinal.push(movimentacao.id);
                                             arrayEntidade.push(movimentacao.id_entidade);
                                             arrayNotaUnica.push(movimentacao.notaunica);
 
@@ -2662,8 +2661,12 @@ router.route('/gerarContasReceber').post(function(req, res) {
                                                 titulo.parcelas.push(parcela);
                                             }                        
                                             
+
                                             titulo.valor = total;
-                                            Atitulo.push(titulo);
+                                            if(total > 0){
+                                                Atitulo.push(titulo);
+                                                movimentacaoFinal.push(movimentacao.id);
+                                            }
                                         }
 
                                         //if(total > 0){  
