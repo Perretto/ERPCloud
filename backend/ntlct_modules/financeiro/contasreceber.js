@@ -12,8 +12,7 @@ var serverWindows = "";
 var configEnvironment = {};
 var EnterpriseID = "";
 var EnterpriseName = "";
-var UserID = "";
-var base = ""; 
+var UserID = "";var base = ""; 
 var url = "";
 var host = "";
 var config = {};
@@ -31,8 +30,8 @@ router.route('/*').get(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "broker";  //"homologa"; //"foodtown";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        dados = "intelecta10";  //"homologa"; //"foodtown";
+        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -88,8 +87,8 @@ router.route('/*').post(function(req, res, next) {
 
     if(full.indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "broker";  //"homologa"; //"foodtown";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+        dados = "intelecta10";  //"homologa"; //"foodtown";
+        configEnvironment = {user: 'sa', password: '12345678', server: '127.0.0.1',  database: 'Environment'};
     }else{
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
@@ -253,6 +252,116 @@ router.route('/listarcontas').post(function(req, res) {
             titulos: [],
         }
 
+        query += "select " 
+        query += "ent.id idEntidade,ent.nm_razaosocial razaoSocial,";
+        query += "cr.id idTitulo,cr.nm_documento titulo,cr.id_venda idPedido,cr.id_notafiscal idNotaFiscal,";
+        query += "crp.id idParcela,crp.nm_documento docParcela,crp.nr_parcela parcela,crp.dt_data_vencimento vencimentoParcela,crp.vl_valor valorParcela,crp.id_banco idBanco,crp.id_configuracao_cnab idConfCnab,crp.id_plano_contas_financeiro idContaFinanceira,crp.id_forma_pagamento idFormaPagamento,crp.sn_fluxocaixa fluxoCaixa,";
+        query += "baixas.id idBaixa,baixas.dt_data dataBaixa,baixas.vl_valor valorBaixa,";
+        query += "formas.nm_documento documentoRec,";
+        query += "venda.nr_pedido nrPedido,"
+        query += "notafiscal.nm_numeronotafiscal nrNotaFiscal"
+        query += " from contas_receber cr";        
+        query += " left join entidade ent on ent.id = cr.id_entidade";
+        query += " left join venda on venda.id = cr.id_venda and venda.id_empresa = @idempresa";
+        query += " left join notafiscal on notafiscal.id = cr.id_notafiscal and notafiscal.id_empresa = @idempresa";
+        query += " left join contas_receber_parcelas crp on crp.id_contas_receber = cr.id and crp.id_empresa = @idempresa";
+        query += " left join contas_receber_baixas baixas on baixas.id_contas_receber_parcela = crp.id and baixas.id_empresa = @idempresa";
+        query += " left join contas_receber_baixas_formaspagamento formas on formas.id_contas_receber_baixas = baixas.id and formas.id_empresa = @idempresa";
+        query += " where cr.id_empresa = @idempresa";
+        if(parametros.titulosRecebidos == 0)
+            query += " and baixas.id is null";
+        query += " and (@pedido is null or cr.id_venda = @pedido)";
+        query += " and (@notaFiscal is null or cr.id_notafiscal = @notafiscal)";
+        query += " and (@identidade is null or cr.id_entidade = @identidade)";
+        query += " and (@vencimentoinicial is null or (convert(varchar(8),crp.dt_data_vencimento,112)) >= @vencimentoinicial)";
+        query += " and (@vencimentofinal is null or (convert(varchar(8),crp.dt_data_vencimento,112)) <= @vencimentofinal)";
+        query += " and (@idbanco is null or crp.id_banco = @idbanco)";
+        query += " and (@idformapagamento is null or crp.id_forma_pagamento = @idformapagamento)";
+        query += " order by crp.dt_data_vencimento,crp.vl_valor desc,crp.nm_documento,crp.nr_parcela";
+
+        sql.close();
+        sql.connect(config, function (err) {    
+            if (err){
+                resposta.status = -2;
+                resposta.mensagem = [];
+                resposta.mensagem.push("" + err);
+                resposta.titulos = [];
+                res.json(resposta);
+            }
+            else{
+                var request = new sql.Request();
+                request.input("idempresa",EnterpriseID);
+                request.input("identidade",(parametros.idEntidade == "" || parametros.idEntidade == "undefined") ? null : parametros.idEntidade);
+                request.input("pedido",(parametros.pedido == "" || parametros.pedido == "undefined") ? null : parametros.pedido);
+                request.input("notafiscal",(parametros.notaFiscal == "" || parametros.notaFiscal == "undefined") ? null : parametros.notaFiscal);
+                request.input("idbanco",(parametros.idBanco ? parametros.idBanco : null));
+                request.input("idformapagamento",(parametros.idFormaPagamento ? parametros.idFormaPagamento : null));
+                request.input("vencimentoinicial",(parametros.vencimentoInicial == "" || parametros.vencimentoInicial == "undefined") ? null : parametros.vencimentoInicial.substring(6,10) + parametros.vencimentoInicial.substring(3,5)  + parametros.vencimentoInicial.substring(0,2));
+                request.input("vencimentofinal",(parametros.vencimentoFinal == "" || parametros.vencimentoFinal == "undefined") ? null : parametros.vencimentoFinal.substring(6,10) + parametros.vencimentoFinal.substring(3,5)  + parametros.vencimentoFinal.substring(0,2));
+                request.query(query, function (err, recordset) {
+                    if (err){
+                        resposta.status = -3;
+                        resposta.mensagem = [];
+                        resposta.mensagem.push("" + err);
+                        resposta.titulos = [];
+                        res.json(resposta);
+                    }
+                    else{
+                        var element = recordset.recordsets[0];                        
+                        resposta.titulos = element                        
+                        resposta.status = 1;
+                        resposta.mensagem = [];
+                        resposta.mensagem.push("Ok");
+                        res.json(resposta);
+                    }
+                })
+            }
+        })
+    }
+    catch(erro){
+        resposta.status = -1;
+        resposta.mensagem = [];
+        resposta.mensagem.push("" + erro);
+        resposta.titulos = [];
+        sql.close();
+        res.json(resposta);
+    }
+})
+
+
+
+/*------------------------------------------------------------------------------
+Cria uma relação das contas a receber (parcelas)
+--------------------------------------------------------------------------------
+*/
+router.route('/listarcontasdetalhepagamento').post(function(req, res) {
+    var query = "";
+    var resposta = null;
+    var titulo = null;
+    var baixa = null;
+    var parametros = null;
+    var idParcela = null;
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
+    res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+
+    resposta = {
+        status: 0,
+        mensagem: [],
+        titulos: [],
+    }
+
+    try{
+        parametros = JSON.parse(req.body.parametros); 
+
+        resposta = {
+            status: 0,
+            mensagem: [],
+            titulos: [],
+        }
+
         query += "select ";
         query += "ent.id identidade,ent.nm_razaosocial razaosocial,";
         query += "cr.id idtitulo,cr.nm_documento titulo,cr.vl_valor valortitulo,cr.dt_emissao emissao,cr.id_venda idvenda,cr.id_notafiscal idnota,cr.sn_dre dre,";
@@ -275,6 +384,8 @@ router.route('/listarcontas').post(function(req, res) {
         query += " and crp.id_contas_receber = cr.id";
         query += " and (@vencimentoinicial is null or (convert(varchar(8),crp.dt_data_vencimento,112)) >= @vencimentoinicial)";
         query += " and (@vencimentofinal is null or (convert(varchar(8),crp.dt_data_vencimento,112)) <= @vencimentofinal)";
+        query += " and (@idbanco is null or crp.id_banco = @idbanco)";
+        query += " and (@idformapagamento is null or crp.id_forma_pagamento = @idformapagamento)";
         query += " order by crp.dt_data_vencimento,crp.vl_valor desc,crp.nm_documento,crp.nr_parcela";
 
         sql.close();
@@ -292,6 +403,8 @@ router.route('/listarcontas').post(function(req, res) {
                 request.input("identidade",(parametros.idEntidade == "" || parametros.idEntidade == "undefined") ? null : parametros.idEntidade);
                 request.input("pedido",(parametros.pedido == "" || parametros.pedido == "undefined") ? null : parametros.pedido);
                 request.input("notafiscal",(parametros.notaFiscal == "" || parametros.notaFiscal == "undefined") ? null : parametros.notaFiscal);
+                request.input("idbanco",(parametros.idBanco ? parametros.idBanco : null));
+                request.input("idformapagamento",(parametros.idFormaPagamento ? parametros.idFormaPagamento : null));
                 request.input("vencimentoinicial",(parametros.vencimentoInicial == "" || parametros.vencimentoInicial == "undefined") ? null : parametros.vencimentoInicial.substring(6,10) + parametros.vencimentoInicial.substring(3,5)  + parametros.vencimentoInicial.substring(0,2));
                 request.input("vencimentofinal",(parametros.vencimentoFinal == "" || parametros.vencimentoFinal == "undefined") ? null : parametros.vencimentoFinal.substring(6,10) + parametros.vencimentoFinal.substring(3,5)  + parametros.vencimentoFinal.substring(0,2));
                 request.query(query, function (err, recordset) {
@@ -423,11 +536,9 @@ router.route('/dadostitulo').post(function(req, res) {
         query += " left join contas_receber_baixas_formaspagamento formas on formas.id_contas_receber_baixas = baixas.id and formas.id_empresa = @idempresa";
         query += " where cr.id_empresa = @idempresa";
         query += " and (@idtitulo is null or cr.id = @idtitulo)";
-        //query += " and crp.id_empresa = @idempresa 
-        query += " and crp.id_contas_receber = cr.id";
+        query += " and crp.id_empresa = @idempresa and crp.id_contas_receber = cr.id";
         query += " and (@idparcela is null or crp.id = @idparcela)";
-        query += " and ent.id = cr.id_entidade ";
-        //query += " and ent.id_empresa = @idempresa";
+        query += " and ent.id = cr.id_entidade and ent.id_empresa = @idempresa";
         query += " order by replicate(' ',10 - len(crp.nr_parcela)) + rtrim(crp.nr_parcela),baixas.dt_data";
 
         sql.close();
@@ -758,7 +869,9 @@ function funAtualizarConta(parametros,callbackf) {
     var query = "";
     var queryItens = "";
     var parcela = 0;
+	var totalParcelas = 0;
     var resposta = null;
+	var conexao = null;
 
     resposta = {
         status: 1,
@@ -814,7 +927,17 @@ function funAtualizarConta(parametros,callbackf) {
                     resposta.status = 0;
                     resposta.mensagem.push("A parcela " + (parcela + 1).toString().trim() + " não possui valor.");
                 }
+				else{
+					totalParcelas += parseFloat(parametros.parcelas[parcela].valor);
+				}
             }
+			if(resposta.status == 1){
+				console.log(parametros);
+				if(parseFloat(parametros.valor) != totalParcelas){
+					resposta.status = 0;
+					resposta.mensagem.push("A soma dos valores das parcelas difere do total do documento.")
+				}
+			}
         }
 
         if(resposta.status == 1){
@@ -834,123 +957,194 @@ function funAtualizarConta(parametros,callbackf) {
                 query += parametros.valor.toString().trim() + ",";
                 query += parametros.dre.toString().trim() + ",";
                 query += "'" + parametros.observacao + "'";
-                query += ")";
+                query += "); ";
 
-                queryItens += "insert into contas_receber_parcelas (id,id_empresa,id_contas_receber,id_Banco,id_forma_pagamento,id_configuracao_cnab,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor)";
-                queryItens += " values ";
+                query += "insert into contas_receber_parcelas (id,id_empresa,id_contas_receber,id_Banco,id_forma_pagamento,id_configuracao_cnab,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor)";
+                query += " values ";
+				
                 for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
-                    if(parcela > 0)
-                        queryItens += ",";
-                    
                     parametros.parcelas[parcela].idParcela = general.guid();
-                    queryItens += "(";
-                    queryItens += "'" + parametros.parcelas[parcela].idParcela + "',";
-                    queryItens += "'" + EnterpriseID + "',";
-                    queryItens += "'" + parametros.idTitulo + "',";
-                    queryItens += (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
-                    
-                    queryItens += (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
-                    queryItens += (!parametros.parcelas[parcela].idConfCNAB ? "null" : "'" + parametros.parcelas[parcela].idConfCNAB + "'") + ",";
-                    queryItens += (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
-                    queryItens += "'" + parametros.parcelas[parcela].parcela + "',";
-                    queryItens += "'" + parametros.parcelas[parcela].documento + "',";
-                    queryItens +=  parametros.parcelas[parcela].fluxoCaixa + ",";
-                    queryItens += "'" + parametros.parcelas[parcela].vencimento + "',";
-                    queryItens += parametros.parcelas[parcela].valor.toString().trim()
-                    queryItens += ")";
+					if(parcela > 0)
+						query += ",";
+                    query += "(";
+                    query += "'" + parametros.parcelas[parcela].idParcela + "',";
+                    query += "'" + EnterpriseID + "',";
+                    query += "'" + parametros.idTitulo + "',";
+                    query += (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";                    
+                    query += (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
+                    query += (!parametros.parcelas[parcela].idConfCNAB ? "null" : "'" + parametros.parcelas[parcela].idConfCNAB + "'") + ",";
+                    query += (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
+                    query += "'" + parametros.parcelas[parcela].parcela + "',";
+                    query += "'" + parametros.parcelas[parcela].documento + "',";
+                    query +=  parametros.parcelas[parcela].fluxoCaixa + ",";
+                    query += "'" + parametros.parcelas[parcela].vencimento + "',";
+                    query += parametros.parcelas[parcela].valor.toString().trim()
+                    query += ")";
                 }
+				
+				conexao = new sql.ConnectionPool(config,function (err) {
+					if (err){
+						resposta.status = -2;
+						resposta.mensagem = ["" + err];
+						respsota.titulo = null;
+						callbackf(resposta);
+					}
+					else{
+						try{
+							var transacao = conexao.transaction();
+							transacao.begin(err =>{
+								var request = transacao.request();
+								
+								request.query(query, function (err, recordset) {
+									if(err){
+										resposta.status = -3;
+										resposta.mensagem = ["" + err];
+										resposta.titulo =  null;
+										transacao.rollback();
+										conexao.close();
+										callbackf(resposta);
+									}
+									else{
+										resposta.status =  1;
+										resposta.mensagem = ["ok"];
+										resposta.titulo = parametros;
+										transacao.commit();
+										conexao.close();
+										callbackf(resposta);
+									}
+								});
+							})
+						}
+						catch(err){
+							resposta.status = -4;
+							respsosta.mensagem = ["ok"];
+							resposta.titulo = null;
+							conexao.close();
+							callbackf(resposta);
+						}
+					}
+				});
             }
             else{
-                queryItens = "";
-                query += "update contas_receber set " 
-                query += "id_plano_contas_financeiro = " + (parametros.idContaFinanceira == "" ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
-                query += "id_venda = " +  ((parametros.idPedido == "" || parametros.idPedido == "undefined") ? "null" : "'" + parametros.idPedido + "'") + ",";
-                query += "id_notafiscal = " + ((parametros.idNotaFiscal == "" || parametros.idNotaFiscal == "undefined") ? "null" : "'" + parametros.idNotaFiscal + "'") + ",";
-                query += "nm_competencia = '" + parametros.competencia + "',"
-                query += "sn_dre = " + parametros.dre.toString() + ","
-                query += "nm_observacao = '" + parametros.observacao + "'";
-                query += "where id = '" + parametros.idTitulo + "'";
-                query += " and id_empresa = '" + EnterpriseID + "'";
-            }
-           
-            sql.close();
-            sql.connect(config, function (err) {    
-                if (err){
-                    resposta.status = -2;
-                    resposta.mensagem = [];
-                    resposta.mensagem.push("f: " + err);
-                    resposta.titulo = null;
-                    callbackf(resposta);
-                }
-                else{
-                    try{
-                        var transacao = new sql.Transaction();
-                        transacao.begin(err =>{
-                            var request = new sql.Request(transacao);
-                            request.query(query, function (err, recordset) {
-                                if (err){
-                                    resposta.status = -3;
-                                    resposta.mensagem = [];
-                                    resposta.mensagem.push("f: " + err);
-                                    resposta.titulo = null;
-                                    transacao.rollback();
-                                    callbackf(resposta);
-                                }
-                                else{
-
-                                    console.log("----------------------------------------------------------");
-                                    console.log(queryItens);
-                                    console.log("----------------------------------------------------------");
-                        
-                                    if(queryItens != ""){
-                                        try{
-                                            var request = new sql.Request(transacao);
-                                            request.query(queryItens, function (err, recordset) {
-                                                if (err){
-                                                    resposta.status = -4;
-                                                    resposta.mensagem = [];
-                                                    resposta.mensagem.push("f: " + err);
-                                                    resposta.titulo = null;
-                                                    transacao.rollback();
-                                                    callbackf(resposta);
-                                                }
-                                                else{
-                                                    resposta.status = 1;
-                                                    resposta.mensagem = ["ok"];
-                                                    resposta.titulo =  parametros;
-                                                    transacao.commit();
-                                                    callbackf(resposta);
-                                                }
-                                            })                                    
-                                        }
-                                        catch(err){
-                                            resposta.status = -5;
-                                            resposta.mensagem = [];
-                                            resposta.mensagem.push("f: " + erro);
-                                            resposta.titulo = null;                            
-                                            callbackf(resposta);
-                                        }
-                                    }
-                                    else{
-                                        resposta.status = 1;
-                                        resposta.mensagem = ["ok"];
-                                        resposta.titulo =  parametros;
-                                        transacao.commit();
-                                        callbackf(resposta);
-                                    }
-                                }
-                            })
-                        })
-                    }
-                    catch(err){
-                        resposta.status = -6;
-                        resposta.mensagem = [];
-                        resposta.mensagem.push("f: " + erro);
-                        resposta.titulo = null;
-                        callbackf(resposta);
-                    }
-                }
-            });
+				query = "select sum(vl_valor) totalbaixas from contas_receber_baixas where id_empresa = '" + EnterpriseID + "' and id_contas_receber_parcela in (select id from contas_receber_parcelas where id_contas_receber = ";
+				query += "(select id from contas_receber where id_empresa = '" + EnterpriseID + "' and id = '" + parametros.idTitulo + "'))";
+				
+                conexao = new sql.ConnectionPool(config,function (err) {
+					if (err){
+						resposta.status = -5;
+						resposta.mensagem = ["" + err];
+						resposta.titulo = null;
+						callbackf(resposta);
+					}
+					else{
+						try{
+							var request = conexao.request();
+							request.query(query, function (err, recordset) {
+								try{
+									if(err){
+										resposta.status = -6;
+										resposta.mensagem = ["" + err];
+										resposta.titulo = null;
+										conexao.close();
+										callbackf(resposta);
+									}
+									else{
+										if(recordset.recordsets[0][0].totalbaixas == null){
+											queryItens = "delete contas_receber_parcelas where id_empresa = '" + EnterpriseID + "' and id_contas_receber = '" + parametros.idTitulo + "'; "
+											queryItens += "update contas_receber set "
+											queryItens += "id_parcelamento = '" + parametros.idParcelamento + "',";
+											queryItens += "id_plano_contas_financeiro = " + (!parametros.idContaFinanceira ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
+											queryItens += "nm_competencia = '" + parametros.competencia + "',"
+											queryItens += "nm_observacao = '" + parametros.observacao + "'";
+											queryItens += " where id = '" + parametros.idTitulo + "'";
+											queryItens += " and id_empresa = '" + EnterpriseID + "'; ";
+										
+											queryItens += "insert into contas_receber_parcelas (id,id_empresa,id_contas_receber,id_Banco,id_forma_pagamento,id_plano_contas_financeiro,nr_parcela,nm_documento,sn_fluxocaixa,dt_data_vencimento,vl_valor)";
+											queryItens += " values ";
+											for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
+												if(parcela > 0)
+													queryItens += ",";
+												
+												parametros.parcelas[parcela].idParcela = general.guid();
+												queryItens += "(";
+												queryItens += "'" + parametros.parcelas[parcela].idParcela + "',";
+												queryItens += "'" + EnterpriseID + "',";
+												queryItens += "'" + parametros.idTitulo + "',";
+												queryItens += (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
+												queryItens += (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
+												queryItens += (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
+												queryItens += "'" + parametros.parcelas[parcela].parcela + "',";
+												queryItens += "'" + parametros.parcelas[parcela].documento + "',";
+												queryItens +=  parametros.parcelas[parcela].fluxoCaixa + ",";
+												queryItens += "'" + parametros.parcelas[parcela].vencimento + "',";
+												queryItens += parametros.parcelas[parcela].valor.toString().trim();
+												queryItens += ")";
+											}
+										}
+										else{
+											queryItens = "update contas_receber set "
+											queryItens += "id_plano_contas_financeiro = " + (!parametros.idContaFinanceira ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
+											queryItens += "nm_competencia = '" + parametros.competencia + "',"
+											queryItens += "nm_observacao = '" + parametros.observacao + "'";
+											queryItens += " where id = '" + parametros.idTitulo + "'";
+											queryItens += " and id_empresa = '" + EnterpriseID + "'";
+																					
+											for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
+												queryItens += "; ";
+												queryItens += "update contas_receber_parcelas set ";
+												queryItens += "id_banco = " + (!parametros.parcelas[parcela].idBanco ? "null" : "'" + parametros.parcelas[parcela].idBanco + "'") + ",";
+												queryItens += "id_forma_pagamento = " + (!parametros.parcelas[parcela].idFormaPagamento ? "null" : "'" + parametros.parcelas[parcela].idFormaPagamento + "'") + ",";
+												queryItens += "id_plano_contas_financeiro = " + (!parametros.parcelas[parcela].idContaFinanceira ? "null" : "'" + parametros.parcelas[parcela].idContaFinanceira + "'") + ",";
+												queryItens += "nm_documento = '" + parametros.parcelas[parcela].documento + "',";
+												queryItens += "sn_fluxocaixa = " + parametros.parcelas[parcela].fluxoCaixa + ",";
+												queryItens += "dt_data_vencimento = '" + parametros.parcelas[parcela].vencimento + "',";
+												queryItens += "vl_valor = " + parametros.parcelas[parcela].valor.toString().trim();
+												queryItens += " where id_empresa = '" + EnterpriseID + "'";
+												queryItens += " and id = '" + parametros.parcelas[parcela].idParcela + "'";
+											}
+										}
+										var transacao = conexao.transaction();
+										transacao.begin(err =>{
+											var request = transacao.request();
+											
+											request.query(queryItens, function (err, recordset) {
+												if(err){
+													resposta.status = -7;
+													resposta.mensagem = ["" + err];
+													resposta.titulo =  null;
+													transacao.rollback();
+													conexao.close();
+													callbackf(resposta);
+												}
+												else{
+													resposta.status =  1;
+													resposta.mensagem = ["ok"];
+													resposta.titulo = parametros;
+													transacao.commit();
+													conexao.close();
+													callbackf(resposta);
+												}
+											});
+										});
+									}
+								}
+								catch(err){
+									resposta.status = -8;
+									resposta.mensagem = ["" + err];
+									resposta.titulo = null;
+									callbackf(resposta);
+								}
+							});
+						}
+						catch(err){
+							resposta.status = -9;
+							resposta.mensagem = ["" + err];
+							resposta.titulo = null;
+							callbackf(resposta);
+						}
+					}
+				});
+			}
         }
         else{
             resposta.titulo == null;
@@ -1007,8 +1201,7 @@ router.route('/realizarrecebimento').post(function(req, res) {
             query += " where parc.id = '" + parametros.idTitulo + "'";
             query += " and parc.id_empresa = '" + EnterpriseID + "'";
             query += " and cr.id = parc.id_contas_receber and cr.id_empresa = '" + EnterpriseID + "'";
-            //query += " and ent.id = cr.id_entidade and ent.id_empresa = '" + EnterpriseID + "'";
-            query += " and ent.id = cr.id_entidade";
+            query += " and ent.id = cr.id_entidade and ent.id_empresa = '" + EnterpriseID + "'";
 
             sql.close();
             sql.connect(config, function (err) {    
@@ -1311,8 +1504,7 @@ router.route('/realizarmultirecebimento').post(function(req, res) {
             query += " where parc.id = '" + parametros.listaParcelas[parcela] + "'";
             query += " and parc.id_empresa = '" + EnterpriseID + "'";
             query += " and cr.id = parc.id_contas_receber and cr.id_empresa = '" + EnterpriseID + "'";
-            query += " and ent.id = cr.id_entidade ";
-            //query += " and ent.id_empresa = '" + EnterpriseID + "'; ";
+            query += " and ent.id = cr.id_entidade and ent.id_empresa = '" + EnterpriseID + "'; ";
         }
         sql.close();
         sql.connect(config, function (err) {    
@@ -1845,11 +2037,12 @@ Atualiza uma parcela em particular
 --------------------------------------------------------------------------------
 */
 router.route('/atualizarparcela').post(function(req, res) {
-    var query = "";
+	var queryDoc = "";
     var queryItens = "";
     var parcela = 0;
     var resposta = null;
     var parametros = null;
+	var conexao = null;
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
@@ -1859,64 +2052,195 @@ router.route('/atualizarparcela').post(function(req, res) {
     resposta = {
         status: 0,
         mensagem: [],
-        parcela: null
+        parcela: null,
+		alteracoes: []
     }
 
     try{
         parametros = req.body.parametros;
-
-        query += "update contas_receber_parcelas set "
-        query += "id_banco = " + (parametros.idBanco == "" ? "null" : "'" + parametros.idBanco + "'") + ",";
-        query += "id_forma_pagamento = " + (parametros.idFormaPagamento == "" ? "null" : "'" + parametros.idFormaPagamento + "'") + ",";
-        query += "id_configuracao_cnab = " + (parametros.idConfCNAB == "" ? "null" : "'" + parametros.idConfCNAB + "'") + ",";
-        query += "id_plano_contas_financeiro = " + (parametros.idContaFinanceira == "" ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
-        query += "nr_parcela = '" + parametros.parcela + "',";
-        query += "dt_data_vencimento = '" + parametros.vencimento + "',";
-        query += "vl_valor = " + parametros.valor + ",";
-        query += "nm_documento = '" + parametros.documento + "',";
-        query += "sn_fluxocaixa = " + parametros.fluxoCaixa;
-        query += " where id = '" + parametros.idParcela + "'"
-        query += " and id_empresa = '" + EnterpriseID + "'";
-
-        sql.close();
-        sql.connect(config, function (err) {    
-            if (err){
+		
+		queryDoc += "select cr.dt_emissao emissaodocumento,cr.vl_valor valordocumento,",
+		queryDoc += "crp.id idparcela,crp.dt_data_vencimento vencimentoparcela,crp.vl_valor valorparcela,";
+		queryDoc += " baixas.vl_valor valorbaixa"
+		queryDoc += " from contas_receber cr,contas_receber_parcelas crp";
+		queryDoc += " left join contas_receber_baixas baixas on baixas.id_contas_receber_parcela = crp.id"
+		queryDoc += " where";
+		queryDoc += " cr.id_empresa = '" + EnterpriseID + "'";
+		queryDoc += " and cr.id = '" + parametros.idTitulo + "'";
+		queryDoc += " and crp.id_empresa = '" + EnterpriseID + "'";
+		queryDoc += " and crp.id_contas_receber = '" + parametros.idTitulo + "'";
+		queryDoc += " order by crp.dt_data_vencimento";
+	
+		conexao = new sql.ConnectionPool(config,function (err) {
+			if (err){
                 resposta.status = -2;
                 resposta.mensagem = [];
                 resposta.mensagem.push("" + err);
                 parcela = null;
                 res.json(resposta);
-            }
+			}
             else{
                 try{
-                    var transacao = new sql.Transaction();
-                    transacao.begin(err =>{
-                        var request = new sql.Request(transacao);
-                        request.query(query, function (err, recordset) {
-                            if (err){
-                                resposta.status = -3;
-                                resposta.mensagem = [];
-                                resposta.mensagem.push("" + err);
-                                parcela = null;
-                                transacao.rollback();
-                                res.json(resposta);
-                            }
-                            else{
-                                resposta.status = 1;
-                                resposta.mensagem = ["ok"];
-                                resposta.parcela =  parametros;
-                                transacao.commit();
-                                res.json(resposta);                                    
-                                }
-                        })
-                    })
+					var request = conexao.request();
+
+					request.query(queryDoc,function(err,recordset){
+						var dataAux = null;
+						var data = null;
+						var emissao = null;
+						var vencimento = null;
+						var parcelasEmAberto = [];
+						var totalParcelasEmAberto = 0;
+						var totalParcelas = 0;
+						var parcela = 0;
+						var diferenca = 0;
+						var cota = 0;
+						var sinal = 0;
+						var query = "";
+						
+						if (err){
+							resposta.status = -5;
+							resposta.mensagem = ["" + err];
+							parcela = null;
+							conexao.close();
+							res.json(resposta);
+						}
+						else{
+							try{
+								resposta.status = 1;
+								data = recordset.recordsets[0][0].emissaodocumento.toISOString().split("T");
+								dataAux = new Date(data);
+								emissao = dataAux.getTime();
+								dataAux = new Date(parametros.vencimento);
+								vencimento = dataAux.getTime();
+								if(emissao > vencimento){
+									resposta.status = 0;
+									resposta.mensagem = ["A data de vencimento da parcela é anterior à data de emissão do documento."];
+									parcela = null;
+									conexao.close();
+									res.json(resposta);
+								}
+								else{
+									query += "update contas_receber_parcelas set "
+									query += "id_banco = " + (parametros.idBanco == "" ? "null" : "'" + parametros.idBanco + "'") + ",";
+									query += "id_forma_pagamento = " + (parametros.idFormaPagamento == "" ? "null" : "'" + parametros.idFormaPagamento + "'") + ",";
+									query += "id_plano_contas_financeiro = " + (parametros.idContaFinanceira == "" ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
+									query += "nr_parcela = '" + parametros.parcela + "',";
+									query += "dt_data_vencimento = '" + parametros.vencimento + "',";
+									query += "vl_valor = " + parametros.valor + ",";
+									query += "nm_documento = '" + parametros.documento + "',";
+									query += "sn_fluxocaixa = " + parametros.fluxoCaixa;
+									query += " where id = '" + parametros.idParcela + "'"
+									query += " and id_empresa = '" + EnterpriseID + "'; ";
+									
+									for(parcela = 0; parcela < recordset.recordsets[0].length; parcela++){
+										if(!recordset.recordsets[0][parcela].valorbaixa){
+											totalParcelasEmAberto += recordset.recordsets[0][parcela].valorparcela;
+											if(recordset.recordsets[0][parcela].idparcela.toLowerCase() != parametros.idParcela.toLowerCase()){
+												parcelasEmAberto.push(recordset.recordsets[0][parcela]);
+												totalParcelas +=  parseFloat(recordset.recordsets[0][parcela].valorparcela);
+											}
+											else
+												totalParcelas += parseFloat(parametros.valor);
+										}
+									}
+									if(parametros.valor >= totalParcelasEmAberto){
+										resposta.status = 0;
+										resposta.mensagem = ["O valor da parcela é maior ou igual ao saldo do documento."];
+										resposta.parcela =  null;
+										conexao.close();
+										res.json(resposta);
+									}
+									else{
+										diferenca = totalParcelasEmAberto - totalParcelas;
+										if(diferenca != 0){
+											if(parcelasEmAberto.length == 0){
+												resposta.status = 0;
+												if(totalParcelasEmAberto > recordset.recordsets[0][0].valordocumento)
+													resposta.mensagem = ["O valor total das parcelas é superior ao do documento."];
+												else
+													resposta.mensagem = ["O valor total das parcelas é inferior ao do documento."];
+												resposta.parcela =  null;
+												conexao.close();
+												res.json(resposta);
+											}
+											else{
+												sinal = 1
+												if(diferenca < 0){
+													sinal = -1;
+													diferenca = Math.abs(diferenca);
+												}
+												cota = Math.trunc(((diferenca * 100) / parcelasEmAberto.length));
+												cota /= 100;
+												while(diferenca > 0){
+													parcela = 0;
+													while(parcela < parcelasEmAberto.length && diferenca > 0){
+														parcelasEmAberto[parcela]["valorparcela"] += (cota * sinal);
+														parcela++
+														diferenca -= cota;
+														if(cota > diferenca)
+															cota = diferenca;
+													}
+												}
+												for(parcela = 0; parcela < parcelasEmAberto.length; parcela++){
+													query += "update contas_receber_parcelas set vl_valor = " + parcelasEmAberto[parcela]["valorparcela"];
+													query += " where id = '" + parcelasEmAberto[parcela]["idparcela"] + "'";
+													query += " and id_empresa = '" + EnterpriseID + "'; ";
+													resposta.alteracoes.push({"idParcela" : parcelasEmAberto[parcela]["idparcela"],"valorParcela" : parcelasEmAberto[parcela]["valorparcela"]});
+												}
+												resposta.status = 1;
+											}
+										}
+										else{
+											resposta.status = 1;
+										}
+									}
+								}
+								
+								if(resposta.status == 1){
+									transacao = conexao.transaction();
+									transacao.begin(err =>{
+										var request = transacao.request();
+										request.query(query, function (err, recordset) {
+											if (err){
+												resposta.status = -3;
+												resposta.mensagem = ["" + err];
+												parcela = null;
+												alteracoes = [];
+												transacao.rollback();
+												conexao.close();
+												res.json(resposta);
+											}
+											else{
+												resposta.status = 1;
+												resposta.mensagem = ["ok"];
+												resposta.parcela =  parametros;
+												transacao.commit();
+												conexao.close();
+												res.json(resposta);
+											}
+										})
+									})
+								}
+							}
+							catch(err){
+								resposta.status = -6;
+								resposta.mensagem = ["" + err];
+								parcela = null;
+								alteracoes = [];
+								conexao.close();
+								res.json(resposta);
+							}
+						}
+					})
                 }
                 catch(err){
                     resposta.status = -4;
                     resposta.mensagem = [];
-                    resposta.mensagem.push("" + erro);
+                    resposta.mensagem.push("" + err);
                     parcela = null;
-                    res.json(resposta);                    
+					alteracoes = [];
+					conexao.close();
+                    res.json(resposta);
                 }
             }
         });
@@ -1925,12 +2249,11 @@ router.route('/atualizarparcela').post(function(req, res) {
         resposta.status = -1;
         resposta.mensagem = [];
         resposta.mensagem.push("" + erro);
-        titulo = null;
+		parcela = null;
+		alteracoes = [];
         res.json(resposta);
     }
 })
-
-
 
 
 /*------------------------------------------------------------------------------

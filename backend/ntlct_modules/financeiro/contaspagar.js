@@ -867,7 +867,7 @@ function funAtualizarConta(parametros,callbackf) {
 				query += " values ";
 				for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
 					if(parcela > 0)
-						queryItens += ",";
+						query += ",";
 					
 					parametros.parcelas[parcela].idParcela = general.guid();
 					query += "(";
@@ -1008,7 +1008,7 @@ function funAtualizarConta(parametros,callbackf) {
 												queryItens += " and id = '" + parametros.parcelas[parcela].idParcela + "'";
 											}
 										}
-										console.log(queryItens);
+										
 										var transacao = conexao.transaction();
 										transacao.begin(err =>{
 											var request = transacao.request();

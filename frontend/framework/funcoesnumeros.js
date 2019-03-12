@@ -58,11 +58,12 @@ function redistribuicaoValores(parametros){
 	var cota = 0;
 	var valorBase = 0;
 	var valorAlterado = 0;
-	var diferenca = 0;
 	var totalItens = 0;
-	var sinal = 1;
+	var diferenca = 0;
 	var resposta = null;
 	var itemModificado = -1;
+	var decimais = 0;
+	var potenciaDez = 0;
 	
 	try{
 		resposta = {
@@ -70,15 +71,27 @@ function redistribuicaoValores(parametros){
 			mensagem: [],
 			itensNovos: null
 		}
+		
+		if(parametros.hasOwnProperty("decimais")){
+			decimais = parametros.decimais
+		}
+		else{
+			decimais = 2;
+		}
+		
+		potenciaDez =  Math.pow(10,decimais);
+		
 		itemModificado = parametros.itens.findIndex(function(value,index,array){return value["id"] == parametros.idItemModificado});
 		valorAlterado = parseFloat(parametros.itens[itemModificado].valor);
 		valorBase = parseFloat(parametros.valorBase);
 		if(valorAlterado >= valorBase){
 			if(valorAlterado > valorBase){
+				resposta.status = 0;
 				resposta.mensagem.push("O valor informado é superior ao saldo.");
 			}
 			else{
 				if(parametros.itens.length > 1){
+					resposta.status = 0;
 					resposta.mensagem.push("O valor informado é igual ao saldo, não permitindo o reajuste das outras parcelas.");
 				}
 			}
@@ -90,34 +103,37 @@ function redistribuicaoValores(parametros){
 			}
 		}
 		if(resposta.status == 1){
-			for(i = 0; i < parametros.itens.length; i++){
-				totalItens += parseFloat(parametros.itens[i].valor);
-			}
-			
-			diferenca = parametros.valorBase - totalItens
-			if(diferenca < 0){
-				sinal = -1
-				diferenca = Math.abs(diferenca);
-			}
-			cota = Math.trunc(((diferenca * 100) / (parametros.itens.length - 1)));
-			cota /= 100;
+			diferenca = valorBase - valorAlterado;
+			cota = Math.trunc((diferenca / (parametros.itens.length - 1) * potenciaDez));
+			cota /= potenciaDez;
 			
 			resposta = {
 				status: 1,
 				mensagem: ["ok"],
 				itensNovos: parametros.itens
 			}
+						
+			for(i = 0; i < resposta.itensNovos.length; i++){
+				if(resposta.itensNovos[i].id != parametros.idItemModificado){
+					resposta.itensNovos[i].valor = cota;
+				}
+				totalItens = totalItens + (resposta.itensNovos[i].valor * potenciaDez);
+			}
 			
-			while(diferenca > 0) {
-				i = 0;
-				while(i < resposta.itensNovos.length && diferenca > 0){
-					if(resposta.itensNovos[i].id != parametros.idItemModificado){
-						resposta.itensNovos[i].valor += (cota * sinal);
-						diferenca -= cota;
-						if(cota > diferenca)
-							cota = diferenca;
+			valorBase *= potenciaDez;
+			if(totalItens != valorBase){
+				diferenca = valorBase - totalItens;
+				cota = 1;
+				
+				while(diferenca > 0){
+					i = 0;
+					while(i < resposta.itensNovos.length && diferenca > 0){
+						if(resposta.itensNovos[i].id != parametros.idItemModificado){
+							resposta.itensNovos[i].valor += (cota / potenciaDez);
+							diferenca -= cota;
+						}
+						i++;
 					}
-					i++;
 				}
 			}
 		}
