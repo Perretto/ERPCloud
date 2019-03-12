@@ -1173,7 +1173,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
     
     if(servico == "*" || servico == "RVS"){
 
-        query += " SELECT REPLACE(venda.codigo, '/', '-' ) AS idvenda,venda.codigo AS codigo, ";
+        query += " SELECT nrrvs AS numcod, REPLACE(venda.codigo, '/', '-' ) AS idvenda,venda.codigo AS codigo, ";
         query += " TO_CHAR(venda.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pex.nome AS nomepessoaextrangeira, pessoa.cpfcnpj AS nomeservico, ('RVS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
         query += " , REPLACE(REPLACE(loread(lo_open(venda.informacoescomplementares, 262144), 1000000)::varchar,'x',''),'\\','')::varchar AS info, vendaoperacao.suareferencia AS referencia , NULL AS obs ";
@@ -1214,7 +1214,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
     }
 
     query += " GROUP BY venda.codigo, venda.codigo,venda.datacadastro, pessoa.nome, pex.nome, pessoa.cpfcnpj ,  ";
-    query += " venda.informacoescomplementares, vendaoperacao.suareferencia, venda.idvenda ";
+    query += " venda.informacoescomplementares, vendaoperacao.suareferencia, venda.idvenda, nrrvs ";
     
     if(servico == "*"){
         query += " UNION ALL ";
@@ -1222,7 +1222,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
 
     
     if(servico == "*" || servico == "RAS"){
-        query += " SELECT REPLACE(aquisicao.codigo, '/', '-' ) AS idvenda,aquisicao.codigo AS codigo, ";
+        query += " SELECT nrras AS numcod, REPLACE(aquisicao.codigo, '/', '-' ) AS idvenda,aquisicao.codigo AS codigo, ";
         query += " TO_CHAR(aquisicao.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pex.nome AS nomepessoaextrangeira, pessoa.cpfcnpj AS nomeservico, ('RAS') AS cnpj, ('') AS valortotal, ('0') AS existe ";
         query += " , REPLACE(REPLACE(loread(lo_open(aquisicao.informacoescomplementares, 262144), 1000000)::varchar,'x',''),'\\','')::varchar  AS info, aquisicaooperacao.suareferencia AS referencia , NULL AS obs ";
@@ -1263,7 +1263,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
     }
 
     query += " GROUP BY aquisicao.codigo,aquisicao.codigo  ,aquisicao.datacadastro ,pessoa.nome, pex.nome, pessoa.cpfcnpj,  ";
-    query += " aquisicao.informacoescomplementares, aquisicaooperacao.suareferencia,aquisicao.idaquisicao ";
+    query += " aquisicao.informacoescomplementares, aquisicaooperacao.suareferencia,aquisicao.idaquisicao , nrras";
 
     if(servico == "*"){
         query += " UNION ALL ";
@@ -1271,7 +1271,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
 
     
     if(servico == "*" || servico == "RF"){
-        query += " SELECT REPLACE(faturamento.codigo, '/', '-' ) AS idvenda,faturamento.codigo AS codigo, ";
+        query += " SELECT  nrrf AS numcod, REPLACE(faturamento.codigo, '/', '-' ) AS idvenda,faturamento.codigo AS codigo, ";
         query += " TO_CHAR(faturamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pex.nome AS nomepessoaextrangeira,  pessoa.cpfcnpj AS nomeservico, ('RF') AS cnpj, ('') AS valortotal, ('0') AS existe ";
         query += " , REPLACE(REPLACE(loread(lo_open(faturamento.observacoes, 262144), 1000000)::varchar,'x',''),'\\','')::varchar  AS info, NULL AS referencia , NULL AS obs ";
@@ -1314,7 +1314,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
     }
 
     query += " GROUP BY faturamento.codigo,faturamento.codigo,faturamento.datacadastro,  pessoa.nome, pex.nome,  pessoa.cpfcnpj, ";
-    query += " faturamento.observacoes,  venda.idvenda ";
+    query += " faturamento.observacoes,  venda.idvenda, nrrf ";
 
 
     if(servico == "*"){
@@ -1324,7 +1324,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
 
     
     if(servico == "*" || servico == "RP"){
-        query += " SELECT REPLACE(pagamento.codigo, '/', '-' ) AS idvenda,pagamento.codigo AS codigo, ";
+        query += " SELECT  nrrp AS numcod, REPLACE(pagamento.codigo, '/', '-' ) AS idvenda,pagamento.codigo AS codigo, ";
         query += " TO_CHAR(pagamento.datacadastro, 'DD/MM/YYYY') AS datacadastro , ";
         query += " pessoa.nome AS nomepessoa, pex.nome AS nomepessoaextrangeira, pessoa.cpfcnpj AS nomeservico, ('RP') AS cnpj, ('') AS valortotal, ('0') AS existe ";
         query += " , REPLACE(REPLACE(loread(lo_open(pagamento.observacoes, 262144), 1000000)::varchar,'x',''),'\\','')::varchar  AS info, NULL AS referencia , NULL AS obs ";
@@ -1368,7 +1368,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
     
 
     query += " GROUP BY pagamento.codigo, pagamento.codigo,pagamento.datacadastro, pessoa.nome ,  ";
-    query += " pex.nome , pessoa.cpfcnpj, pagamento.observacoes, aquisicao.idaquisicao  ";
+    query += " pex.nome , pessoa.cpfcnpj, pagamento.observacoes, aquisicao.idaquisicao, nrrp  ";
                               
     query += " ORDER BY datacadastro ASC ";
     
@@ -3542,13 +3542,14 @@ router.route('/gerarNFSe').post(function(req, res) {
 
 router.route('/carregarNFSe').get(function(req, res) {
     
+    
     var  select = "";
     select += " SELECT cast('false' as bit)  AS 'Marcar', id AS 'id', dataemissao AS 'data',RazaoSocialTomador AS 'razaosocial',  ";
     select += " CnpjTomador AS 'cnpj', ValorTotalServicos AS 'valor',  ";
     select += " status AS 'status' ";
     select += " FROM nfse ";
     select += " WHERE status = 'Pendente' ";
-    select += " GROUP BY  id,dataemissao, RazaoSocialTomador, CnpjTomador, ValorTotalServicos, status ";
+    select += " GROUP BY  id,dataemissao, RazaoSocialTomador, CnpjTomador, ValorTotalServicos, status ORDER BY RazaoSocialTomador ";
 
     sql.close(); 
     sql.connect(config, function (err) { 
@@ -3916,14 +3917,14 @@ router.route('/importarSiscoserv').post(function(req, res) {
                             insert += " DELETE FROM movimentacao_servicos WHERE nm_numero_operacao='" + parametros.codigo[i] + "'; "; 
                             insert += " INSERT INTO movimentacao_servicos (id, dt_emissao, id_entidade, id_produtos, nm_documento, nm_obs,  ";
                             insert += " vl_valor, id_operador,id_indicador,id_subservicos,vl_cotacao,id_dsg_movimentacao_status, ";
-                            insert += " nm_numero_nfes,nm_numero_boleto,dt_faturamento,nm_numero_operacao,nm_status,id_contas_receber, nm_nomepessoaextrangeira, id_referencia) ";
+                            insert += " nm_numero_nfes,nm_numero_boleto,dt_faturamento,nm_numero_operacao,nm_status,id_contas_receber, nm_nomepessoaextrangeira, id_referencia, nm_numcod) ";
                             
                             insert += " VALUES (newID(), '" + parametros.data[i] + "', '" + identidade + "', ";
                             insert += "'" + idservico + "', IIF((SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) > 0 ,";
                             insert += "(SELECT TOP 1 nm_documento FROM movimentacao_servicos ORDER BY nm_documento DESC) + 1,1 ";
                             insert += "), '" + parametros.obs[i] + "',";
                             insert += parametros.valor[i] + ", '" + idoperador + "'," + idindicador + ", '" + idsubservico + "', 0, NULL,";
-                            insert += " NULL, NULL, NULL, '" + parametros.codigo[i] + "', NULL, NULL, '" + parametros.nomepessoaextrangeira[i] + "', '" + parametros.idreferencia[i] + "'";
+                            insert += " NULL, NULL, NULL, '" + parametros.codigo[i] + "', NULL, NULL, '" + parametros.nomepessoaextrangeira[i] + "', '" + parametros.idreferencia[i] + "', '" + parametros.numcod[i] + "'";
                             insert += "); ";
                         }
                         
