@@ -777,6 +777,8 @@ function funAtualizarConta(parametros,callbackf) {
 	var totalParcelas = 0;
     var resposta = null;
 	var conexao = null;
+	var dataEmissao = null;
+	var dataVencimento = null;
 
     resposta = {
         status: 1,
@@ -815,6 +817,7 @@ function funAtualizarConta(parametros,callbackf) {
             resposta.mensagem.push("As parcelas não foram informadas.");
         }
         else{
+            dataEmissao = new Date(parametros.emissao.substring(0,4),parseInt(parametros.emissao.substring(5,7)) - 1,parametros.emissao.substring(8,10));
             for(parcela = 0; parcela < parametros.parcelas.length; parcela++){
                 if(parametros.parcelas[parcela].documento == "" || parametros.parcelas[parcela].documento == "undefined"){
                     resposta.status = 0;
@@ -828,6 +831,13 @@ function funAtualizarConta(parametros,callbackf) {
                     resposta.status = 0;
                     resposta.mensagem.push("A parcela " + (parcela + 1).toString().trim() + " não possui a data de vencimento.");
                 }
+				else{
+					dataVencimento = new Date(parametros.parcelas[parcela].vencimento.substring(0,4),parseInt(parametros.parcelas[parcela].vencimento.substring(5,7)) - 1,parametros.parcelas[parcela].vencimento.substring(8,10));
+					if(dataVencimento.getTime() < dataEmissao.getTime()){
+						resposta.status = 0;
+						resposta.mensagem.push("A data de vencimento da parcela " + (parcela + 1).toString().trim() + " é anterior à data de emissão do documento.");
+					}
+				}
                 if(parametros.parcelas[parcela].valor == "" || parametros.parcelas[parcela].valor == "undefined" || isNaN(parametros.parcelas[parcela].valor)){
                     resposta.status = 0;
                     resposta.mensagem.push("A parcela " + (parcela + 1).toString().trim() + " não possui valor.");
