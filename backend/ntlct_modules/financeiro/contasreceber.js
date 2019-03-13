@@ -711,6 +711,8 @@ router.route('/gerarparcelasvenda').post(function(req, res) {
 
     parametros = req.body.parametros;
 
+    origem = funcoesFinanceiro.buscaOrigemNome("vendas");
+
     try{
         query += "select id_entidade,nr_pedido,dt_emissao,id_parcelamento,id_formapagamento,id_configuracao_cnab,id from venda";
         query += " where id_empresa = '" + EnterpriseID + "'";
@@ -840,6 +842,8 @@ router.route('/atualizarconta').post(function(req, res) {
     try{
         parametros = req.body.parametros;
 
+        parametros.idOrigem = null;
+
         if(!(parametros.hasOwnProperty("idPedido")))
             parametros.idPedido = "";
 
@@ -953,7 +957,7 @@ function funAtualizarConta(parametros,callbackf) {
         if(resposta.status == 1){
             if(parametros.idTitulo == ""){
                 parametros.idTitulo = general.guid();
-                query = "insert into contas_receber (id,id_empresa,id_entidade,id_venda,id_notafiscal,id_parcelamento,id_plano_contas_financeiro,nm_documento,dt_emissao,nm_competencia,vl_valor,sn_dre,nm_observacao) values("
+                query = "insert into contas_receber (id,id_empresa,id_entidade,id_venda,id_notafiscal,id_parcelamento,id_plano_contas_financeiro,id_origem,nm_documento,dt_emissao,nm_competencia,vl_valor,sn_dre,nm_observacao) values("
                 query += "'" + parametros.idTitulo + "',";
                 query += "'" + EnterpriseID + "',";
                 query += "'" + parametros.idEntidade + "',";
@@ -961,6 +965,7 @@ function funAtualizarConta(parametros,callbackf) {
                 query += (!parametros.idNotaFiscal ? "null" : "'" + parametros.idNotaFiscal + "'") + ",";
                 query += "'" + parametros.idParcelamento + "',";
                 query += (!parametros.idContaFinanceira ? "null" : "'" + parametros.idContaFinanceira + "'") + ",";
+                query += (!parametros.idOrigem ? "null" : "'" + parametros.idOrigem + "'") + ",";
                 query += "'" + parametros.nrTitulo + "',";
                 query += "'" + parametros.emissao + "',";
                 query += "'" + parametros.competencia  + "',";
@@ -1929,11 +1934,76 @@ router.route('/verificarexclusaoconta').post(function(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
     res.setHeader('Access-Control-Allow-Credentials', true); // If needed
 
-    resposta = {
-        status: 1,
-        mensagem: ["ok"]
+    try{
+        query += "select id_origem from contas_receber where id = '" + req.body.parametros.idTitulo + "'";
+        query += " and id_empresa = '" + EnterpriseID + "'; ";
+
+        query += "select crp.id,baixa.vl_valor from contas_receber_parcelas crp"
+        query += " left join contas_receber_baixas baixa on baixa.id_contas_receber_parcela = crp.id and baixa.id_empresa = '" + EnterpriseID + "'";
+        query += " where crp.id_contas_receber = '" + req.body.parametros.idTitulo + "' and crp.id_empresa = '" + EnterpriseID + "'";
+
+        sql.close();
+        sql.connect(config, function (err) {
+            if (err){
+                resposta = {
+                    status: -2,
+                    mensagem: ["" + err],
+                }
+                res.json(resposta);
+            }
+            else{
+                var request = new sql.Request();
+                request.query(query, function (err, recordset) {
+                    if (err){
+                        resposta = {
+                            status: -3,
+                            mensagem: ["" + err]
+                        }
+                        res.json(resposta);
+                    }
+                    else{
+                        if(recordset.recordsets[0][0].id_origem){
+                            origem = funcoesFinanceiro.buscaOrigemId(recordset.recordsets[0][0].id_origem);
+                            resposta = {
+                                status: 0,
+                                mensagem: ["Este documento foi gerado por " + origem.nome + ". Sua exclusão deve ser feita pela exclusão do documento original."]
+                            }
+                        }
+                        else{
+                            baixa = false;
+                            parcela = 0;
+                            while(parcela < recordset.recordsets[1].length && !baixa){
+                                if(recordset.recordsets[1][parcela].vl_valor){
+                                    baixa = true;
+                                }
+                                parcela++;
+                            }
+                            if(baixa){
+                                resposta = {
+                                    status: 0,
+                                    mensagem: ["Este documento possui parcelas que foram pagas. Para excluí-lo, os pagamentos devem ser cancelados."]
+                                }
+                            }
+                            else{
+                                resposta = {
+                                    status: 1,
+                                    mensagem: ["ok"]
+                                }
+                            }
+                        }
+                        res.json(resposta);
+                    }
+                })
+            }
+        })
     }
-    res.json(resposta);
+    catch(err){
+        resposta = {
+            status: -1,
+            mensagem: ["" + err],
+        }
+        res.json(resposta);
+    }
 })
 
 

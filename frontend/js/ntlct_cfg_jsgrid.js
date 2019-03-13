@@ -401,8 +401,8 @@ campoAutoComplete.prototype = new jsGrid.Field({
 	insertValue: function() {
 		var ret = null;
 		
-		if(this._editPicker.children[0].value)
-			ret = {"label" : this._editPicker.children[0].value,"id" : this._editPicker.children[1].value};
+		if(this._insertPicker.children[0].value)
+			ret = {"label" : this._insertPicker.children[0].value,"id" : this._insertPicker.children[1].value};
 		else
 			ret = {"label" : "","id" : ""};
 			
