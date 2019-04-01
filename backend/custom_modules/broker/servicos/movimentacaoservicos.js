@@ -4803,7 +4803,7 @@ router.route('/enviarEmailGeral/:id').get(function(req, res) {
                                 if(retorno.recordset[i].boleto){
                                     attachment = {
                                         filename: 'boleto.pdf',
-                                        path:"http://homologacao.cobrancabancaria.tecnospeed.com.br:8080/api/v1/boletos/impressao/lote/" + retorno.recordset[i].boleto
+                                        path:"http://cobrancabancaria.tecnospeed.com.br/api/v1/boletos/impressao/lote/" + retorno.recordset[i].boleto
                                     };
                                     mail.attachments.push(attachment);
                                 }
@@ -4831,7 +4831,7 @@ router.route('/enviarEmailGeral/:id').get(function(req, res) {
                                 if(retorno.recordset[i].boleto){
                                     attachment = {
                                         filename: 'boleto.pdf',
-                                        path:"http://homologacao.cobrancabancaria.tecnospeed.com.br:8080/api/v1/boletos/impressao/lote/" + retorno.recordset[i].boleto
+                                        path:"http://cobrancabancaria.tecnospeed.com.br/api/v1/boletos/impressao/lote/" + retorno.recordset[i].boleto
                                     };
                                     mail.attachments.push(attachment);
                                 }
