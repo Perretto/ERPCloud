@@ -289,6 +289,7 @@ var arrayData = [];
 
     select = select + where; 
     select = select + "  GROUP BY movimentacao_servicos.id_produtos,   entidade.id, entidade.nm_cnpj, entidade.nm_razaosocial,  movimentacao_servicos.dt_faturamento,  movimentacao_servicos.nm_numero_nfes,  contas_receber_parcelas.nm_numero_boleto,  cliente_servicos.sn_notaunica, movimentacao_servicos.id_contas_receber, contas_receber_parcelas.nm_idprotocoloimpressao";
+    select = select + " ORDER BY entidade.nm_razaosocial, dt_faturamento ";
     console.log("=============================================================");
     console.log(select)
     sql.close(); 
