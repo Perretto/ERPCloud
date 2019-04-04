@@ -4722,6 +4722,12 @@ router.route('/enviarEmailGeral/:id').get(function(req, res) {
     select += " contato.id_dsg_tipo_contato AS 'tipocontato', ";
     select += " contas_receber_parcelas.nm_idprotocoloimpressao AS 'boleto', ";
     select += " movimentacao_servicos.nm_numero_nfes AS 'numero_nfes', movimentacao_servicos.nm_numero_protocolo AS 'numero_protocolo' ";
+  
+    select += " , (SELECT TOP 1 IIF(nf.DiscriminacaoServico LIKE '%RP - %','true', ";
+    select += " IIF(nf.DiscriminacaoServico LIKE '%RF - %', 'true', ";
+    select += " IIF(nf.DiscriminacaoServico LIKE '%RAS - %', 'true', ";
+    select += " IIF(nf.DiscriminacaoServico LIKE '%RVS - %', 'true', ";
+    select += " 'false')))) FROM nfse nf WHERE nfse.id=nf.id) AS 'siscoserv' ";
 
     select += " FROM nfse ";
     select += " INNER JOIN contas_receber ON nfse.id=contas_receber.id_venda ";
@@ -4737,7 +4743,7 @@ router.route('/enviarEmailGeral/:id').get(function(req, res) {
     where += " cadastro_email.nm_servidor,   cadastro_email.nm_emailenvio ,   "; 
     where += " cadastro_email.nm_senha ,   cadastro_email.nm_assunto,   cadastro_email.nm_texto,     ";
     where += " contato.id_dsg_tipo_contato,  contas_receber_parcelas.nm_idprotocoloimpressao,   ";
-    where += " movimentacao_servicos.nm_numero_nfes, movimentacao_servicos.nm_numero_protocolo ";
+    where += " movimentacao_servicos.nm_numero_nfes, movimentacao_servicos.nm_numero_protocolo, nfse.id ";
 
     select += where;
     console.log(select);
@@ -4769,15 +4775,26 @@ router.route('/enviarEmailGeral/:id').get(function(req, res) {
                         switch(retorno.recordset[i].tipocontato.toLowerCase()) {
                             case "61b90b9a-13de-43c1-a742-7857de0231ea":   
                                 //Envia todos  
-                                        
-                                var path = "http://" + req.host + ":3002/api/r/detalhesservicosgeraisemail";
-                                path += "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
-                                path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
-                                path += "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,";
-                                path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,";
-                                path += "%22nfse%22:%7B%22value%22:%22" + id + "%22,";
-                                path += "%22type%22:%22caracter%22,%22text%22:%22%20-%2010.00%22%7D%7D";
+                                var path = "";        
+                                if(retorno.recordset[i].siscoserv == 'true'){
+                                    path +=  "http://" + req.host + ":3002/api/r/detalhesservicossiscoservemail";
+                                    path +=  "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
+                                    path +=  "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
+                                    path +=  "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,";
+                                    path +=  "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,";
+                                    path +=  "%22nfse%22:%7B%22value%22:%22" + id + "%22,";
+                                    path +=  "%22type%22:%22caracter%22,%22text%22:%22%22%7D%7D";
 
+                                }else{
+                                    path +=  "http://" + req.host + ":3002/api/r/detalhesservicosgeraisemail";
+                                    path += "/%7B%22userId%22:%7B%22value%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22,";
+                                    path += "%22text%22:%22de5d2469-ae66-4696-9147-004f86f7d0d9%22%7D,";
+                                    path += "%22_orientacao_%22:%7B%22value%22:%22landscape%22,%22text%22:%22Paisagem%22%7D,";
+                                    path += "%22_saida_%22:%7B%22value%22:%22pdf%22,%22text%22:%22Pdf%22%7D,";
+                                    path += "%22nfse%22:%7B%22value%22:%22" + id + "%22,";
+                                    path += "%22type%22:%22caracter%22,%22text%22:%22%20-%2010.00%22%7D%7D";
+                                }
+                                console.log(path)
                                 mail.attachments = [];
 
                                 var attachment = {
