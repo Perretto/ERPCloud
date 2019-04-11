@@ -2223,7 +2223,7 @@ router.route('/atualizarparcela').post(function(req, res) {
 												totalParcelas += parseFloat(parametros.valor);
 										}
 									}
-									if(parametros.valor >= totalParcelasEmAberto){
+									if((parametros.valor > totalParcelasEmAberto) || (parametros.valor = totalParcelasEmAberto && recordset.recordsets[0].length > 1)){
 										resposta.status = 0;
 										resposta.mensagem = ["O valor da parcela é maior ou igual ao saldo do documento."];
 										resposta.parcela =  null;
