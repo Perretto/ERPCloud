@@ -538,7 +538,7 @@ router.route('/dadostitulo').post(function(req, res) {
         query += " and (@idtitulo is null or cr.id = @idtitulo)";
         query += " and crp.id_empresa = @idempresa and crp.id_contas_receber = cr.id";
         query += " and (@idparcela is null or crp.id = @idparcela)";
-        query += " and ent.id = cr.id_entidade and ent.id_empresa = @idempresa";
+        query += " and ent.id = cr.id_entidade ";
         query += " order by replicate(' ',10 - len(crp.nr_parcela)) + rtrim(crp.nr_parcela),baixas.dt_data";
 
         sql.close();

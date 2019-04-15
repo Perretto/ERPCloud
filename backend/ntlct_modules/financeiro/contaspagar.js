@@ -223,12 +223,121 @@ router.route('/listacomplementoparcelas').post(function(req, res) {
     }
 })
 
-
 /*------------------------------------------------------------------------------
 Cria uma relação das contas a pagar (parcelas)
 --------------------------------------------------------------------------------
 */
 router.route('/listarcontas').post(function(req, res) {
+    var query = "";
+    var resposta = null;
+    var titulo = null;
+    var baixa = null;
+    var parametros = null;
+    var idParcela = null;
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
+    res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+
+    resposta = {
+        status: 0,
+        mensagem: [],
+        titulos: [],
+    }
+
+    try{
+        parametros = req.body.parametros;
+
+        resposta = {
+            status: 0,
+            mensagem: [],
+            titulos: [],
+        }
+
+        query += "select ";
+        query += "ent.id idEntidade,ent.nm_razaosocial razaoSocial,";
+        query += "cp.id idTitulo,cp.nm_documento titulo,cp.vl_valor valorTitulo,cp.dt_emissao emissao,cp.id_compra idCompra,cp.id_notafiscal idNota,cp.sn_dre dre,";
+        query += "cp.nm_competencia,cp.dt_cancelamento cancelamentoDocumento,";
+        query += "cpp.id idParcela,cpp.nm_documento docParcela,cpp.nr_parcela parcela,cpp.dt_data_vencimento vencimentoParcela,cpp.vl_valor valorParcela,cpp.id_banco idBanco,";
+        query += "cpp.id_plano_contas_financeiro idContaFinanceira,cpp.id_forma_pagamento idFormaPagamento,cpp.sn_fluxocaixa fluxoCaixa,cpp.dt_cancelamento cancelamentoParcela,";
+        query += "baixas.id idBaixa,baixas.dt_data dataBaixa,baixas.vl_valor valorBaixa,";
+        query += "formas.nm_documento documentoPag,";
+        query += "(select nr_pedido from compra where compra.id = cp.id_compra and compra.id_empresa = @idempresa) nrPedido,";
+        query += "(select nm_numeronotafiscal from notafiscal where notafiscal.id = cp.id_notafiscal and notafiscal.id_empresa = @idempresa) nrNotaFiscal";
+        query += " from contas_pagar cp";
+        query += " left join entidade ent on ent.id = cp.id_entidade";
+        query += " left join contas_pagar_parcelas cpp on cpp.id_contas_pagar = cp.id and cpp.id_empresa = @idempresa";
+        query += " left join contas_pagar_baixas baixas on baixas.id_contas_pagar_parcela = cpp.id and baixas.id_empresa = @idempresa";
+        query += " left join contas_pagar_baixas_formaspagamento formas on formas.id_contas_pagar_baixas = baixas.id and formas.id_empresa = @idempresa";
+        query += " where cp.id_empresa = @idempresa";
+		
+		if(parametros.titulosPagos == 0){
+			query += " and baixas.id is null";
+		}
+		if(parametros.hasOwnProperty("titulosCancelados")){
+			if(parametros.titulosCancelados == 0){
+				query += " and (cp.dt_cancelamento is null or cp.dt_cancelamento = '')"
+			}
+		}
+        query += " and (@pedido is null or cp.id_compra in (select id from compra where compra.nr_pedido = @pedido))";
+        query += " and (@notaFiscal is null or cp.id_notafiscal in (select id from notafiscal nota where nota.nm_numeronotafiscal = @notafiscal))";
+        query += " and (@identidade is null or cp.id_entidade = @identidade)";
+        query += " and ent.id = cp.id_entidade";
+        query += " and cpp.id_contas_pagar = cp.id";
+        query += " and (@vencimentoinicial is null or (convert(varchar(8),cpp.dt_data_vencimento,112)) >= @vencimentoinicial)";
+        query += " and (@vencimentofinal is null or (convert(varchar(8),cpp.dt_data_vencimento,112)) <= @vencimentofinal)";
+        query += " order by cpp.dt_data_vencimento,cpp.vl_valor desc,cpp.nm_documento,cpp.nr_parcela";
+		
+        sql.close();
+        sql.connect(config, function (err) {    
+            if (err){
+                resposta.status = -2;
+                resposta.mensagem = [];
+                resposta.mensagem.push("" + err);
+                resposta.titulos = [];
+                res.json(resposta);
+            }
+            else{
+                var request = new sql.Request();
+                request.input("idempresa",EnterpriseID);
+                request.input("identidade",(parametros.idEntidade == "" || parametros.idEntidade == "undefined") ? null : parametros.idEntidade);
+                request.input("pedido",(parametros.pedido == "" || parametros.pedido == "undefined") ? null : parametros.pedido);
+                request.input("notafiscal",(parametros.notaFiscal == "" || parametros.notaFiscal == "undefined") ? null : parametros.notaFiscal);
+                request.input("vencimentoinicial",(parametros.vencimentoInicial == "" || parametros.vencimentoInicial == "undefined") ? null : parametros.vencimentoInicial.substring(6,10) + parametros.vencimentoInicial.substring(3,5)  + parametros.vencimentoInicial.substring(0,2));
+                request.input("vencimentofinal",(parametros.vencimentoFinal == "" || parametros.vencimentoFinal == "undefined") ? null : parametros.vencimentoFinal.substring(6,10) + parametros.vencimentoFinal.substring(3,5)  + parametros.vencimentoFinal.substring(0,2));
+                
+				request.query(query, function (err, recordset) {
+                    if (err){
+                        resposta.status = -3;
+                        resposta.mensagem = ["" + err];
+                        resposta.titulos = [];
+                        res.json(resposta);
+                    }
+                    else{
+                        resposta.titulos = recordset.recordsets[0];
+                        resposta.status = 1;
+                        resposta.mensagem = ["ok"];
+                        res.json(resposta);
+                    }
+                })
+            }
+        })
+    }
+    catch(erro){
+        resposta.status = -1;
+        resposta.mensagem = ["" + erro];
+        resposta.titulos = [];
+        sql.close();
+        res.json(resposta);
+    }
+})
+
+/*------------------------------------------------------------------------------
+Cria uma relação das contas a pagar (parcelas)
+--------------------------------------------------------------------------------
+*/
+router.route('/listarcontasdetalhepagamento').post(function(req, res) {
     var query = "";
     var resposta = null;
     var titulo = null;
@@ -430,7 +539,7 @@ router.route('/dadostitulo').post(function(req, res) {
         query += " and (@idtitulo is null or cp.id = @idtitulo)";
         query += " and cpp.id_empresa = @idempresa and cpp.id_contas_pagar = cp.id";
         query += " and (@idparcela is null or cpp.id = @idparcela)";
-        query += " and ent.id = cp.id_entidade and ent.id_empresa = @idempresa";
+        query += " and ent.id = cp.id_entidade ";
         query += " order by replicate(' ',10 - len(cpp.nr_parcela)) + rtrim(cpp.nr_parcela),baixas.dt_data";
 
         sql.close();
@@ -448,6 +557,7 @@ router.route('/dadostitulo').post(function(req, res) {
                 request.input("idempresa",EnterpriseID);
                 request.input("idtitulo",parametros.idTitulo == "" ? null : parametros.idTitulo);
                 request.input("idparcela",parametros.idParcela == "" ? null : parametros.idParcela);
+                console.log(query)
                 request.query(query, function (err, recordset) {
                     try{
                         if (err){
@@ -2128,7 +2238,7 @@ router.route('/atualizarparcela').post(function(req, res) {
 												totalParcelas += parseFloat(parametros.valor);
 										}
 									}
-									if(parametros.valor >= totalParcelasEmAberto){
+									if((parametros.valor > totalParcelasEmAberto) || (parametros.valor = totalParcelasEmAberto && recordset.recordsets[0].length > 1)){
 										resposta.status = 0;
 										resposta.mensagem = ["O valor da parcela é maior ou igual ao saldo do documento."];
 										resposta.parcela =  null;
