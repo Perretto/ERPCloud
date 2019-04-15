@@ -12,12 +12,14 @@ campoData.prototype = new jsGrid.Field({
 	
 	sorter: function (data1, data2) {
 		//return new Date(date1) - new Date(date2);
-		var vlr1 = ""; var vlr2 = ""; var ret = 0; var data = [];
+		var vlr1 = ""; var vlr2 = ""; var ret = 0; var data = "";
 		
-		data = data1.split("/");
-		vlr1 = data[2] + data[1] + data[0];
-		data = data2.split("/");
-		vlr2 = data[2] + data[1] + data[0];
+		if(data1){
+			vlr1 = data1.substring(0,4),parseInt(data1.substring(5,7)) - 1,data1.substring(8,10)
+		}
+		if(data2){
+			vlr2 = data2.substring(0,4),parseInt(data2.substring(5,7)) - 1,data2.substring(8,10)
+		}
 		
 		if(vlr1 < vlr2) 
 			ret = -1;   // return negative value when first is less than second
@@ -271,16 +273,36 @@ campoNumeroFormatado.prototype = new jsGrid.Field({
 	},
 	insertValue: function() {
 		var valor = null;
+		var ret = 0;
 		
-		valor = parseFloat(this._insertPicker[0].value.replace(/\./g,"").replace(",", "."));
-		return(valor);
+		valor = this._insertPicker[0].value.replace(/\./g,"").replace(",", ".");
+		
+		if(valor){
+			if(isNaN(valor))
+				value = "0";
+		}
+		else
+			valor = "0";
+			
+		ret = parseFloat(valor);
+		return(ret);
 	},
 
 	editValue: function() {
 		var valor = null;
+		var ret = 0;
 		
-		valor = parseFloat(this._editPicker[0].value.replace(/\./g,"").replace(",", "."));
-		return(valor);
+		valor = this._editPicker[0].value.replace(/\./g,"").replace(",", ".");
+		
+		if(valor){
+			if(isNaN(valor))
+				value = "0";
+		}
+		else
+			valor = "0";
+			
+		ret = parseFloat(valor);
+		return(ret);
 	}
 });
 
@@ -302,18 +324,23 @@ campoTexto.prototype = new jsGrid.Field({
 	sorter: function (vlr1, vlr2) {
 		var ret = 0;
 		
-		if(vlr1 && vlr2){
-			if(vlr1 < vlr2) 
-				ret = -1;   // return negative value when first is less than second
+		if(!vlr1)
+			vlr1 = "";
+			
+		if(!vlr2)
+			vlr2 = "";
+			
+		if(vlr1 < vlr2) 
+			ret = -1;   // return negative value when first is less than second
+		else{
+			if(vlr1 == vlr2) 
+				ret = 0;   // return zero if values are equal
 			else{
-				if(vlr1 == vlr2) 
-					ret = 0;   // return zero if values are equal
-				else{
-					if(vlr1 > vlr2) 
-						ret = 1;    // return positive value when first is greater than second
-				}
+				if(vlr1 > vlr2) 
+					ret = 1;    // return positive value when first is greater than second
 			}
 		}
+		
 		return(ret);
 	},
 	itemTemplate: function (value,item) {
