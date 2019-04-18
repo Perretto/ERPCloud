@@ -2551,64 +2551,114 @@ router.route('/gerarpagamentosperiodicos').post(function(req, res) {
 
     var emissao = parametros.emissao.split("/");
     parametros.emissao = emissao[1] + "/" + emissao[0] + "/" +  emissao[2]
-
-    for (let index = 0; index < ind; index++) {   
-        var guid = general.guid();      
-        ins += "INSERT INTO contas_pagar ";
-        ins += " (id, id_empresa, id_entidade, id_parcelamento, id_plano_contas_financeiro, nm_documento, ";
-        ins += "dt_emissao, vl_valor, nm_observacao, nm_competencia) ";
-        ins += " VALUES('" + guid + "', '" + parametros.idempresa + "', '" + parametros.fornecedor + "', '" + parametros.parcelamento + "', "
-        ins += "'" + parametros.contafinanceira + "','" + parametros.documento + "','" + parametros.emissao + "'";
-        ins += "," + parametros.valor + ",'" + parametros.obs + "','');"   
-        
-              
-        var guid2 = general.guid();      
-        ins += "INSERT INTO contas_pagar_parcelas ";
-        ins += " (id, id_empresa, id_contas_pagar,  id_plano_contas_financeiro, nm_documento ";
-        ins += " ,vl_valor, dt_data_vencimento, nr_parcela) ";
-        ins += " VALUES('" + guid2 + "', '" + parametros.idempresa + "', '" + guid + "',  "
-        ins += "'" + parametros.contafinanceira + "','" + parametros.documento + "',";
-        ins += "" + parametros.valor + ",'" + parametros.emissao + "', 1);";
-        
-    }
-
-   
     
-    sql.close();
-    sql.connect(config, function (err) {  
-        var transacao = new sql.Transaction();
-        transacao.begin(err =>{
-            var request = new sql.Request(transacao);
-            request.query(ins, function (err, recordset) {
-                if (err){
-                    console.log(err)
-                    resposta.status = -2;
-                    resposta.mensagem = [];
-                    resposta.mensagem.push("" + err);
-                    resposta.documento = null;
-                    transacao.rollback();
-                    res.json(resposta);
-                }
-                else{
-                    try{
-                        resposta.status = 1
-                        resposta.mensagem = ["ok"];
+    var select = "SELECT nr_intervaloparcelas AS 'intervaloparcelas', nm_carencia AS 'carencia', nr_diavencimento AS 'diavencimento'"; 
+    select += " FROM parcelamento WHERE id='" + parametros.parcelamento + "'";
+
+    sql.close(); 
+    sql.connect(config, function (err) { 
+        if (err) console.log(err); 
+        var request = new sql.Request(); 
+        request.query(select, function (err, rec){ 
+            if (err) console.log(err);
+            
+            if(rec.recordset){
+                if(rec.recordset.length > 0){
+                    var diavencimento = rec.recordset[0].diavencimento;
+                    
+                    var datavenc = new Date(parametros.emissao);
+                    
+                    for (let index = 0; index < ind; index++) {  
                         
-                        transacao.commit();
-                        console.log(ins)
-                        res.json(resposta);
+                        /*
+                        if(diavencimento){
+                            datavenc = mes + "/" + diavencimento + "/" +  emissao[2];
+                        }else{
+                            var dia = parseInt(emissao[1]) + intervaloparcelas;
+                            datavenc = mes + "/" + diavencimento + "/" +  emissao[2];    
+                        } 
+*/
+                        if (diavencimento){
+                            datavenc.setDate(diavencimento)
+                            datavenc.setMonth((datavenc.getMonth() + 1));                            
+                        }else{
+                            var intervaloparcelas = parseInt(rec.recordset[0].intervaloparcelas);
+                            var carencia = parseInt(rec.recordset[0].carencia);
+
+                            if(carencia && index == 0){
+                                datavenc.setDate(datavenc.getDate() + carencia)
+                            }
+
+                            if(intervaloparcelas){
+                                datavenc.setDate(datavenc.getDate() + intervaloparcelas)
+                            }
+                        }
+                        
+                        var dia = datavenc.getDate();
+                        var mes = datavenc.getMonth() + 1;
+                        var ano = datavenc.getFullYear();
+                        
+                        var guid = general.guid();      
+                        ins += "INSERT INTO contas_pagar ";
+                        ins += " (id, id_empresa, id_entidade, id_parcelamento, id_plano_contas_financeiro, nm_documento, ";
+                        ins += "dt_emissao, vl_valor, nm_observacao, nm_competencia) ";
+                        ins += " VALUES('" + guid + "', '" + parametros.idempresa + "', '" + parametros.fornecedor + "', '" + parametros.parcelamento + "', "
+                        ins += "'" + parametros.contafinanceira + "','" + parametros.documento + "','" + parametros.emissao + "'";
+                        ins += "," + parametros.valor + ",'" + parametros.obs + "','');"   
+                        
+                            
+                        var guid2 = general.guid();      
+                        ins += "INSERT INTO contas_pagar_parcelas ";
+                        ins += " (id, id_empresa, id_contas_pagar,  id_plano_contas_financeiro, nm_documento ";
+                        ins += " ,vl_valor, dt_data_vencimento, nr_parcela) ";
+                        ins += " VALUES('" + guid2 + "', '" + parametros.idempresa + "', '" + guid + "',  "
+                        ins += "'" + parametros.contafinanceira + "','" + parametros.documento + "',";
+                        ins += "" + parametros.valor + ",'" + mes + "/" + dia + "/" + ano + "', " + (index + 1) + ");";
+                        
                     }
-                    catch(err){
-                        resposta.status = -3;
-                        resposta.mensagem = [];
-                        resposta.mensagem.push("" + err);
-                        resposta.documento = null;
-                        transacao.rollback();
-                        res.json(resposta);                
-                    }
+
+                
+                    
+                    sql.close();
+                    sql.connect(config, function (err) {  
+                        var transacao = new sql.Transaction();
+                        transacao.begin(err =>{
+                            var request = new sql.Request(transacao);
+                            request.query(ins, function (err, recordset) {
+                                if (err){
+                                    console.log(err)
+                                    resposta.status = -2;
+                                    resposta.mensagem = [];
+                                    resposta.mensagem.push("" + err);
+                                    resposta.documento = null;
+                                    transacao.rollback();
+                                    res.json(resposta);
+                                }
+                                else{
+                                    try{
+                                        resposta.status = 1
+                                        resposta.mensagem = ["ok"];
+                                        
+                                        transacao.commit();
+                                        console.log(ins)
+                                        res.json(resposta);
+                                    }
+                                    catch(err){
+                                        resposta.status = -3;
+                                        resposta.mensagem = [];
+                                        resposta.mensagem.push("" + err);
+                                        resposta.documento = null;
+                                        transacao.rollback();
+                                        res.json(resposta);                
+                                    }
+                                }
+                            })
+                        })                        
+                    })
                 }
-            })
-        })
-        
-    })
+            }
+        }); 
+    }); 
+
+
 })
