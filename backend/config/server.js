@@ -15,7 +15,7 @@ server.use(bodyParser.json({
     extended: false,
     parameterLimit: 100000,
     limit: 1024 * 1024 * 1000,
-    type: function(res, req) {
+    type: function(req) {
         return req.headers['Content-Type'] === '*/*; charset=UTF-8';
     }
 })) 

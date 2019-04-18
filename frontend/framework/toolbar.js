@@ -223,7 +223,9 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
             accepts: "application/json",
             url: returnCookie("urlPlataform") + "/api/save/", 
             type: "POST",
-            data:  data,
+            data: {parametros: data },
+            dataType: "json",
+            async: false,
             success: function(result){
 
 

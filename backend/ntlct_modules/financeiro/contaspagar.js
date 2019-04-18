@@ -2523,3 +2523,92 @@ function cancelarConta(parametros,conexao,callbackf){
 		callbackf(resposta);
 	}
 }
+
+
+
+router.route('/gerarpagamentosperiodicos').post(function(req, res) {
+    var parcela = 0;
+    var resposta = null;
+    var parametros = null;
+    var ins = "";
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
+    res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+
+    resposta = {
+        status: 0,
+        mensagem: [],
+        parcelas: [],
+    }
+
+    
+    parametros = req.body.parametros;
+    var ind = parseInt(parametros.recorrencia);
+
+    parametros.valor = parametros.valor.replace(".","").replace(",",".");
+
+    var emissao = parametros.emissao.split("/");
+    parametros.emissao = emissao[1] + "/" + emissao[0] + "/" +  emissao[2]
+
+    for (let index = 0; index < ind; index++) {   
+        var guid = general.guid();      
+        ins += "INSERT INTO contas_pagar ";
+        ins += " (id, id_empresa, id_entidade, id_parcelamento, id_plano_contas_financeiro, nm_documento, ";
+        ins += "dt_emissao, vl_valor, nm_observacao, nm_competencia) ";
+        ins += " VALUES('" + guid + "', '" + parametros.idempresa + "', '" + parametros.fornecedor + "', '" + parametros.parcelamento + "', "
+        ins += "'" + parametros.contafinanceira + "','" + parametros.documento + "','" + parametros.emissao + "'";
+        ins += "," + parametros.valor + ",'" + parametros.obs + "','');"   
+        
+              
+        var guid2 = general.guid();      
+        ins += "INSERT INTO contas_pagar_parcelas ";
+        ins += " (id, id_empresa, id_contas_pagar,  id_plano_contas_financeiro, nm_documento ";
+        ins += " ,vl_valor, dt_data_vencimento, nr_parcela) ";
+        ins += " VALUES('" + guid2 + "', '" + parametros.idempresa + "', '" + guid + "',  "
+        ins += "'" + parametros.contafinanceira + "','" + parametros.documento + "',";
+        ins += "" + parametros.valor + ",'" + parametros.emissao + "', 1);";
+        
+    }
+
+   
+    
+    sql.close();
+    sql.connect(config, function (err) {  
+        var transacao = new sql.Transaction();
+        transacao.begin(err =>{
+            var request = new sql.Request(transacao);
+            request.query(ins, function (err, recordset) {
+                if (err){
+                    console.log(err)
+                    resposta.status = -2;
+                    resposta.mensagem = [];
+                    resposta.mensagem.push("" + err);
+                    resposta.documento = null;
+                    transacao.rollback();
+                    res.json(resposta);
+                }
+                else{
+                    try{
+                        resposta.status = 1
+                        resposta.mensagem = ["ok"];
+                        
+                        transacao.commit();
+                        console.log(ins)
+                        res.json(resposta);
+                    }
+                    catch(err){
+                        resposta.status = -3;
+                        resposta.mensagem = [];
+                        resposta.mensagem.push("" + err);
+                        resposta.documento = null;
+                        transacao.rollback();
+                        res.json(resposta);                
+                    }
+                }
+            })
+        })
+        
+    })
+})

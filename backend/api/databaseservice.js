@@ -2013,8 +2013,14 @@ router.route('/save').post(function(req, res) {
     var retorno = "0"
     var setrecord;
     var error = "";
+    var submit;
 
-    var submit = req.body;
+    if(req.body.parametros){
+        submit = req.body.parametros;
+    }else{
+        submit = req.body;
+    }
+    
     var insertOrUpdate = ""
     var request = new sql.Request();
 
