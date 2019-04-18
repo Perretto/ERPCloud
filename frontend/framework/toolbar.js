@@ -219,13 +219,9 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
         }
 
         $.ajax({
-            contentType: "application/json",
-            accepts: "application/json",
             url: returnCookie("urlPlataform") + "/api/save/", 
             type: "POST",
-            data: {parametros: data },
-            dataType: "json",
-            async: false,
+            data:  {paramentros: data},
             success: function(result){
 
 
@@ -280,7 +276,7 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
                     }
                    
                     if (onAfterSaving) {
-                        if (onAfterSaving != "null"  && onBeforeSaving != "undefined") {
+                        if (onAfterSaving != "null") {
                             executeFunctionByName(onAfterSaving.substring(0, onAfterSaving.indexOf("(")), window, result);
                         }
                     }
@@ -311,11 +307,10 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
             
         }
         })
-    }
-},function(){
-    loaderImage(form, false);
-})
     
+
+    }
+})
 }
 
 function SerializeFields(param){
