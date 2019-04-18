@@ -1216,7 +1216,7 @@ router.route('/realizarrecebimento').post(function(req, res) {
             query += " where parc.id = '" + parametros.idTitulo + "'";
             query += " and parc.id_empresa = '" + EnterpriseID + "'";
             query += " and cr.id = parc.id_contas_receber and cr.id_empresa = '" + EnterpriseID + "'";
-            query += " and ent.id = cr.id_entidade and ent.id_empresa = '" + EnterpriseID + "'";
+            query += " and ent.id = cr.id_entidade";
 
             sql.close();
             sql.connect(config, function (err) {    
@@ -1519,7 +1519,7 @@ router.route('/realizarmultirecebimento').post(function(req, res) {
             query += " where parc.id = '" + parametros.listaParcelas[parcela] + "'";
             query += " and parc.id_empresa = '" + EnterpriseID + "'";
             query += " and cr.id = parc.id_contas_receber and cr.id_empresa = '" + EnterpriseID + "'";
-            query += " and ent.id = cr.id_entidade and ent.id_empresa = '" + EnterpriseID + "'; ";
+            query += " and ent.id = cr.id_entidade ";
         }
         sql.close();
         sql.connect(config, function (err) {    
@@ -1790,7 +1790,7 @@ router.route('/cancelarmultirecebimento').post(function(req, res) {
             query += " where parc.id = '" + parametros.listaParcelas[parcela] + "'";
             query += " and parc.id_empresa = '" + EnterpriseID + "'";
             query += " and cr.id = parc.id_contas_receber and cr.id_empresa = '" + EnterpriseID + "'";
-            query += " and ent.id = cr.id_entidade and ent.id_empresa = '" + EnterpriseID + "'; ";
+            query += " and ent.id = cr.id_entidade ; ";
         }
         sql.close();
         sql.connect(config, function (err) {    
