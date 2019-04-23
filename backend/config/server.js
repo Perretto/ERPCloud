@@ -7,7 +7,7 @@ const allowCors = require('./cors')
 const queryParser = require('express-query-int')
 
 server.use(bodyParser.urlencoded({ 
-    extended: true ,
+    extended: false ,
     parameterLimit: 100000,
     limit: 1024 * 1024 * 1000
 }))

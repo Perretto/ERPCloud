@@ -3639,10 +3639,15 @@ router.route('/getInfoNFSe').post(function(req, res) {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
     res.setHeader('Access-Control-Allow-Credentials', true); // If needed
+    res.setHeader('Content-Type', 'application/json');
     
     var retorno = false;
     var update = "";
-    var parametros = req.body;
+    var parametros = req.body; 
+    parametros.listID = parametros.listID.replace("[","");
+    parametros.listID = parametros.listID.replace("]","");
+    
+    parametros.listID = parametros.listID.split(",");
 
     var enterpriseID = parametros.enterpriseID;
     
@@ -3698,6 +3703,8 @@ router.route('/getInfoNFSe').post(function(req, res) {
     var where = "";
 
     for (let index = 0; index < parametros.listID.length; index++) { 
+        parametros.listID[index] = parametros.listID[index].replace("\"", "");
+        parametros.listID[index] = parametros.listID[index].replace("\"", "");
         if(index == 0){
             where += " (nfse.id ='" + parametros.listID[index] + "')";
         }else{
