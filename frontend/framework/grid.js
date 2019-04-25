@@ -672,13 +672,14 @@ function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
             $("#" + idcheckbox).on('ifClicked', function () {
                 var args = this;
                 if (funcName != "" && funcName != undefined && funcName != null) {
-
+                     
                     executeFunctionByName(funcName, window, args);
                     //funcName = funcName + "(line)";
                     //window[funcName](args);
                     //executeFunctionByName(onClickName + ".");
                 }
             });
+            
         });
 
     }
@@ -688,6 +689,8 @@ function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
     //} else {
         //ClearForm(containerID, false);
     //}
+
+     
 
     if (containerID.split("_")[0] == "474181e6-f8d3-4a8e-9bdb-a12528941aff" || containerID.split("_")[0] == "2e9ecdc9-9d91-4750-958f-d8f530e77e13" || containerID.split("_")[0] == "b63c19ea-dba3-411f-a5c0-fed30483abac" || containerID.split("_")[0] == "87cc1ae4-a188-498b-83a6-ae137b91c76b" || containerID.split("_")[0] == "9ce79fa0-fd8a-4cd1-b1be-3878e455409b" || containerID.split("_")[0] == "2d03e5da-ef21-4f65-9dee-de305246c737") {
         (function (document, window, $) {
@@ -714,6 +717,7 @@ function addRowGrid(containerID, controls, navigation, clearFormIgnore) {
     //reinicalizaContadores(containerID);
     
     $(".dropdown-toggle").dropdown();
+    $("#SelecionaTodos ins").remove();
 }
 
 function mudaTotalGrid(containerID, parameters) {
@@ -1253,5 +1257,40 @@ function sharpGridPager(containerID) {
         $("." + containerID.replace("_nav", "").replace("table_", "") + "_edit").addClass("disabled");
     } else {
         $("." + containerID.replace("_nav", "").replace("table_", "") + "_edit").removeClass("disabled");
+    }
+}
+
+
+function selecionaTodos(id){
+    console.log(id)
+    var checkar = $("#" + id + " th .icheckbox_flat-blue").hasClass("checked");
+    if(!checkar){   
+        if($("#" + id + " tr[style='display: table-row;']").length == 0){
+            $("#" + id + " div.icheckbox_flat-blue").addClass("checked");
+        }else{
+            $("#" + id + " tr[style='display: table-row;'] div.icheckbox_flat-blue").addClass("checked");
+            $("#" + id + " #SelecionaTodos div.icheckbox_flat-blue").addClass("checked");
+        }
+    }else{
+        if($("#" + id + " tr[style='display: table-row;']").length == 0){
+            $("#" + id + " div.icheckbox_flat-blue").removeClass("checked");
+        }else{
+            $("#" + id + " tr[style='display: table-row;'] div.icheckbox_flat-blue").removeClass("checked");
+            $("#" + id + " #SelecionaTodos div.icheckbox_flat-blue").removeClass("checked");
+        }
+        
+        
+    }
+    
+}
+
+function searchGrid(id){
+    var val = $("#" + id).val();
+    val = val.toUpperCase();
+    if(!val){
+        $("tbody tr").show();
+    }else{
+        $("tbody tr").hide();
+        $("[data-newvalue*='" + val + "']").parents("tr").show();
     }
 }
