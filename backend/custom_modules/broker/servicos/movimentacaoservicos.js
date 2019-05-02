@@ -1219,6 +1219,8 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '60933017000123' ";
                         query += " AND pessoa.cpfcnpj <> '49467293000291' ";
                         query += " AND pessoa.cpfcnpj <> '49467293000100' ";
+                        query += " AND pessoa.cpfcnpj <> '02162646000109' ";
+
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                         
                     } 
@@ -1269,6 +1271,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '60933017000123' ";
                         query += " AND pessoa.cpfcnpj <> '49467293000291' ";
                         query += " AND pessoa.cpfcnpj <> '49467293000100' ";
+                        query += " AND pessoa.cpfcnpj <> '02162646000109' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                     } 
                 } 
@@ -1320,6 +1323,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '60933017000123' ";
                         query += " AND pessoa.cpfcnpj <> '49467293000291' ";
                         query += " AND pessoa.cpfcnpj <> '49467293000100' ";
+                        query += " AND pessoa.cpfcnpj <> '02162646000109' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";  
                     } 
                 } 
@@ -1373,6 +1377,7 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '60933017000123' ";
                         query += " AND pessoa.cpfcnpj <> '49467293000291' ";
                         query += " AND pessoa.cpfcnpj <> '49467293000100' ";
+                        query += " AND pessoa.cpfcnpj <> '02162646000109' ";
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                     } 
                 } 
