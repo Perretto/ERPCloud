@@ -2502,13 +2502,13 @@ router.route('/gerarContasReceber').post(function(req, res) {
             var datade = parametros.filtros.datade;
             var dataate = parametros.filtros.dataate;
 
-            if(faturamento == true){
+            if(faturamento == "true"){
                 faturamento = " NOT ";
             }else{
                 faturamento = "";
             }
 
-            if(boleto == true){
+            if(boleto == "true"){
                 boleto = " NOT ";
             }else{
                 boleto = "";
