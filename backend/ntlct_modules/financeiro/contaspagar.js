@@ -957,7 +957,7 @@ function funAtualizarConta(parametros,callbackf) {
 				}
             }
 			if(resposta.status == 1){
-				if(parseFloat(parametros.valor) != totalParcelas){
+				if(parseFloat(parametros.valor).toFixed(2) != parseFloat(totalParcelas.toFixed(2))){
 					resposta.status = 0;
 					resposta.mensagem.push("A soma dos valores das parcelas difere do total do documento.")
 				}
