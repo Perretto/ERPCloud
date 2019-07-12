@@ -493,7 +493,7 @@ router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtf
         if(!where){ 
             where += " WHERE  movimentacao_servicos.dt_faturamento  = '" + dtfat + "' "; 
         }else{ 
-            where += " AND CONVERT(date, FORMAT(movimentacao_servicos.dt_faturamento, 'd', 'pt-BR' )) = '" + dtfat + "' "; 
+            where += " AND  FORMAT(movimentacao_servicos.dt_faturamento, 'd', 'pt-BR' )  = '" + dtfat + "' "; 
         } 
     }else{
         if(!where){ 
