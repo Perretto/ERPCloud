@@ -461,7 +461,9 @@ router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtf
     select += " INNER JOIN entidade ON entidade.id=movimentacao_servicos.id_entidade "; 
     select += " LEFT JOIN cliente_servicos ON cliente_servicos.id_produtos=movimentacao_servicos.id_subservicos  ";
     select += " AND  cliente_servicos.id_entidade= movimentacao_servicos.id_entidade ";
-
+    select += " LEFT JOIN contas_receber_parcelas ON contas_receber_parcelas.id=movimentacao_servicos.id_contas_receber ";
+    select += " LEFT JOIN contas_receber  ON contas_receber.id=contas_receber_parcelas.id_contas_receber ";
+    
     if(cliente != "-"){ 
         where = " WHERE entidade.nm_razaosocial='" + cliente + "' "; 
     }
@@ -486,10 +488,10 @@ router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtf
         dtfat = dtfat.replace("-","/"); 
         
         arrayData = dtfat.split('/');
-        dtfat = arrayData[1] + "/" + arrayData[0] + "/" + arrayData[2];
+        dtfat = arrayData[0] + "/" + arrayData[1] + "/" + arrayData[2];
 
         if(!where){ 
-            where += " WHERE CONVERT(date, FORMAT(movimentacao_servicos.dt_faturamento, 'd', 'pt-BR' )) = '" + dtfat + "' "; 
+            where += " WHERE  movimentacao_servicos.dt_faturamento  = '" + dtfat + "' "; 
         }else{ 
             where += " AND CONVERT(date, FORMAT(movimentacao_servicos.dt_faturamento, 'd', 'pt-BR' )) = '" + dtfat + "' "; 
         } 
@@ -517,15 +519,15 @@ router.route('/carregaListaDetalhesServicos/:dataDe/:dataAte/:cliente/:cnpj/:dtf
     
     if(bol != "-"){  
         if(!where){ 
-            where += " WHERE movimentacao_servicos.nm_numero_boleto = '" + bol + "' "; 
+            where += " WHERE contas_receber_parcelas.nm_numero_boleto = '" + bol + "' "; 
         }else{ 
-            where += " AND movimentacao_servicos.nm_numero_boleto = '" + bol + "' "; 
+            where += " AND contas_receber_parcelas.nm_numero_boleto = '" + bol + "' "; 
         } 
     }else{
         if(!where){ 
-            where += " WHERE movimentacao_servicos.nm_numero_boleto IS NULL "; 
+            where += " WHERE contas_receber_parcelas.nm_numero_boleto IS NULL "; 
         }else{ 
-            where += " AND movimentacao_servicos.nm_numero_boleto IS NULL  "; 
+            where += " AND contas_receber_parcelas.nm_numero_boleto IS NULL  "; 
         } 
     }
     if(dataDe){ 
