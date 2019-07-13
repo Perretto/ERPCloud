@@ -12,7 +12,20 @@ const parseJson = require('parse-json');
 var pdf = require('html-pdf');
 const PDFDocument = require('pdfkit')
 
-var fs = require('fs');
+const htmlToJson = require('html-to-json')
+var HTMLParser = require('node-html-parser');
+var parser = require('html-dom-parser');
+var htmlparser = require("htmlparser2");
+
+var fs = require('fs'); 
+
+var jsdom = require("jsdom");
+const { JSDOM } = jsdom;
+const { window } = new JSDOM();
+const { document } = (new JSDOM('')).window;
+global.document = document;
+
+var $ = jQuery = require('jquery')(window);
 
 const router = express.Router()
 server.use('/api', router)
@@ -40,7 +53,7 @@ var base = ""; //erpcloudfoodtown
 var url = "";
 var host = "";
 var local;
-
+var Excel = require('exceljs');
 router.route('/*').get(function(req, res, next) {
 
     var full = req.host; //"http://homologa.empresarioerpcloud.com.br"; //
@@ -316,7 +329,123 @@ function compareObj(a,b) {
                         */
                        
                         switch (saidaRelatorio){
-                            case "excel":
+                            case "excel": 
+                            var retArray = [];
+                            var arrayTH = []
+                            var arrayTD = []
+                            var arrayTR = html.detail.split("<tr>");
+                            
+                            for (let index = 0; index < arrayTR.length; index++) {
+                                arrayTH = arrayTR[index].split("<th")
+                                for (let i = 0; i < arrayTH.length; i++) {
+                                    if(arrayTH[i].indexOf("</th") != -1){
+                                        var elementFormat = arrayTH[i].replace("</th>", "");
+                                        elementFormat = elementFormat.substr(elementFormat.indexOf(">"), elementFormat.length - elementFormat.indexOf(">"))
+                                        
+                                        elementFormat = elementFormat.replace(">", "");
+                                        elementFormat = elementFormat.replace("</tr>", "")
+                                        retArray.push(elementFormat)
+                                    }  
+                                }
+                                if(arrayTR[index].indexOf("</th") != -1){
+                                    
+                                    retArray.push("tr")
+                                }
+
+                                arrayTD = arrayTR[index].split("<td")
+                                for (let i = 0; i < arrayTD.length; i++) {
+                                    if(arrayTD[i].indexOf("</td") != -1){
+                                        var elementFormat = arrayTD[i].replace("</td>", "");
+                                        elementFormat = elementFormat.substr(elementFormat.indexOf(">"), elementFormat.length - elementFormat.indexOf(">"))
+                                        
+                                        elementFormat = elementFormat.replace(">", "");
+                                        elementFormat = elementFormat.replace("</tr>", "")
+                                        elementFormat = elementFormat.replace("</table>", "")
+                                        retArray.push(elementFormat)
+
+
+                                        if(arrayTD[i].indexOf("</tr") != -1){
+                                            retArray.push("tr")
+                                        }
+                                        
+                                    }  
+                                }
+                                
+                                
+                            }
+                            
+                                res.writeHead(200, {
+                                    'Content-Disposition': 'attachment; filename="file.xlsx"',
+                                    'Transfer-Encoding': 'chunked',
+                                    'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                                  })
+                                  var workbook = new Excel.stream.xlsx.WorkbookWriter({ stream: res })
+                                  var worksheet = workbook.addWorksheet('some-worksheet')
+                                  var row = []
+                                  var tr = "";
+                                  for (let index = 0; index < retArray.length; index++) {
+                                      
+                                       if(retArray[index] == "tr"){
+                                        worksheet.addRow(row).commit()
+                                        row = [];
+                                        tr = "tr"
+                                       }else{
+                                           if(tr == "tr"){
+                                            row.push(retArray[index])
+                                           }else if(retArray[index] != " "){
+                                            row.push(retArray[index])
+                                           }                                        
+                                       }
+                                       
+                                      
+                                  }
+                                  //worksheet.addRow(['foo2', 'bar2']).commit()
+                                  worksheet.commit()
+                                  workbook.commit()
+
+                                
+ /*
+                            var root = HTMLParser.parse(html.detail);
+                             
+                            var retor = root.querySelector('tr')
+                            
+                            var retArray = [];
+
+                            for (let index = 0; index < retor.childNodes.length; index++) {
+                                retArray.push(retor.childNodes[index].toString());
+                            }
+
+                            res.send(html);
+                            */
+
+
+                            /*
+                            var promise = htmlToJson.parse(html.detail, {
+                                'th': function ($doc) {                                  
+                                    return $doc.find('th').text();
+                                },
+                                'tr': function ($doc) {
+
+                                    return $doc.find('tr').find('td').text();
+                                }
+                              }, function (err, result) {
+                                console.log(result);
+                                res.send(result)
+                              });
+                            /*  
+                            res.send(html.detail)
+                            res.end();
+                            res.writeHead(200, {
+                                'Content-Disposition': 'attachment; filename="file.xlsx"',
+                                'Transfer-Encoding': 'chunked',
+                                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                              })
+                              var workbook = new Excel.stream.xlsx.WorkbookWriter({ stream: res })
+                              var worksheet = workbook.addWorksheet('some-worksheet')
+                              worksheet.addRow(['foo2', 'bar2']).commit()
+                              worksheet.commit()
+                              workbook.commit()
+                            
                                 convertxls(req.host, html.topo +  html.detail + html.footer + html.base, function(namefile){                            
                                     if(req.host.indexOf("localhost") > -1){
                                         res.download("../frontend/reports/render/" + namefile + ".xlsx");
@@ -324,7 +453,7 @@ function compareObj(a,b) {
                                         res.download("./frontend/reports/render/" + namefile + ".xlsx");
                                     }                                    
                                 });
-                                
+                                */
                                 break;
                             case "pdf":
                                 if(!headersize){
@@ -3701,5 +3830,21 @@ async function  convertxls(url, html, callback){
         callback(name);
     });    
 }
+
+router.route('/testexlsx').get(function(req, res) {
+   
+    res.writeHead(200, {
+        'Content-Disposition': 'attachment; filename="file.xlsx"',
+        'Transfer-Encoding': 'chunked',
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      })
+      var workbook = new Excel.stream.xlsx.WorkbookWriter({ stream: res })
+      var worksheet = workbook.addWorksheet('some-worksheet')
+      worksheet.addRow(['foo', 'bar']).commit()
+      worksheet.commit()
+      workbook.commit()
+        
+      
+});
 
 module.exports = database
