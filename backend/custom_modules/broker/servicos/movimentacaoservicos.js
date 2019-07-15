@@ -2282,10 +2282,17 @@ function gerarparcelas(config,idEmpresa,idParcelamento,valor,dataInicial,callbac
                                 
                                     if (element.nr_diavencimento != null && element.nr_diavencimento != 0){
                                         dataInicial.setDate(element.nr_diavencimento);
-                                        if (element.nr_diavencimento > hoje.getDate() && element.sn_messeguinte == false)
+                                        if (element.nr_diavencimento > hoje.getDate() && element.sn_messeguinte == false){
                                             dataInicial.setMonth(dataInicial.getMonth() + 1);
-                                        else
-                                            dataInicial = element.sn_messeguinte != null && element.sn_messeguinte ? dataInicial.setMonth(dataInicial.getMonth() + 2) : dataInicial;
+                                        }else{
+
+                                            if(element.sn_messeguinte != null && element.sn_messeguinte){
+                                                dataInicial = dataInicial.setMonth(dataInicial.getMonth() + 2);
+                                                dataInicial = Date(dataInicial)
+                                            }
+                                            
+                                            
+                                        }
                                     }
                                     else{
                                         dias1aParcela = parseInt(element.nm_carencia)
