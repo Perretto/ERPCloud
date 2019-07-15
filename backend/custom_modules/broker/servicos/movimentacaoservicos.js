@@ -2287,8 +2287,7 @@ function gerarparcelas(config,idEmpresa,idParcelamento,valor,dataInicial,callbac
                                         }else{
 
                                             if(element.sn_messeguinte != null && element.sn_messeguinte){
-                                                dataInicial = dataInicial.setMonth(dataInicial.getMonth() + 2);
-                                                dataInicial = Date(dataInicial)
+                                                dataInicial.setMonth(dataInicial.getMonth() + 1);
                                             }
                                             
                                             
@@ -2376,11 +2375,12 @@ function gerarparcelas(config,idEmpresa,idParcelamento,valor,dataInicial,callbac
                                             vencimento: new Date(dataInicial),
                                             vencimentoReal: new Date(vencimentoReal)
                                         });
-                                        
+                                        /*
                                         if (element.nr_diavencimento != null && element.nr_diavencimento != 0)
                                             dataInicial.setMonth(dataInicial.getMonth() + 1);
                                         else
                                             dataInicial.setDate(dataInicial.getDate() + element.nr_intervaloparcelas)
+                                            */
                                     }
                                     resposta = {
                                         status: 1,
