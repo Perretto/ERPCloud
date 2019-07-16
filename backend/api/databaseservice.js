@@ -44,7 +44,8 @@ var configEnvironment = {};
 //var configEnvironment = {user: 'sa', password: '1234567890', server: '127.0.0.1',  database: 'Environment'};
 //var configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
 
-var pastaParametrosRelatorios = "../frontend/reports/parametrosusuarios/";
+//var pastaParametrosRelatorios = "../frontend/reports/parametrosusuarios/";
+var pastaParametrosRelatorios = "C:\\ERPCloud\\frontend\\reports\\parametrosusuarios\\";
 
 var EnterpriseID = "";
 var EnterpriseName = "";
@@ -947,7 +948,8 @@ function createHTML(element,select,paramRelatorio){
         cmdFinaisFuncao += "}";
         cmdFinaisFuncao += "return(_html_); ";
         if(local == true){
-            funcoesnumeros = fs.readFileSync("../frontend/framework/funcoesnumeros.js");
+            //funcoesnumeros = fs.readFileSync("../frontend/framework/funcoesnumeros.js");
+            funcoesnumeros = fs.readFileSync("C:\\ERPCloud\\frontend\\framework\\funcoesnumeros.js");
         }else{
             funcoesnumeros = fs.readFileSync("/home/ubuntu/ERPCloud/frontend/framework/funcoesnumeros.js");
         }
