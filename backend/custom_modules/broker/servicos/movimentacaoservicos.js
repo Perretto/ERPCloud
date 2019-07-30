@@ -3592,10 +3592,10 @@ router.route('/carregarNFSe').get(function(req, res) {
     var  select = "";
     select += " SELECT cast('false' as bit)  AS 'Marcar', id AS 'id', dataemissao AS 'data',RazaoSocialTomador AS 'razaosocial',  ";
     select += " CnpjTomador AS 'cnpj', ValorTotalServicos AS 'valor',  ";
-    select += " status AS 'status' ";
+    select += " status AS 'status', FORMAT(CAST(Competencia AS date), 'd', 'pt-BR' ) AS 'Competencia' ";
     select += " FROM nfse ";
     select += " WHERE status = 'Pendente' ";
-    select += " GROUP BY  id,dataemissao, RazaoSocialTomador, CnpjTomador, ValorTotalServicos, status ORDER BY RazaoSocialTomador ";
+    select += " GROUP BY  id,dataemissao, RazaoSocialTomador, CnpjTomador, ValorTotalServicos, status, Competencia ORDER BY RazaoSocialTomador ";
 
     sql.close(); 
     sql.connect(config, function (err) { 
