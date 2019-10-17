@@ -221,6 +221,7 @@ function onSave(form, id, instanceID, containerID, layoutID, async, onAfterSavin
         $.ajax({
             url: returnCookie("urlPlataform") + "/api/save/", 
             type: "POST",
+            crossDomain: true,
             data:  {paramentros: data},
             success: function(result){
 
