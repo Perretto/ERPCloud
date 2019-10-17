@@ -403,6 +403,14 @@ function SerializeFields(param){
     for (var i = 0; i < arrayObjs.length; i++) { 
         if (arrayObjs[i].table && arrayObjs[i].field) { 
             if (arrayObjs[i].table != "null") {
+
+                if(arrayObjs[i].field == "id_usuarios" || arrayObjs[i].field == "id_usuario"){
+                    if(!arrayObjs[i].valor){
+                        arrayObjs[i].valor = returnCookie("UserID");
+                    }
+                    
+                }
+
                 if (Arraytable.indexOf(arrayObjs[i].table) < 0) {
                     if (Arraytable.length > 0) {
                         json += '    }, {'
