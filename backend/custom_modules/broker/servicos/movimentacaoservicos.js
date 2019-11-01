@@ -1222,6 +1222,47 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '49467293000291' ";
                         query += " AND pessoa.cpfcnpj <> '49467293000100' ";
                         query += " AND pessoa.cpfcnpj <> '02162646000109' ";
+                                                
+                        query += " AND pessoa.cpfcnpj <> '00900716000145' ";
+                        query += " AND pessoa.cpfcnpj <> '02314269000178' ";
+                        query += " AND pessoa.cpfcnpj <> '01644135000152' ";
+                        query += " AND pessoa.cpfcnpj <> '11305720000181' ";
+                        query += " AND pessoa.cpfcnpj <> '08714102000180' ";
+                        query += " AND pessoa.cpfcnpj <> '61153169000176' ";
+                        query += " AND pessoa.cpfcnpj <> '05283785000170' ";
+                        query += " AND pessoa.cpfcnpj <> '62579164000172' ";
+                        query += " AND pessoa.cpfcnpj <> '03237583000167' ";
+                        query += " AND pessoa.cpfcnpj <> '32081580000185' ";
+                        query += " AND pessoa.cpfcnpj <> '61069100000169' ";
+                        query += " AND pessoa.cpfcnpj <> '08236807000130' ";
+                        query += " AND pessoa.cpfcnpj <> '00144257000117' ";
+                        query += " AND pessoa.cpfcnpj <> '66538570000148' ";
+                        query += " AND pessoa.cpfcnpj <> '07504171000105' ";
+                        query += " AND pessoa.cpfcnpj <> '14864868000144' ";
+                        query += " AND pessoa.cpfcnpj <> '11316854000106' ";
+                        query += " AND pessoa.cpfcnpj <> '61407078000110' ";
+                        query += " AND pessoa.cpfcnpj <> '07495268000190' ";
+                        query += " AND pessoa.cpfcnpj <> '32092462000172' ";
+                        query += " AND pessoa.cpfcnpj <> '10556487000147' ";
+                        query += " AND pessoa.cpfcnpj <> '45603529000138' ";
+                        query += " AND pessoa.cpfcnpj <> '53309795000180' ";
+                        query += " AND pessoa.cpfcnpj <> '12077181000133' ";
+                        query += " AND pessoa.cpfcnpj <> '61249587000161' ";
+                        query += " AND pessoa.cpfcnpj <> '62829510000123' ";
+                        query += " AND pessoa.cpfcnpj <> '17819629000160' ";
+                        query += " AND pessoa.cpfcnpj <> '45010717000152' ";
+                        query += " AND pessoa.cpfcnpj <> '06697954000181' ";
+                        query += " AND pessoa.cpfcnpj <> '10599342000123' ";
+                        query += " AND pessoa.cpfcnpj <> '81716144000140' ";
+                        query += " AND pessoa.cpfcnpj <> '02763005000100' ";
+                        query += " AND pessoa.cpfcnpj <> '14376135000160' ";
+                        query += " AND pessoa.cpfcnpj <> '04636293000159' ";
+                        query += " AND pessoa.cpfcnpj <> '11660182000143' ";
+                        query += " AND pessoa.cpfcnpj <> '60933017000123' ";
+                        query += " AND pessoa.cpfcnpj <> '08739643000163' ";
+                        query += " AND pessoa.cpfcnpj <> '09021935000129' ";
+
+
 
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                         
@@ -1274,6 +1315,49 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '49467293000291' ";
                         query += " AND pessoa.cpfcnpj <> '49467293000100' ";
                         query += " AND pessoa.cpfcnpj <> '02162646000109' ";
+
+                                                
+                        query += " AND pessoa.cpfcnpj <> '00900716000145' ";
+                        query += " AND pessoa.cpfcnpj <> '02314269000178' ";
+                        query += " AND pessoa.cpfcnpj <> '01644135000152' ";
+                        query += " AND pessoa.cpfcnpj <> '11305720000181' ";
+                        query += " AND pessoa.cpfcnpj <> '08714102000180' ";
+                        query += " AND pessoa.cpfcnpj <> '61153169000176' ";
+                        query += " AND pessoa.cpfcnpj <> '05283785000170' ";
+                        query += " AND pessoa.cpfcnpj <> '62579164000172' ";
+                        query += " AND pessoa.cpfcnpj <> '03237583000167' ";
+                        query += " AND pessoa.cpfcnpj <> '32081580000185' ";
+                        query += " AND pessoa.cpfcnpj <> '61069100000169' ";
+                        query += " AND pessoa.cpfcnpj <> '08236807000130' ";
+                        query += " AND pessoa.cpfcnpj <> '00144257000117' ";
+                        query += " AND pessoa.cpfcnpj <> '66538570000148' ";
+                        query += " AND pessoa.cpfcnpj <> '07504171000105' ";
+                        query += " AND pessoa.cpfcnpj <> '14864868000144' ";
+                        query += " AND pessoa.cpfcnpj <> '11316854000106' ";
+                        query += " AND pessoa.cpfcnpj <> '61407078000110' ";
+                        query += " AND pessoa.cpfcnpj <> '07495268000190' ";
+                        query += " AND pessoa.cpfcnpj <> '32092462000172' ";
+                        query += " AND pessoa.cpfcnpj <> '10556487000147' ";
+                        query += " AND pessoa.cpfcnpj <> '45603529000138' ";
+                        query += " AND pessoa.cpfcnpj <> '53309795000180' ";
+                        query += " AND pessoa.cpfcnpj <> '12077181000133' ";
+                        query += " AND pessoa.cpfcnpj <> '61249587000161' ";
+                        query += " AND pessoa.cpfcnpj <> '62829510000123' ";
+                        query += " AND pessoa.cpfcnpj <> '17819629000160' ";
+                        query += " AND pessoa.cpfcnpj <> '45010717000152' ";
+                        query += " AND pessoa.cpfcnpj <> '06697954000181' ";
+                        query += " AND pessoa.cpfcnpj <> '10599342000123' ";
+                        query += " AND pessoa.cpfcnpj <> '81716144000140' ";
+                        query += " AND pessoa.cpfcnpj <> '02763005000100' ";
+                        query += " AND pessoa.cpfcnpj <> '14376135000160' ";
+                        query += " AND pessoa.cpfcnpj <> '04636293000159' ";
+                        query += " AND pessoa.cpfcnpj <> '11660182000143' ";
+                        query += " AND pessoa.cpfcnpj <> '60933017000123' ";
+                        query += " AND pessoa.cpfcnpj <> '08739643000163' ";
+                        query += " AND pessoa.cpfcnpj <> '09021935000129' ";
+
+
+
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                     } 
                 } 
@@ -1326,6 +1410,49 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '49467293000291' ";
                         query += " AND pessoa.cpfcnpj <> '49467293000100' ";
                         query += " AND pessoa.cpfcnpj <> '02162646000109' ";
+
+                                                
+                        query += " AND pessoa.cpfcnpj <> '00900716000145' ";
+                        query += " AND pessoa.cpfcnpj <> '02314269000178' ";
+                        query += " AND pessoa.cpfcnpj <> '01644135000152' ";
+                        query += " AND pessoa.cpfcnpj <> '11305720000181' ";
+                        query += " AND pessoa.cpfcnpj <> '08714102000180' ";
+                        query += " AND pessoa.cpfcnpj <> '61153169000176' ";
+                        query += " AND pessoa.cpfcnpj <> '05283785000170' ";
+                        query += " AND pessoa.cpfcnpj <> '62579164000172' ";
+                        query += " AND pessoa.cpfcnpj <> '03237583000167' ";
+                        query += " AND pessoa.cpfcnpj <> '32081580000185' ";
+                        query += " AND pessoa.cpfcnpj <> '61069100000169' ";
+                        query += " AND pessoa.cpfcnpj <> '08236807000130' ";
+                        query += " AND pessoa.cpfcnpj <> '00144257000117' ";
+                        query += " AND pessoa.cpfcnpj <> '66538570000148' ";
+                        query += " AND pessoa.cpfcnpj <> '07504171000105' ";
+                        query += " AND pessoa.cpfcnpj <> '14864868000144' ";
+                        query += " AND pessoa.cpfcnpj <> '11316854000106' ";
+                        query += " AND pessoa.cpfcnpj <> '61407078000110' ";
+                        query += " AND pessoa.cpfcnpj <> '07495268000190' ";
+                        query += " AND pessoa.cpfcnpj <> '32092462000172' ";
+                        query += " AND pessoa.cpfcnpj <> '10556487000147' ";
+                        query += " AND pessoa.cpfcnpj <> '45603529000138' ";
+                        query += " AND pessoa.cpfcnpj <> '53309795000180' ";
+                        query += " AND pessoa.cpfcnpj <> '12077181000133' ";
+                        query += " AND pessoa.cpfcnpj <> '61249587000161' ";
+                        query += " AND pessoa.cpfcnpj <> '62829510000123' ";
+                        query += " AND pessoa.cpfcnpj <> '17819629000160' ";
+                        query += " AND pessoa.cpfcnpj <> '45010717000152' ";
+                        query += " AND pessoa.cpfcnpj <> '06697954000181' ";
+                        query += " AND pessoa.cpfcnpj <> '10599342000123' ";
+                        query += " AND pessoa.cpfcnpj <> '81716144000140' ";
+                        query += " AND pessoa.cpfcnpj <> '02763005000100' ";
+                        query += " AND pessoa.cpfcnpj <> '14376135000160' ";
+                        query += " AND pessoa.cpfcnpj <> '04636293000159' ";
+                        query += " AND pessoa.cpfcnpj <> '11660182000143' ";
+                        query += " AND pessoa.cpfcnpj <> '60933017000123' ";
+                        query += " AND pessoa.cpfcnpj <> '08739643000163' ";
+                        query += " AND pessoa.cpfcnpj <> '09021935000129' ";
+
+
+
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";  
                     } 
                 } 
@@ -1380,6 +1507,49 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '49467293000291' ";
                         query += " AND pessoa.cpfcnpj <> '49467293000100' ";
                         query += " AND pessoa.cpfcnpj <> '02162646000109' ";
+
+                                                
+                        query += " AND pessoa.cpfcnpj <> '00900716000145' ";
+                        query += " AND pessoa.cpfcnpj <> '02314269000178' ";
+                        query += " AND pessoa.cpfcnpj <> '01644135000152' ";
+                        query += " AND pessoa.cpfcnpj <> '11305720000181' ";
+                        query += " AND pessoa.cpfcnpj <> '08714102000180' ";
+                        query += " AND pessoa.cpfcnpj <> '61153169000176' ";
+                        query += " AND pessoa.cpfcnpj <> '05283785000170' ";
+                        query += " AND pessoa.cpfcnpj <> '62579164000172' ";
+                        query += " AND pessoa.cpfcnpj <> '03237583000167' ";
+                        query += " AND pessoa.cpfcnpj <> '32081580000185' ";
+                        query += " AND pessoa.cpfcnpj <> '61069100000169' ";
+                        query += " AND pessoa.cpfcnpj <> '08236807000130' ";
+                        query += " AND pessoa.cpfcnpj <> '00144257000117' ";
+                        query += " AND pessoa.cpfcnpj <> '66538570000148' ";
+                        query += " AND pessoa.cpfcnpj <> '07504171000105' ";
+                        query += " AND pessoa.cpfcnpj <> '14864868000144' ";
+                        query += " AND pessoa.cpfcnpj <> '11316854000106' ";
+                        query += " AND pessoa.cpfcnpj <> '61407078000110' ";
+                        query += " AND pessoa.cpfcnpj <> '07495268000190' ";
+                        query += " AND pessoa.cpfcnpj <> '32092462000172' ";
+                        query += " AND pessoa.cpfcnpj <> '10556487000147' ";
+                        query += " AND pessoa.cpfcnpj <> '45603529000138' ";
+                        query += " AND pessoa.cpfcnpj <> '53309795000180' ";
+                        query += " AND pessoa.cpfcnpj <> '12077181000133' ";
+                        query += " AND pessoa.cpfcnpj <> '61249587000161' ";
+                        query += " AND pessoa.cpfcnpj <> '62829510000123' ";
+                        query += " AND pessoa.cpfcnpj <> '17819629000160' ";
+                        query += " AND pessoa.cpfcnpj <> '45010717000152' ";
+                        query += " AND pessoa.cpfcnpj <> '06697954000181' ";
+                        query += " AND pessoa.cpfcnpj <> '10599342000123' ";
+                        query += " AND pessoa.cpfcnpj <> '81716144000140' ";
+                        query += " AND pessoa.cpfcnpj <> '02763005000100' ";
+                        query += " AND pessoa.cpfcnpj <> '14376135000160' ";
+                        query += " AND pessoa.cpfcnpj <> '04636293000159' ";
+                        query += " AND pessoa.cpfcnpj <> '11660182000143' ";
+                        query += " AND pessoa.cpfcnpj <> '60933017000123' ";
+                        query += " AND pessoa.cpfcnpj <> '08739643000163' ";
+                        query += " AND pessoa.cpfcnpj <> '09021935000129' ";
+
+
+
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                     } 
                 } 
