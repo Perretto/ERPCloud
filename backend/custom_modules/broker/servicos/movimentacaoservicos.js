@@ -1262,7 +1262,9 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '08739643000163' ";
                         query += " AND pessoa.cpfcnpj <> '09021935000129' ";
 
-
+                        query += " AND pessoa.cpfcnpj <> '04480563000185' ";
+                        query += " AND pessoa.cpfcnpj <> '02492398000156' ";
+                        query += " AND pessoa.cpfcnpj <> '61558805000140' ";
 
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
                         
@@ -1356,6 +1358,10 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '08739643000163' ";
                         query += " AND pessoa.cpfcnpj <> '09021935000129' ";
 
+
+                        query += " AND pessoa.cpfcnpj <> '04480563000185' ";
+                        query += " AND pessoa.cpfcnpj <> '02492398000156' ";
+                        query += " AND pessoa.cpfcnpj <> '61558805000140' ";
 
 
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
@@ -1451,6 +1457,10 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '08739643000163' ";
                         query += " AND pessoa.cpfcnpj <> '09021935000129' ";
 
+
+                        query += " AND pessoa.cpfcnpj <> '04480563000185' ";
+                        query += " AND pessoa.cpfcnpj <> '02492398000156' ";
+                        query += " AND pessoa.cpfcnpj <> '61558805000140' ";
 
 
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";  
@@ -1548,6 +1558,10 @@ router.route('/filtrarImportacaoBySisco/:dataDe/:dataAte/:cliente/:servico/:cota
                         query += " AND pessoa.cpfcnpj <> '08739643000163' ";
                         query += " AND pessoa.cpfcnpj <> '09021935000129' ";
 
+
+                        query += " AND pessoa.cpfcnpj <> '04480563000185' ";
+                        query += " AND pessoa.cpfcnpj <> '02492398000156' ";
+                        query += " AND pessoa.cpfcnpj <> '61558805000140' ";
 
 
                         query += " AND pessoa.cpfcnpj <> '16944141000100') ";
