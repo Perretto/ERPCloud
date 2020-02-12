@@ -145,8 +145,10 @@ function getGlobalParameters(parametro) {
         var parts = full.split('.');
         if (parts.length > 3) {
             dados = parts[0];
-            global.urlPlataforma = "http://" + dados + ".empresariocloud.com.br"
-            global.urlInterface = "http://" + dados + ".empresariocloud.com.br"
+            //global.urlPlataforma = "http://" + dados + ".empresariocloud.com.br"
+            //global.urlInterface = "http://" + dados + ".empresariocloud.com.br"
+            global.urlPlataforma = "http://"+ window.location.hostname + ":2444";
+            global.urlInterface = "http://"+ window.location.hostname;
         }else {
             global.urlPlataforma = "http://localhost:2444"
             global.urlInterface = "http://localhost:2444"

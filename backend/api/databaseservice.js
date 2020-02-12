@@ -65,15 +65,17 @@ router.route('/*').get(function(req, res, next) {
     }
     host = dados;
     dados = dados.replace("http://","");
+    dados = "broker"; //"broker";
 
     if(full.indexOf("localhost") > -1){
-        serverWindows = "http://localhost:2444";
-        dados = "broker"; //"broker";
+        serverWindows = "http://localhost:2444";        
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
         local = true;
     }else{
-        serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
-        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
+        //serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
+        //configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
+        serverWindows = "http://localhost:2444";        
+        configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};        
         local = false;
     }
 
@@ -115,9 +117,10 @@ router.route('/*').get(function(req, res, next) {
 
 
 function conectionsLink(full, callback){
+    /*
     if(String(full).indexOf("localhost") > -1){
         serverWindows = "http://localhost:2444";
-        dados = "broker"; //"broker";
+        dados = "homologa_armando"; //"broker";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
     }else{
         var parts = String(full).split('.');
@@ -129,7 +132,20 @@ function conectionsLink(full, callback){
         serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
         configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
     }
+*/
+dados = "broker"; //"broker";
 
+if(full.indexOf("localhost") > -1){
+    serverWindows = "http://localhost:2444";        
+    configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};
+    local = true;
+}else{
+    //serverWindows = "http://" + dados + ".empresariocloud.com.br"; //"http://localhost:2444";
+    //configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '172.31.8.216',  database: 'Environment'};
+    serverWindows = "http://localhost:2444";        
+    configEnvironment = {user: 'sa', password: 'IntSql2015@', server: '127.0.0.1',  database: 'Environment'};        
+    local = false;
+}
     var database = ""; //"eCloud-homologa";
     var server = ""; //"127.0.0.1";
     var password = ""; //"1234567890";

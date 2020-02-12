@@ -26,12 +26,12 @@ function checkEnvironment(sn_loadEnterprises) {
         dados = parts[0];
     }else {
         if(full.indexOf("localhost") > -1){
-            dados = "broker"; //" broker";
+            dados = "homologa_armando"; //" broker";
         }else{
             window.location = "http://intelecta.com.br";
         }
     }
-
+    dados = "broker";
     getAjaxParameter(url, dados, function (result) { welcome(result) });    
 }
 

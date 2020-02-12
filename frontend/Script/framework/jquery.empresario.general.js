@@ -380,8 +380,8 @@ function getGlobalParameters(parametro) {
         global.urlPlataforma = "http://" + dados + ".empresariocloud.com.br"
         global.urlInterface = "http://" + dados + ".empresariocloud.com.br"
     }else {
-        global.urlPlataforma = "http://localhost:2444"
-        global.urlInterface = "http://localhost:2444"
+        global.urlPlataforma = "http://"+ window.location.hostname + ":2444";
+        global.urlInterface = "http://"+ window.location.hostname;
     }
 
     global.urlSearch = "http://" + window.location.host + ":8983"
