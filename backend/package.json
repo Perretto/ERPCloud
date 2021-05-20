@@ -18,7 +18,7 @@
     "express": "^4.15.2",
     "express-query-int": "^1.0.1",
     "html-dom-parser": "^0.2.2",
-    "html-pdf": "^2.2.0",
+    "html-pdf": "^3.0.1",
     "html-to-xlsx": "^1.0.2",
     "htmlparser2": "^3.10.1",
     "jquery": "^3.4.1",
