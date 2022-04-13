@@ -9,7 +9,7 @@
   "author": "Perretto",
   "license": "ISC",
   "dependencies": {
-    "async": "^2.5.0",
+    "async": "^3.2.2",
     "body-parser": "^1.17.1",
     "cheerio": "^1.0.0-rc.2",
     "chrome-page-eval": "^1.2.0",
