@@ -22,7 +22,7 @@
     "html-to-xlsx": "^1.0.2",
     "htmlparser2": "^3.10.1",
     "jquery": "^3.4.1",
-    "jsdom": "^15.1.1",
+    "jsdom": "^16.5.0",
     "loadash": "0.0.1",
     "mkdirp": "^0.5.1",
     "mongoose": "^4.9.8",
